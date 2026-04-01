@@ -1,5 +1,5 @@
-import { multipartFormRequestOptions, createForm } from 'bem/internal/uploads';
-import { toFile } from 'bem/core/uploads';
+import { multipartFormRequestOptions, createForm } from 'bem-ai/internal/uploads';
+import { toFile } from 'bem-ai/core/uploads';
 
 describe('form data validation', () => {
   test('valid values do not error', async () => {

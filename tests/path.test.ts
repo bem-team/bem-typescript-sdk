@@ -1,4 +1,4 @@
-import { createPathTagFunction, encodeURIPath } from 'bem/internal/utils/path';
+import { createPathTagFunction, encodeURIPath } from 'bem-ai/internal/utils/path';
 import { inspect } from 'node:util';
 import { runInNewContext } from 'node:vm';
 
