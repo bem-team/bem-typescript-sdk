@@ -1,7 +1,7 @@
 import iconv from 'iconv-lite';
-import { stringify } from 'bem-ai/internal/qs';
-import { encode } from 'bem-ai/internal/qs/utils';
-import { StringifyOptions } from 'bem-ai/internal/qs/types';
+import { stringify } from 'bem-ai-sdk/internal/qs';
+import { encode } from 'bem-ai-sdk/internal/qs/utils';
+import { StringifyOptions } from 'bem-ai-sdk/internal/qs/types';
 import { empty_test_cases } from './empty-keys-cases';
 import assert from 'assert';
 
