@@ -1,6 +1,6 @@
 import fs from 'fs';
-import type { ResponseLike } from 'bem/internal/to-file';
-import { toFile } from 'bem/core/uploads';
+import type { ResponseLike } from 'bem-ai/internal/to-file';
+import { toFile } from 'bem-ai/core/uploads';
 import { File } from 'node:buffer';
 
 class MyClass {
@@ -97,7 +97,7 @@ describe('missing File error message', () => {
   });
 
   test('is thrown', async () => {
-    const uploads = await import('bem/core/uploads');
+    const uploads = await import('bem-ai/core/uploads');
     await expect(
       uploads.toFile(mockResponse({ url: 'https://example.com/my/audio.mp3' })),
     ).rejects.toMatchInlineSnapshot(
