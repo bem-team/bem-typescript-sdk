@@ -8,8 +8,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "paths": {
-      "bem/*": ["./src/*"],
-      "bem": ["./src/index.ts"]
+      "bem-ai/*": ["./src/*"],
+      "bem-ai": ["./src/index.ts"]
     },
     "noEmit": true,
 

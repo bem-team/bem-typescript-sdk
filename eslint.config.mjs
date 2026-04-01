@@ -25,7 +25,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              regex: '^bem(/.*)?',
+              regex: '^bem-ai(/.*)?',
               message: 'Use a relative import, not a package import.',
             },
           ],
