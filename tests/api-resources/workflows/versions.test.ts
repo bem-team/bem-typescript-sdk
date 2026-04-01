@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import Bem from 'bem-ai';
+import Bem from 'bem-ai-sdk';
 
 const client = new Bem({
   apiKey: 'My API Key',

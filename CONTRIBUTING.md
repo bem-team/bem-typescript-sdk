@@ -55,12 +55,12 @@ $ cd bem-typescript-sdk
 # With yarn
 $ yarn link
 $ cd ../my-package
-$ yarn link bem-ai
+$ yarn link bem-ai-sdk
 
 # With pnpm
 $ pnpm link --global
 $ cd ../my-package
-$ pnpm link --global bem-ai
+$ pnpm link --global bem-ai-sdk
 ```
 
 ## Running tests
