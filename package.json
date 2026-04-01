@@ -1,5 +1,5 @@
 {
-  "name": "bem-ai",
+  "name": "bem-ai-sdk",
   "version": "0.0.3",
   "description": "The official TypeScript library for the Bem API",
   "author": "Bem <contact@example.com>",
