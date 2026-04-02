@@ -431,7 +431,7 @@ export interface WorkflowCallParams {
   /**
    * Multiple input files (for join functions).
    */
-  files?: Array<string>;
+  files?: Array<unknown>;
 
   /**
    * When `true`, the endpoint blocks until the call completes (up to 30 seconds) and
