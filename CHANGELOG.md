@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.1 (2026-04-03)
+
+Full Changelog: [v0.1.0...v0.1.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.1.0...v0.1.1)
+
+### Chores
+
+* configure new SDK language ([5b8a200](https://github.com/bem-team/bem-typescript-sdk/commit/5b8a200b499801cbe46c02b610833f02f1abc732))
+
 ## 0.1.0 (2026-04-02)
 
 Full Changelog: [v0.0.5...v0.1.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.0.5...v0.1.0)
