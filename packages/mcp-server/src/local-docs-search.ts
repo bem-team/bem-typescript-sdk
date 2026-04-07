@@ -1055,6 +1055,47 @@ const EMBEDDED_METHODS: MethodEntry[] = [
       },
     },
   },
+  {
+    name: 'create',
+    endpoint: '/v3/infer-schema',
+    httpMethod: 'post',
+    summary: 'Infer Schema from File',
+    description:
+      '**Analyze a file and infer a JSON Schema from its contents.**\n\nAccepts a file via multipart form upload and uses Gemini to analyze the document,\nreturning a description of its contents, an inferred JSON Schema capturing all\nextractable fields, and document classification metadata.\n\nThe returned schema is designed to be reusable across many similar documents of the\nsame type, not just the specific file uploaded. It can be used directly as the\n`outputSchema` when creating a Transform function.\n\nThe endpoint also detects whether the file contains multiple bundled documents\nand classifies the content nature (textual, visual, audio, video, or mixed).\n\n## Supported file types\n\nPDF, PNG, JPEG, HEIC, HEIF, WebP, CSV, XLS, XLSX, DOCX, JSON, HTML, XML, EML,\nplain text, WAV, MP3, M4A, MP4.\n\n## File size limit\n\nMaximum file size is **20 MB**.\n\n## Example\n\n```bash\ncurl -X POST https://api.bem.ai/v3/infer-schema \\\n  -H "x-api-key: YOUR_API_KEY" \\\n  -F "file=@invoice.pdf"\n```',
+    stainlessPath: '(resource) infer_schema > (method) create',
+    qualified: 'client.inferSchema.create',
+    params: ['file: object;'],
+    response:
+      '{ analysis: { contentNature: string; contentType: string; description: string; documentTypes: { count: number; description: string; name: string; }[]; fileName: string; fileType: string; isMultiDocument: boolean; sizeBytes: number; schema?: object; }; filename: string; }',
+    markdown:
+      '## create\n\n`client.inferSchema.create(file: object): { analysis: object; filename: string; }`\n\n**post** `/v3/infer-schema`\n\n**Analyze a file and infer a JSON Schema from its contents.**\n\nAccepts a file via multipart form upload and uses Gemini to analyze the document,\nreturning a description of its contents, an inferred JSON Schema capturing all\nextractable fields, and document classification metadata.\n\nThe returned schema is designed to be reusable across many similar documents of the\nsame type, not just the specific file uploaded. It can be used directly as the\n`outputSchema` when creating a Transform function.\n\nThe endpoint also detects whether the file contains multiple bundled documents\nand classifies the content nature (textual, visual, audio, video, or mixed).\n\n## Supported file types\n\nPDF, PNG, JPEG, HEIC, HEIF, WebP, CSV, XLS, XLSX, DOCX, JSON, HTML, XML, EML,\nplain text, WAV, MP3, M4A, MP4.\n\n## File size limit\n\nMaximum file size is **20 MB**.\n\n## Example\n\n```bash\ncurl -X POST https://api.bem.ai/v3/infer-schema \\\n  -H "x-api-key: YOUR_API_KEY" \\\n  -F "file=@invoice.pdf"\n```\n\n### Parameters\n\n- `file: object`\n  The file to analyze and infer a JSON schema from.\n\n### Returns\n\n- `{ analysis: { contentNature: string; contentType: string; description: string; documentTypes: { count: number; description: string; name: string; }[]; fileName: string; fileType: string; isMultiDocument: boolean; sizeBytes: number; schema?: object; }; filename: string; }`\n  Response from the infer-schema endpoint.\n\n  - `analysis: { contentNature: string; contentType: string; description: string; documentTypes: { count: number; description: string; name: string; }[]; fileName: string; fileType: string; isMultiDocument: boolean; sizeBytes: number; schema?: object; }`\n  - `filename: string`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst inferSchema = await client.inferSchema.create({ file: {} });\n\nconsole.log(inferSchema);\n```',
+    perLanguage: {
+      csharp: {
+        method: 'InferSchema.Create',
+        example:
+          'InferSchemaCreateParams parameters = new()\n{\n    File = JsonSerializer.Deserialize<JsonElement>("{}")\n};\n\nvar inferSchema = await client.InferSchema.Create(parameters);\n\nConsole.WriteLine(inferSchema);',
+      },
+      go: {
+        method: 'client.InferSchema.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tinferSchema, err := client.InferSchema.New(context.TODO(), bem.InferSchemaNewParams{\n\t\tFile: map[string]any{},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", inferSchema.Analysis)\n}\n',
+      },
+      http: {
+        example:
+          "curl https://api.bem.ai/v3/infer-schema \\\n    -H 'Content-Type: multipart/form-data' \\\n    -H \"x-api-key: $BEM_API_KEY\" \\\n    -F file='{}'",
+      },
+      python: {
+        method: 'infer_schema.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ninfer_schema = client.infer_schema.create(\n    file={},\n)\nprint(infer_schema.analysis)',
+      },
+      typescript: {
+        method: 'client.inferSchema.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst inferSchema = await client.inferSchema.create({ file: {} });\n\nconsole.log(inferSchema.analysis);",
+      },
+    },
+  },
 ];
 
 const EMBEDDED_READMES: { language: string; content: string }[] = [

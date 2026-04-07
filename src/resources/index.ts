@@ -29,6 +29,7 @@ export {
   type FunctionListParams,
   type FunctionsFunctionsPage,
 } from './functions/functions';
+export { InferSchema, type InferSchemaCreateResponse, type InferSchemaCreateParams } from './infer-schema';
 export {
   Outputs,
   type AnyType,
