@@ -72,19 +72,18 @@ import {
 } from './resources/functions/functions';
 import {
   FunctionVersionIdentifier,
-  Workflow,
   WorkflowCallParams,
   WorkflowCopyParams,
   WorkflowCopyResponse,
   WorkflowCreateParams,
   WorkflowCreateResponse,
   WorkflowListParams,
-  WorkflowRequestRelationship,
+  WorkflowListResponse,
+  WorkflowListResponsesWorkflowsPage,
   WorkflowRetrieveResponse,
   WorkflowUpdateParams,
   WorkflowUpdateResponse,
   Workflows,
-  WorkflowsWorkflowsPage,
 } from './resources/workflows/workflows';
 import { type Fetch } from './internal/builtin-types';
 import { HeadersLike, NullableHeaders, buildHeaders } from './internal/headers';
@@ -954,13 +953,12 @@ export declare namespace Bem {
   export {
     Workflows as Workflows,
     type FunctionVersionIdentifier as FunctionVersionIdentifier,
-    type Workflow as Workflow,
-    type WorkflowRequestRelationship as WorkflowRequestRelationship,
     type WorkflowCreateResponse as WorkflowCreateResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
+    type WorkflowListResponse as WorkflowListResponse,
     type WorkflowCopyResponse as WorkflowCopyResponse,
-    type WorkflowsWorkflowsPage as WorkflowsWorkflowsPage,
+    type WorkflowListResponsesWorkflowsPage as WorkflowListResponsesWorkflowsPage,
     type WorkflowCreateParams as WorkflowCreateParams,
     type WorkflowUpdateParams as WorkflowUpdateParams,
     type WorkflowListParams as WorkflowListParams,

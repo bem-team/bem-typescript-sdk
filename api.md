@@ -90,11 +90,10 @@ Methods:
 Types:
 
 - <code><a href="./src/resources/workflows/workflows.ts">FunctionVersionIdentifier</a></code>
-- <code><a href="./src/resources/workflows/workflows.ts">Workflow</a></code>
-- <code><a href="./src/resources/workflows/workflows.ts">WorkflowRequestRelationship</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowCreateResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowRetrieveResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowUpdateResponse</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowListResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowCopyResponse</a></code>
 
 Methods:
@@ -102,7 +101,7 @@ Methods:
 - <code title="post /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">create</a>({ ...params }) -> WorkflowCreateResponse</code>
 - <code title="get /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">retrieve</a>(workflowName) -> WorkflowRetrieveResponse</code>
 - <code title="patch /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">update</a>(workflowName, { ...params }) -> WorkflowUpdateResponse</code>
-- <code title="get /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">list</a>({ ...params }) -> WorkflowsWorkflowsPage</code>
+- <code title="get /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">list</a>({ ...params }) -> WorkflowListResponsesWorkflowsPage</code>
 - <code title="delete /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">delete</a>(workflowName) -> void</code>
 - <code title="post /v3/workflows/{workflowName}/call">client.workflows.<a href="./src/resources/workflows/workflows.ts">call</a>(workflowName, { ...params }) -> CallGetResponse</code>
 - <code title="post /v3/workflows/copy">client.workflows.<a href="./src/resources/workflows/workflows.ts">copy</a>({ ...params }) -> WorkflowCopyResponse</code>
@@ -112,8 +111,9 @@ Methods:
 Types:
 
 - <code><a href="./src/resources/workflows/versions.ts">VersionRetrieveResponse</a></code>
+- <code><a href="./src/resources/workflows/versions.ts">VersionListResponse</a></code>
 
 Methods:
 
 - <code title="get /v3/workflows/{workflowName}/versions/{versionNum}">client.workflows.versions.<a href="./src/resources/workflows/versions.ts">retrieve</a>(versionNum, { ...params }) -> VersionRetrieveResponse</code>
-- <code title="get /v3/workflows/{workflowName}/versions">client.workflows.versions.<a href="./src/resources/workflows/versions.ts">list</a>(workflowName, { ...params }) -> WorkflowsWorkflowVersionsPage</code>
+- <code title="get /v3/workflows/{workflowName}/versions">client.workflows.versions.<a href="./src/resources/workflows/versions.ts">list</a>(workflowName, { ...params }) -> VersionListResponsesWorkflowVersionsPage</code>
