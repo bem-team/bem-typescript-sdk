@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (2026-04-07)
+
+Full Changelog: [v0.2.0...v0.3.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.2.0...v0.3.0)
+
+### Features
+
+* **api:** add new infer-schema endpoint ([cdcec4d](https://github.com/bem-team/bem-typescript-sdk/commit/cdcec4d9f697739ee592ed2c5ada002d73c6e7df))
+
 ## 0.2.0 (2026-04-07)
 
 Full Changelog: [v0.1.1...v0.2.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.1.1...v0.2.0)
