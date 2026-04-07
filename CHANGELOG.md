@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0 (2026-04-07)
+
+Full Changelog: [v0.1.1...v0.2.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.1.1...v0.2.0)
+
+### Features
+
+* **api:** api update ([b4a6ec5](https://github.com/bem-team/bem-typescript-sdk/commit/b4a6ec5111d44f2d75ded2578ae050ac16ea7c27))
+* **api:** fix workflow references in Stainless config ([7e6b50b](https://github.com/bem-team/bem-typescript-sdk/commit/7e6b50b8e22564ae0f069ae65f70504f56c7dfdb))
+
+
+### Chores
+
+* **internal:** fix MCP server import ordering ([3cb709b](https://github.com/bem-team/bem-typescript-sdk/commit/3cb709baf6645bdaa74b451867da8203f58cdb2a))
+
 ## 0.1.1 (2026-04-03)
 
 Full Changelog: [v0.1.0...v0.1.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.1.0...v0.1.1)
