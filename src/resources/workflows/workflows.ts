@@ -5,16 +5,14 @@ import * as WorkflowsAPI from './workflows';
 import * as CallsAPI from '../calls';
 import * as FunctionsAPI from '../functions/functions';
 import * as VersionsAPI from './versions';
-import {
-  VersionListParams,
-  VersionListResponse,
-  VersionListResponsesWorkflowVersionsPage,
-  VersionRetrieveParams,
-  VersionRetrieveResponse,
-  Versions,
-} from './versions';
+import { VersionListParams, VersionRetrieveParams, VersionRetrieveResponse, Versions } from './versions';
 import { APIPromise } from '../../core/api-promise';
-import { PagePromise, WorkflowsPage, type WorkflowsPageParams } from '../../core/pagination';
+import {
+  PagePromise,
+  WorkflowVersionsPage,
+  WorkflowsPage,
+  type WorkflowsPageParams,
+} from '../../core/pagination';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { multipartFormRequestOptions } from '../../internal/uploads';
@@ -57,11 +55,8 @@ export class Workflows extends APIResource {
   list(
     query: WorkflowListParams | null | undefined = {},
     options?: RequestOptions,
-  ): PagePromise<WorkflowListResponsesWorkflowsPage, WorkflowListResponse> {
-    return this._client.getAPIList('/v3/workflows', WorkflowsPage<WorkflowListResponse>, {
-      query,
-      ...options,
-    });
+  ): PagePromise<WorkflowsWorkflowsPage, Workflow> {
+    return this._client.getAPIList('/v3/workflows', WorkflowsPage<Workflow>, { query, ...options });
   }
 
   /**
@@ -115,7 +110,9 @@ export class Workflows extends APIResource {
   }
 }
 
-export type WorkflowListResponsesWorkflowsPage = WorkflowsPage<WorkflowListResponse>;
+export type WorkflowsWorkflowsPage = WorkflowsPage<Workflow>;
+
+export type WorkflowsWorkflowVersionsPage = WorkflowVersionsPage<Workflow>;
 
 export interface FunctionVersionIdentifier {
   /**
@@ -135,418 +132,10 @@ export interface FunctionVersionIdentifier {
   versionNum?: number;
 }
 
-export interface WorkflowCreateResponse {
-  /**
-   * Error message if the workflow creation failed.
-   */
-  error?: string;
-
-  /**
-   * V3 read representation of a workflow version.
-   */
-  workflow?: WorkflowCreateResponse.Workflow;
-}
-
-export namespace WorkflowCreateResponse {
-  /**
-   * V3 read representation of a workflow version.
-   */
-  export interface Workflow {
-    /**
-     * Unique identifier of the workflow.
-     */
-    id: string;
-
-    /**
-     * The date and time the workflow was created.
-     */
-    createdAt: string;
-
-    /**
-     * All directed edges in this workflow version's DAG.
-     */
-    edges: Array<Workflow.Edge>;
-
-    /**
-     * Name of the entry-point call-site node.
-     */
-    mainNodeName: string;
-
-    /**
-     * Unique name of the workflow within the environment.
-     */
-    name: string;
-
-    /**
-     * All call-site nodes in this workflow version's DAG.
-     */
-    nodes: Array<Workflow.Node>;
-
-    /**
-     * The date and time the workflow was last updated.
-     */
-    updatedAt: string;
-
-    /**
-     * Version number of this workflow version.
-     */
-    versionNum: number;
-
-    /**
-     * Audit trail information.
-     */
-    audit?: Workflow.Audit;
-
-    /**
-     * Human-readable display name.
-     */
-    displayName?: string;
-
-    /**
-     * Inbound email address associated with the workflow, if any.
-     */
-    emailAddress?: string;
-
-    /**
-     * Tags associated with the workflow.
-     */
-    tags?: Array<string>;
-  }
-
-  export namespace Workflow {
-    /**
-     * Read representation of a directed edge between call-site nodes.
-     */
-    export interface Edge {
-      /**
-       * Name of the destination node.
-       */
-      destinationNodeName: string;
-
-      /**
-       * Name of the source node.
-       */
-      sourceNodeName: string;
-
-      /**
-       * Labelled outlet on the source node, if any.
-       */
-      destinationName?: string;
-    }
-
-    /**
-     * Read representation of a call-site node.
-     */
-    export interface Node {
-      /**
-       * Function (and version) executing at this call site.
-       */
-      function: WorkflowsAPI.FunctionVersionIdentifier;
-
-      /**
-       * Name of this call site, unique within the workflow version.
-       */
-      name: string;
-    }
-
-    /**
-     * Audit trail information.
-     */
-    export interface Audit {
-      /**
-       * Information about who created the current version.
-       */
-      versionCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who created the workflow.
-       */
-      workflowCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who last updated the workflow.
-       */
-      workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
-    }
-  }
-}
-
-export interface WorkflowRetrieveResponse {
-  /**
-   * Error message if the workflow retrieval failed.
-   */
-  error?: string;
-
-  /**
-   * V3 read representation of a workflow version.
-   */
-  workflow?: WorkflowRetrieveResponse.Workflow;
-}
-
-export namespace WorkflowRetrieveResponse {
-  /**
-   * V3 read representation of a workflow version.
-   */
-  export interface Workflow {
-    /**
-     * Unique identifier of the workflow.
-     */
-    id: string;
-
-    /**
-     * The date and time the workflow was created.
-     */
-    createdAt: string;
-
-    /**
-     * All directed edges in this workflow version's DAG.
-     */
-    edges: Array<Workflow.Edge>;
-
-    /**
-     * Name of the entry-point call-site node.
-     */
-    mainNodeName: string;
-
-    /**
-     * Unique name of the workflow within the environment.
-     */
-    name: string;
-
-    /**
-     * All call-site nodes in this workflow version's DAG.
-     */
-    nodes: Array<Workflow.Node>;
-
-    /**
-     * The date and time the workflow was last updated.
-     */
-    updatedAt: string;
-
-    /**
-     * Version number of this workflow version.
-     */
-    versionNum: number;
-
-    /**
-     * Audit trail information.
-     */
-    audit?: Workflow.Audit;
-
-    /**
-     * Human-readable display name.
-     */
-    displayName?: string;
-
-    /**
-     * Inbound email address associated with the workflow, if any.
-     */
-    emailAddress?: string;
-
-    /**
-     * Tags associated with the workflow.
-     */
-    tags?: Array<string>;
-  }
-
-  export namespace Workflow {
-    /**
-     * Read representation of a directed edge between call-site nodes.
-     */
-    export interface Edge {
-      /**
-       * Name of the destination node.
-       */
-      destinationNodeName: string;
-
-      /**
-       * Name of the source node.
-       */
-      sourceNodeName: string;
-
-      /**
-       * Labelled outlet on the source node, if any.
-       */
-      destinationName?: string;
-    }
-
-    /**
-     * Read representation of a call-site node.
-     */
-    export interface Node {
-      /**
-       * Function (and version) executing at this call site.
-       */
-      function: WorkflowsAPI.FunctionVersionIdentifier;
-
-      /**
-       * Name of this call site, unique within the workflow version.
-       */
-      name: string;
-    }
-
-    /**
-     * Audit trail information.
-     */
-    export interface Audit {
-      /**
-       * Information about who created the current version.
-       */
-      versionCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who created the workflow.
-       */
-      workflowCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who last updated the workflow.
-       */
-      workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
-    }
-  }
-}
-
-export interface WorkflowUpdateResponse {
-  /**
-   * Error message if the workflow update failed.
-   */
-  error?: string;
-
-  /**
-   * V3 read representation of a workflow version.
-   */
-  workflow?: WorkflowUpdateResponse.Workflow;
-}
-
-export namespace WorkflowUpdateResponse {
-  /**
-   * V3 read representation of a workflow version.
-   */
-  export interface Workflow {
-    /**
-     * Unique identifier of the workflow.
-     */
-    id: string;
-
-    /**
-     * The date and time the workflow was created.
-     */
-    createdAt: string;
-
-    /**
-     * All directed edges in this workflow version's DAG.
-     */
-    edges: Array<Workflow.Edge>;
-
-    /**
-     * Name of the entry-point call-site node.
-     */
-    mainNodeName: string;
-
-    /**
-     * Unique name of the workflow within the environment.
-     */
-    name: string;
-
-    /**
-     * All call-site nodes in this workflow version's DAG.
-     */
-    nodes: Array<Workflow.Node>;
-
-    /**
-     * The date and time the workflow was last updated.
-     */
-    updatedAt: string;
-
-    /**
-     * Version number of this workflow version.
-     */
-    versionNum: number;
-
-    /**
-     * Audit trail information.
-     */
-    audit?: Workflow.Audit;
-
-    /**
-     * Human-readable display name.
-     */
-    displayName?: string;
-
-    /**
-     * Inbound email address associated with the workflow, if any.
-     */
-    emailAddress?: string;
-
-    /**
-     * Tags associated with the workflow.
-     */
-    tags?: Array<string>;
-  }
-
-  export namespace Workflow {
-    /**
-     * Read representation of a directed edge between call-site nodes.
-     */
-    export interface Edge {
-      /**
-       * Name of the destination node.
-       */
-      destinationNodeName: string;
-
-      /**
-       * Name of the source node.
-       */
-      sourceNodeName: string;
-
-      /**
-       * Labelled outlet on the source node, if any.
-       */
-      destinationName?: string;
-    }
-
-    /**
-     * Read representation of a call-site node.
-     */
-    export interface Node {
-      /**
-       * Function (and version) executing at this call site.
-       */
-      function: WorkflowsAPI.FunctionVersionIdentifier;
-
-      /**
-       * Name of this call site, unique within the workflow version.
-       */
-      name: string;
-    }
-
-    /**
-     * Audit trail information.
-     */
-    export interface Audit {
-      /**
-       * Information about who created the current version.
-       */
-      versionCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who created the workflow.
-       */
-      workflowCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who last updated the workflow.
-       */
-      workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
-    }
-  }
-}
-
 /**
  * V3 read representation of a workflow version.
  */
-export interface WorkflowListResponse {
+export interface Workflow {
   /**
    * Unique identifier of the workflow.
    */
@@ -560,7 +149,7 @@ export interface WorkflowListResponse {
   /**
    * All directed edges in this workflow version's DAG.
    */
-  edges: Array<WorkflowListResponse.Edge>;
+  edges: Array<WorkflowEdgeResponse>;
 
   /**
    * Name of the entry-point call-site node.
@@ -575,7 +164,7 @@ export interface WorkflowListResponse {
   /**
    * All call-site nodes in this workflow version's DAG.
    */
-  nodes: Array<WorkflowListResponse.Node>;
+  nodes: Array<WorkflowNodeResponse>;
 
   /**
    * The date and time the workflow was last updated.
@@ -590,7 +179,7 @@ export interface WorkflowListResponse {
   /**
    * Audit trail information.
    */
-  audit?: WorkflowListResponse.Audit;
+  audit?: WorkflowAudit;
 
   /**
    * Human-readable display name.
@@ -608,61 +197,92 @@ export interface WorkflowListResponse {
   tags?: Array<string>;
 }
 
-export namespace WorkflowListResponse {
+export interface WorkflowAudit {
   /**
-   * Read representation of a directed edge between call-site nodes.
+   * Information about who created the current version.
    */
-  export interface Edge {
-    /**
-     * Name of the destination node.
-     */
-    destinationNodeName: string;
-
-    /**
-     * Name of the source node.
-     */
-    sourceNodeName: string;
-
-    /**
-     * Labelled outlet on the source node, if any.
-     */
-    destinationName?: string;
-  }
+  versionCreatedBy?: FunctionsAPI.UserActionSummary;
 
   /**
-   * Read representation of a call-site node.
+   * Information about who created the workflow.
    */
-  export interface Node {
-    /**
-     * Function (and version) executing at this call site.
-     */
-    function: WorkflowsAPI.FunctionVersionIdentifier;
-
-    /**
-     * Name of this call site, unique within the workflow version.
-     */
-    name: string;
-  }
+  workflowCreatedBy?: FunctionsAPI.UserActionSummary;
 
   /**
-   * Audit trail information.
+   * Information about who last updated the workflow.
    */
-  export interface Audit {
-    /**
-     * Information about who created the current version.
-     */
-    versionCreatedBy?: FunctionsAPI.UserActionSummary;
+  workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
+}
 
-    /**
-     * Information about who created the workflow.
-     */
-    workflowCreatedBy?: FunctionsAPI.UserActionSummary;
+/**
+ * Read representation of a directed edge between call-site nodes.
+ */
+export interface WorkflowEdgeResponse {
+  /**
+   * Name of the destination node.
+   */
+  destinationNodeName: string;
 
-    /**
-     * Information about who last updated the workflow.
-     */
-    workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
-  }
+  /**
+   * Name of the source node.
+   */
+  sourceNodeName: string;
+
+  /**
+   * Labelled outlet on the source node, if any.
+   */
+  destinationName?: string;
+}
+
+/**
+ * Read representation of a call-site node.
+ */
+export interface WorkflowNodeResponse {
+  /**
+   * Function (and version) executing at this call site.
+   */
+  function: FunctionVersionIdentifier;
+
+  /**
+   * Name of this call site, unique within the workflow version.
+   */
+  name: string;
+}
+
+export interface WorkflowCreateResponse {
+  /**
+   * Error message if the workflow creation failed.
+   */
+  error?: string;
+
+  /**
+   * V3 read representation of a workflow version.
+   */
+  workflow?: Workflow;
+}
+
+export interface WorkflowRetrieveResponse {
+  /**
+   * Error message if the workflow retrieval failed.
+   */
+  error?: string;
+
+  /**
+   * V3 read representation of a workflow version.
+   */
+  workflow?: Workflow;
+}
+
+export interface WorkflowUpdateResponse {
+  /**
+   * Error message if the workflow update failed.
+   */
+  error?: string;
+
+  /**
+   * V3 read representation of a workflow version.
+   */
+  workflow?: Workflow;
 }
 
 export interface WorkflowCopyResponse {
@@ -685,7 +305,7 @@ export interface WorkflowCopyResponse {
   /**
    * V3 read representation of a workflow version.
    */
-  workflow?: WorkflowCopyResponse.Workflow;
+  workflow?: Workflow;
 }
 
 export namespace WorkflowCopyResponse {
@@ -719,128 +339,6 @@ export namespace WorkflowCopyResponse {
      * Version number of the newly created function in the target environment.
      */
     targetVersionNum: number;
-  }
-
-  /**
-   * V3 read representation of a workflow version.
-   */
-  export interface Workflow {
-    /**
-     * Unique identifier of the workflow.
-     */
-    id: string;
-
-    /**
-     * The date and time the workflow was created.
-     */
-    createdAt: string;
-
-    /**
-     * All directed edges in this workflow version's DAG.
-     */
-    edges: Array<Workflow.Edge>;
-
-    /**
-     * Name of the entry-point call-site node.
-     */
-    mainNodeName: string;
-
-    /**
-     * Unique name of the workflow within the environment.
-     */
-    name: string;
-
-    /**
-     * All call-site nodes in this workflow version's DAG.
-     */
-    nodes: Array<Workflow.Node>;
-
-    /**
-     * The date and time the workflow was last updated.
-     */
-    updatedAt: string;
-
-    /**
-     * Version number of this workflow version.
-     */
-    versionNum: number;
-
-    /**
-     * Audit trail information.
-     */
-    audit?: Workflow.Audit;
-
-    /**
-     * Human-readable display name.
-     */
-    displayName?: string;
-
-    /**
-     * Inbound email address associated with the workflow, if any.
-     */
-    emailAddress?: string;
-
-    /**
-     * Tags associated with the workflow.
-     */
-    tags?: Array<string>;
-  }
-
-  export namespace Workflow {
-    /**
-     * Read representation of a directed edge between call-site nodes.
-     */
-    export interface Edge {
-      /**
-       * Name of the destination node.
-       */
-      destinationNodeName: string;
-
-      /**
-       * Name of the source node.
-       */
-      sourceNodeName: string;
-
-      /**
-       * Labelled outlet on the source node, if any.
-       */
-      destinationName?: string;
-    }
-
-    /**
-     * Read representation of a call-site node.
-     */
-    export interface Node {
-      /**
-       * Function (and version) executing at this call site.
-       */
-      function: WorkflowsAPI.FunctionVersionIdentifier;
-
-      /**
-       * Name of this call site, unique within the workflow version.
-       */
-      name: string;
-    }
-
-    /**
-     * Audit trail information.
-     */
-    export interface Audit {
-      /**
-       * Information about who created the current version.
-       */
-      versionCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who created the workflow.
-       */
-      workflowCreatedBy?: FunctionsAPI.UserActionSummary;
-
-      /**
-       * Information about who last updated the workflow.
-       */
-      workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
-    }
   }
 }
 
@@ -1063,12 +561,15 @@ Workflows.Versions = Versions;
 export declare namespace Workflows {
   export {
     type FunctionVersionIdentifier as FunctionVersionIdentifier,
+    type Workflow as Workflow,
+    type WorkflowAudit as WorkflowAudit,
+    type WorkflowEdgeResponse as WorkflowEdgeResponse,
+    type WorkflowNodeResponse as WorkflowNodeResponse,
     type WorkflowCreateResponse as WorkflowCreateResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
-    type WorkflowListResponse as WorkflowListResponse,
     type WorkflowCopyResponse as WorkflowCopyResponse,
-    type WorkflowListResponsesWorkflowsPage as WorkflowListResponsesWorkflowsPage,
+    type WorkflowsWorkflowsPage as WorkflowsWorkflowsPage,
     type WorkflowCreateParams as WorkflowCreateParams,
     type WorkflowUpdateParams as WorkflowUpdateParams,
     type WorkflowListParams as WorkflowListParams,
@@ -1079,8 +580,6 @@ export declare namespace Workflows {
   export {
     Versions as Versions,
     type VersionRetrieveResponse as VersionRetrieveResponse,
-    type VersionListResponse as VersionListResponse,
-    type VersionListResponsesWorkflowVersionsPage as VersionListResponsesWorkflowVersionsPage,
     type VersionRetrieveParams as VersionRetrieveParams,
     type VersionListParams as VersionListParams,
   };
