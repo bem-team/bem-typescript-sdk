@@ -119,3 +119,13 @@ Methods:
 
 - <code title="get /v3/workflows/{workflowName}/versions/{versionNum}">client.workflows.versions.<a href="./src/resources/workflows/versions.ts">retrieve</a>(versionNum, { ...params }) -> VersionRetrieveResponse</code>
 - <code title="get /v3/workflows/{workflowName}/versions">client.workflows.versions.<a href="./src/resources/workflows/versions.ts">list</a>(workflowName, { ...params }) -> WorkflowsWorkflowVersionsPage</code>
+
+# InferSchema
+
+Types:
+
+- <code><a href="./src/resources/infer-schema.ts">InferSchemaCreateResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/infer-schema">client.inferSchema.<a href="./src/resources/infer-schema.ts">create</a>({ ...params }) -> InferSchemaCreateResponse</code>

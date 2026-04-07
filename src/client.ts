@@ -42,6 +42,7 @@ import {
   Errors as ErrorsAPIErrors,
   InboundEmailEvent,
 } from './resources/errors';
+import { InferSchema, InferSchemaCreateParams, InferSchemaCreateResponse } from './resources/infer-schema';
 import {
   AnyType,
   Event,
@@ -868,6 +869,17 @@ export class Bem {
    * Workflow operations
    */
   workflows: API.Workflows = new API.Workflows(this);
+  /**
+   * Infer JSON Schemas from uploaded documents using AI.
+   *
+   * Upload a file (PDF, image, spreadsheet, email, etc.) and receive a general-purpose JSON Schema
+   * that captures the document's structure. The inferred schema can be used directly as the
+   * `outputSchema` when creating Transform functions.
+   *
+   * The schema is designed to be broadly applicable to documents of the same type, not just
+   * the specific file uploaded.
+   */
+  inferSchema: API.InferSchema = new API.InferSchema(this);
 }
 
 Bem.Functions = Functions;
@@ -875,6 +887,7 @@ Bem.Calls = Calls;
 Bem.Errors = ErrorsAPIErrors;
 Bem.Outputs = Outputs;
 Bem.Workflows = Workflows;
+Bem.InferSchema = InferSchema;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -970,5 +983,11 @@ export declare namespace Bem {
     type WorkflowListParams as WorkflowListParams,
     type WorkflowCallParams as WorkflowCallParams,
     type WorkflowCopyParams as WorkflowCopyParams,
+  };
+
+  export {
+    InferSchema as InferSchema,
+    type InferSchemaCreateResponse as InferSchemaCreateResponse,
+    type InferSchemaCreateParams as InferSchemaCreateParams,
   };
 }

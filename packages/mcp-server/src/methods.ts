@@ -148,6 +148,12 @@ export const sdkMethods: SdkMethod[] = [
     httpMethod: 'get',
     httpPath: '/v3/workflows/{workflowName}/versions',
   },
+  {
+    clientCallName: 'client.inferSchema.create',
+    fullyQualifiedName: 'inferSchema.create',
+    httpMethod: 'post',
+    httpPath: '/v3/infer-schema',
+  },
 ];
 
 function allowedMethodsForCodeTool(options: McpOptions | undefined): SdkMethod[] | undefined {

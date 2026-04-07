@@ -131,6 +131,7 @@ const fuse = new Fuse(
     'client.workflows.update',
     'client.workflows.versions.list',
     'client.workflows.versions.retrieve',
+    'client.inferSchema.create',
   ],
   { threshold: 1, shouldSort: true },
 );
