@@ -9,8 +9,12 @@ const client = new Bem({
 
 describe('resource workflows', () => {
   // Mock server tests are disabled
-  test.skip('create', async () => {
-    const responsePromise = client.workflows.create({});
+  test.skip('create: only required params', async () => {
+    const responsePromise = client.workflows.create({
+      mainNodeName: 'mainNodeName',
+      name: 'name',
+      nodes: [{ function: {} }],
+    });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -18,6 +22,33 @@ describe('resource workflows', () => {
     const dataAndResponse = await responsePromise.withResponse();
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('create: required and optional params', async () => {
+    const response = await client.workflows.create({
+      mainNodeName: 'mainNodeName',
+      name: 'name',
+      nodes: [
+        {
+          function: {
+            id: 'id',
+            name: 'name',
+            versionNum: 0,
+          },
+          name: 'name',
+        },
+      ],
+      displayName: 'displayName',
+      edges: [
+        {
+          destinationNodeName: 'destinationNodeName',
+          sourceNodeName: 'sourceNodeName',
+          destinationName: 'destinationName',
+        },
+      ],
+      tags: ['string'],
+    });
   });
 
   // Mock server tests are disabled
