@@ -132,99 +132,121 @@ export interface FunctionVersionIdentifier {
   versionNum?: number;
 }
 
+/**
+ * V3 read representation of a workflow version.
+ */
 export interface Workflow {
   /**
-   * Unique identifier of workflow.
+   * Unique identifier of the workflow.
    */
   id: string;
-
-  mainFunction: FunctionVersionIdentifier;
-
-  /**
-   * Unique name of workflow. Must be UNIQUE on a per-environment basis.
-   */
-  name: string;
-
-  /**
-   * Version number of workflow version.
-   */
-  versionNum: number;
-
-  /**
-   * Audit trail information for the workflow.
-   */
-  audit?: Workflow.Audit;
 
   /**
    * The date and time the workflow was created.
    */
-  createdAt?: string;
+  createdAt: string;
 
   /**
-   * Display name of workflow.
+   * All directed edges in this workflow version's DAG.
    */
-  displayName?: string;
+  edges: Array<WorkflowEdgeResponse>;
 
   /**
-   * Email address of workflow.
+   * Name of the entry-point call-site node.
    */
-  emailAddress?: string;
-
-  relationships?: Array<Workflow.Relationship>;
+  mainNodeName: string;
 
   /**
-   * Array of tags to categorize and organize workflows.
+   * Unique name of the workflow within the environment.
    */
-  tags?: Array<string>;
+  name: string;
+
+  /**
+   * All call-site nodes in this workflow version's DAG.
+   */
+  nodes: Array<WorkflowNodeResponse>;
 
   /**
    * The date and time the workflow was last updated.
    */
-  updatedAt?: string;
-}
+  updatedAt: string;
 
-export namespace Workflow {
   /**
-   * Audit trail information for the workflow.
+   * Version number of this workflow version.
    */
-  export interface Audit {
-    /**
-     * Information about who created the current version.
-     */
-    versionCreatedBy?: FunctionsAPI.UserActionSummary;
-
-    /**
-     * Information about who created the workflow.
-     */
-    workflowCreatedBy?: FunctionsAPI.UserActionSummary;
-
-    /**
-     * Information about who last updated the workflow.
-     */
-    workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
-  }
-
-  export interface Relationship {
-    destinationFunction: WorkflowsAPI.FunctionVersionIdentifier;
-
-    sourceFunction: WorkflowsAPI.FunctionVersionIdentifier;
-
-    /**
-     * Name of destination.
-     */
-    destinationName?: string;
-  }
-}
-
-export interface WorkflowRequestRelationship {
-  destinationFunction: FunctionVersionIdentifier;
-
-  sourceFunction: FunctionVersionIdentifier;
+  versionNum: number;
 
   /**
-   * Name of destination.
+   * Audit trail information.
+   */
+  audit?: WorkflowAudit;
+
+  /**
+   * Human-readable display name.
+   */
+  displayName?: string;
+
+  /**
+   * Inbound email address associated with the workflow, if any.
+   */
+  emailAddress?: string;
+
+  /**
+   * Tags associated with the workflow.
+   */
+  tags?: Array<string>;
+}
+
+export interface WorkflowAudit {
+  /**
+   * Information about who created the current version.
+   */
+  versionCreatedBy?: FunctionsAPI.UserActionSummary;
+
+  /**
+   * Information about who created the workflow.
+   */
+  workflowCreatedBy?: FunctionsAPI.UserActionSummary;
+
+  /**
+   * Information about who last updated the workflow.
+   */
+  workflowLastUpdatedBy?: FunctionsAPI.UserActionSummary;
+}
+
+/**
+ * Read representation of a directed edge between call-site nodes.
+ */
+export interface WorkflowEdgeResponse {
+  /**
+   * Name of the destination node.
+   */
+  destinationNodeName: string;
+
+  /**
+   * Name of the source node.
+   */
+  sourceNodeName: string;
+
+  /**
+   * Labelled outlet on the source node, if any.
    */
   destinationName?: string;
+}
+
+/**
+ * Read representation of a call-site node.
+ */
+export interface WorkflowNodeResponse {
+  /**
+   * Function (and version) executing at this call site.
+   */
+  function: FunctionVersionIdentifier;
+
+  /**
+   * Name of this call site, unique within the workflow version.
+   */
+  name: string;
 }
 
 export interface WorkflowCreateResponse {
@@ -233,6 +255,9 @@ export interface WorkflowCreateResponse {
    */
   error?: string;
 
+  /**
+   * V3 read representation of a workflow version.
+   */
   workflow?: Workflow;
 }
 
@@ -242,6 +267,9 @@ export interface WorkflowRetrieveResponse {
    */
   error?: string;
 
+  /**
+   * V3 read representation of a workflow version.
+   */
   workflow?: Workflow;
 }
 
@@ -251,18 +279,21 @@ export interface WorkflowUpdateResponse {
    */
   error?: string;
 
+  /**
+   * V3 read representation of a workflow version.
+   */
   workflow?: Workflow;
 }
 
 export interface WorkflowCopyResponse {
   /**
-   * Information about functions that were copied when copying to a different
-   * environment. Empty when copying within the same environment.
+   * Functions that were copied when copying to a different environment. Empty when
+   * copying within the same environment.
    */
   copiedFunctions?: Array<WorkflowCopyResponse.CopiedFunction>;
 
   /**
-   * The environment where the workflow was copied to.
+   * The environment the workflow was copied to.
    */
   environment?: string;
 
@@ -272,7 +303,7 @@ export interface WorkflowCopyResponse {
   error?: string;
 
   /**
-   * The newly created workflow.
+   * V3 read representation of a workflow version.
    */
   workflow?: Workflow;
 }
@@ -313,92 +344,140 @@ export namespace WorkflowCopyResponse {
 
 export interface WorkflowCreateParams {
   /**
-   * Display name of workflow.
+   * Name of the entry-point node. Must not be a destination of any edge.
+   */
+  mainNodeName: string;
+
+  /**
+   * Unique name for the workflow. Must match `^[a-zA-Z0-9_-]{1,128}$`.
+   */
+  name: string;
+
+  /**
+   * Call-site nodes in the DAG. At least one is required.
+   */
+  nodes: Array<WorkflowCreateParams.Node>;
+
+  /**
+   * Human-readable display name.
    */
   displayName?: string;
 
   /**
-   * Main function for the workflow. The `mainFunction` and `relationships` fields
-   * act as a unit and must be provided together, or neither provided.
-   *
-   * - If `mainFunction` is provided without `relationships`, relationships will
-   *   default to an empty array.
-   * - If `relationships` is provided, `mainFunction` must also be provided
-   *   (validation error if missing).
-   * - If neither is provided, both mainFunction and relationships remain unchanged
-   *   from the current workflow version.
+   * Directed edges between nodes. Omit or leave empty for single-node workflows.
    */
-  mainFunction?: FunctionVersionIdentifier;
+  edges?: Array<WorkflowCreateParams.Edge>;
 
   /**
-   * Name of workflow. Can be updated to rename the workflow. Must be unique within
-   * the environment and match the pattern ^[a-zA-Z0-9_-]{1,128}$.
-   */
-  name?: string;
-
-  /**
-   * Relationships between functions in the workflow. The `mainFunction` and
-   * `relationships` fields act as a unit and must be provided together, or neither
-   * provided.
-   *
-   * - If `relationships` is provided, `mainFunction` must also be provided
-   *   (validation error if missing).
-   * - If `mainFunction` is provided without `relationships`, relationships will
-   *   default to an empty array.
-   * - If neither is provided, both mainFunction and relationships remain unchanged
-   *   from the current workflow version.
-   */
-  relationships?: Array<WorkflowRequestRelationship>;
-
-  /**
-   * Array of tags to categorize and organize workflows.
+   * Tags to categorize and organize the workflow.
    */
   tags?: Array<string>;
 }
 
+export namespace WorkflowCreateParams {
+  /**
+   * A single function call-site node in a workflow DAG.
+   */
+  export interface Node {
+    /**
+     * The function (and version) to execute at this call site.
+     */
+    function: WorkflowsAPI.FunctionVersionIdentifier;
+
+    /**
+     * Name for this call site. Must be unique within the workflow version. Defaults to
+     * the function's own name when omitted.
+     */
+    name?: string;
+  }
+
+  /**
+   * A directed edge between two named call-site nodes.
+   */
+  export interface Edge {
+    /**
+     * Name of the destination node.
+     */
+    destinationNodeName: string;
+
+    /**
+     * Name of the source node.
+     */
+    sourceNodeName: string;
+
+    /**
+     * Labelled outlet on the source node that activates this edge. Omit for the
+     * default (unlabelled) outlet.
+     */
+    destinationName?: string;
+  }
+}
+
 export interface WorkflowUpdateParams {
   /**
-   * Display name of workflow.
+   * Human-readable display name.
    */
   displayName?: string;
 
-  /**
-   * Main function for the workflow. The `mainFunction` and `relationships` fields
-   * act as a unit and must be provided together, or neither provided.
-   *
-   * - If `mainFunction` is provided without `relationships`, relationships will
-   *   default to an empty array.
-   * - If `relationships` is provided, `mainFunction` must also be provided
-   *   (validation error if missing).
-   * - If neither is provided, both mainFunction and relationships remain unchanged
-   *   from the current workflow version.
-   */
-  mainFunction?: FunctionVersionIdentifier;
+  edges?: Array<WorkflowUpdateParams.Edge>;
 
   /**
-   * Name of workflow. Can be updated to rename the workflow. Must be unique within
-   * the environment and match the pattern ^[a-zA-Z0-9_-]{1,128}$.
+   * `mainNodeName`, `nodes`, and `edges` must be provided together to update the DAG
+   * topology. If none are provided the topology is copied unchanged from the current
+   * version.
+   */
+  mainNodeName?: string;
+
+  /**
+   * New name for the workflow (renames it). Must match `^[a-zA-Z0-9_-]{1,128}$`.
    */
   name?: string;
 
-  /**
-   * Relationships between functions in the workflow. The `mainFunction` and
-   * `relationships` fields act as a unit and must be provided together, or neither
-   * provided.
-   *
-   * - If `relationships` is provided, `mainFunction` must also be provided
-   *   (validation error if missing).
-   * - If `mainFunction` is provided without `relationships`, relationships will
-   *   default to an empty array.
-   * - If neither is provided, both mainFunction and relationships remain unchanged
-   *   from the current workflow version.
-   */
-  relationships?: Array<WorkflowRequestRelationship>;
+  nodes?: Array<WorkflowUpdateParams.Node>;
 
   /**
-   * Array of tags to categorize and organize workflows.
+   * Tags to categorize and organize the workflow.
    */
   tags?: Array<string>;
+}
+
+export namespace WorkflowUpdateParams {
+  /**
+   * A directed edge between two named call-site nodes.
+   */
+  export interface Edge {
+    /**
+     * Name of the destination node.
+     */
+    destinationNodeName: string;
+
+    /**
+     * Name of the source node.
+     */
+    sourceNodeName: string;
+
+    /**
+     * Labelled outlet on the source node that activates this edge. Omit for the
+     * default (unlabelled) outlet.
+     */
+    destinationName?: string;
+  }
+
+  /**
+   * A single function call-site node in a workflow DAG.
+   */
+  export interface Node {
+    /**
+     * The function (and version) to execute at this call site.
+     */
+    function: WorkflowsAPI.FunctionVersionIdentifier;
+
+    /**
+     * Name for this call site. Must be unique within the workflow version. Defaults to
+     * the function's own name when omitted.
+     */
+    name?: string;
+  }
 }
 
 export interface WorkflowListParams extends WorkflowsPageParams {
@@ -483,7 +562,9 @@ export declare namespace Workflows {
   export {
     type FunctionVersionIdentifier as FunctionVersionIdentifier,
     type Workflow as Workflow,
-    type WorkflowRequestRelationship as WorkflowRequestRelationship,
+    type WorkflowAudit as WorkflowAudit,
+    type WorkflowEdgeResponse as WorkflowEdgeResponse,
+    type WorkflowNodeResponse as WorkflowNodeResponse,
     type WorkflowCreateResponse as WorkflowCreateResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,

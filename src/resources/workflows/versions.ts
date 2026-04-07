@@ -46,6 +46,9 @@ export interface VersionRetrieveResponse {
    */
   error?: string;
 
+  /**
+   * V3 read representation of a workflow version.
+   */
   workflow?: WorkflowsAPI.Workflow;
 }
 

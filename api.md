@@ -91,7 +91,9 @@ Types:
 
 - <code><a href="./src/resources/workflows/workflows.ts">FunctionVersionIdentifier</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">Workflow</a></code>
-- <code><a href="./src/resources/workflows/workflows.ts">WorkflowRequestRelationship</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowAudit</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowEdgeResponse</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowNodeResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowCreateResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowRetrieveResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowUpdateResponse</a></code>
