@@ -87,6 +87,7 @@ export type CreateFunction =
   | CreateFunction.TransformFunction
   | CreateFunction.AnalyzeFunction
   | CreateFunction.RouteFunction
+  | CreateFunction.SendFunction
   | CreateFunction.SplitFunction
   | CreateFunction.JoinFunction
   | CreateFunction.PayloadShapingFunction
@@ -185,6 +186,56 @@ export namespace CreateFunction {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export interface SendFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'send';
+
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType?: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Google Drive folder ID. Required when destinationType is google_drive. Managed
+     * via Paragon OAuth.
+     */
+    googleDriveFolderId?: string;
+
+    /**
+     * S3 bucket to upload the payload to. Required when destinationType is s3.
+     */
+    s3Bucket?: string;
+
+    /**
+     * Optional S3 key prefix (folder path).
+     */
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     */
+    webhookSigningEnabled?: boolean;
+
+    /**
+     * Webhook URL to POST the payload to. Required when destinationType is webhook.
+     */
+    webhookUrl?: string;
   }
 
   export interface SplitFunction {
@@ -491,15 +542,15 @@ export interface EnrichStep {
 }
 
 /**
- * A function that transforms and customizes input payloads using JMESPath
- * expressions. Payload shaping allows you to extract specific data, perform
- * calculations, and reshape complex input structures into simplified, standardized
- * output formats tailored to your downstream systems or business requirements.
+ * A function that delivers workflow outputs to an external destination. Send
+ * functions receive the output of an upstream workflow node and forward it to a
+ * webhook, S3 bucket, or Google Drive folder.
  */
 export type Function =
   | Function.TransformFunction
   | Function.AnalyzeFunction
   | Function.RouteFunction
+  | Function.SendFunction
   | Function.SplitFunction
   | Function.JoinFunction
   | Function.PayloadShapingFunction
@@ -670,6 +721,81 @@ export namespace Function {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  /**
+   * A function that delivers workflow outputs to an external destination. Send
+   * functions receive the output of an upstream workflow node and forward it to a
+   * webhook, S3 bucket, or Google Drive folder.
+   */
+  export interface SendFunction {
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'send';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Google Drive folder ID. Present when destinationType is google_drive. Managed
+     * via Paragon OAuth.
+     */
+    googleDriveFolderId?: string;
+
+    /**
+     * S3 bucket to upload the payload to. Present when destinationType is s3.
+     */
+    s3Bucket?: string;
+
+    /**
+     * S3 key prefix (folder path). Optional, present when destinationType is s3.
+     */
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+
+    /**
+     * Whether webhook payloads are signed with an HMAC-SHA256 signature.
+     */
+    webhookSigningEnabled?: boolean;
+
+    /**
+     * Webhook URL to POST the payload to. Present when destinationType is webhook.
+     */
+    webhookUrl?: string;
   }
 
   export interface SplitFunction {
@@ -948,10 +1074,9 @@ export interface FunctionAudit {
  */
 export interface FunctionResponse {
   /**
-   * A function that transforms and customizes input payloads using JMESPath
-   * expressions. Payload shaping allows you to extract specific data, perform
-   * calculations, and reshape complex input structures into simplified, standardized
-   * output formats tailored to your downstream systems or business requirements.
+   * A function that delivers workflow outputs to an external destination. Send
+   * functions receive the output of an upstream workflow node and forward it to a
+   * webhook, S3 bucket, or Google Drive folder.
    */
   function: Function;
 }
@@ -962,6 +1087,7 @@ export interface FunctionResponse {
 export type FunctionType =
   | 'transform'
   | 'route'
+  | 'send'
   | 'split'
   | 'join'
   | 'analyze'
@@ -1035,6 +1161,7 @@ export type UpdateFunction =
   | UpdateFunction.TransformFunction
   | UpdateFunction.AnalyzeFunction
   | UpdateFunction.RouteFunction
+  | UpdateFunction.SendFunction
   | UpdateFunction.SplitFunction
   | UpdateFunction.JoinFunction
   | UpdateFunction.PayloadShapingFunction
@@ -1133,6 +1260,56 @@ export namespace UpdateFunction {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export interface SendFunction {
+    type: 'send';
+
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType?: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Google Drive folder ID. Required when destinationType is google_drive. Managed
+     * via Paragon OAuth.
+     */
+    googleDriveFolderId?: string;
+
+    /**
+     * S3 bucket to upload the payload to. Required when destinationType is s3.
+     */
+    s3Bucket?: string;
+
+    /**
+     * Optional S3 key prefix (folder path).
+     */
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     */
+    webhookSigningEnabled?: boolean;
+
+    /**
+     * Webhook URL to POST the payload to. Required when destinationType is webhook.
+     */
+    webhookUrl?: string;
   }
 
   export interface SplitFunction {
@@ -1339,6 +1516,7 @@ export type FunctionCreateParams =
   | FunctionCreateParams.CreateTransformFunction
   | FunctionCreateParams.CreateAnalyzeFunction
   | FunctionCreateParams.CreateRouteFunction
+  | FunctionCreateParams.CreateSendFunction
   | FunctionCreateParams.CreateSplitFunction
   | FunctionCreateParams.CreateJoinFunction
   | FunctionCreateParams.CreatePayloadShapingFunction
@@ -1437,6 +1615,56 @@ export declare namespace FunctionCreateParams {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export interface CreateSendFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'send';
+
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType?: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Google Drive folder ID. Required when destinationType is google_drive. Managed
+     * via Paragon OAuth.
+     */
+    googleDriveFolderId?: string;
+
+    /**
+     * S3 bucket to upload the payload to. Required when destinationType is s3.
+     */
+    s3Bucket?: string;
+
+    /**
+     * Optional S3 key prefix (folder path).
+     */
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     */
+    webhookSigningEnabled?: boolean;
+
+    /**
+     * Webhook URL to POST the payload to. Required when destinationType is webhook.
+     */
+    webhookUrl?: string;
   }
 
   export interface CreateSplitFunction {
@@ -1596,6 +1824,7 @@ export type FunctionUpdateParams =
   | FunctionUpdateParams.UpsertTransformFunction
   | FunctionUpdateParams.UpsertAnalyzeFunction
   | FunctionUpdateParams.UpsertRouteFunction
+  | FunctionUpdateParams.UpsertSendFunction
   | FunctionUpdateParams.UpsertSplitFunction
   | FunctionUpdateParams.UpsertJoinFunction
   | FunctionUpdateParams.UpsertPayloadShapingFunction
@@ -1694,6 +1923,56 @@ export declare namespace FunctionUpdateParams {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export interface UpsertSendFunction {
+    type: 'send';
+
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType?: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Google Drive folder ID. Required when destinationType is google_drive. Managed
+     * via Paragon OAuth.
+     */
+    googleDriveFolderId?: string;
+
+    /**
+     * S3 bucket to upload the payload to. Required when destinationType is s3.
+     */
+    s3Bucket?: string;
+
+    /**
+     * Optional S3 key prefix (folder path).
+     */
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     */
+    webhookSigningEnabled?: boolean;
+
+    /**
+     * Webhook URL to POST the payload to. Required when destinationType is webhook.
+     */
+    webhookUrl?: string;
   }
 
   export interface UpsertSplitFunction {

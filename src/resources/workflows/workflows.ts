@@ -15,7 +15,7 @@ import {
 } from '../../core/pagination';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
-import { multipartFormRequestOptions } from '../../internal/uploads';
+import { maybeMultipartFormRequestOptions } from '../../internal/uploads';
 import { path } from '../../internal/utils/path';
 
 /**
@@ -70,16 +70,25 @@ export class Workflows extends APIResource {
   }
 
   /**
-   * **Invoke a workflow by submitting a multipart form request.**
+   * **Invoke a workflow.**
    *
-   * Workflows can only be called via multipart form in V3. Submit the input file
-   * along with an optional reference ID for tracking.
+   * Submit the input file as either a multipart form request or a JSON request with
+   * base64-encoded file content. The workflow name is derived from the URL path.
+   *
+   * ## Input Formats
+   *
+   * - **Multipart form** (`multipart/form-data`): attach the file directly via the
+   *   `file` or `files` fields. Set `wait` in the form body to control synchronous
+   *   behaviour.
+   * - **JSON** (`application/json`): base64-encode the file content and set it in
+   *   `input.singleFile.inputContent` or `input.batchFiles.inputs[*].inputContent`.
+   *   Pass `wait=true` as a query parameter to control synchronous behaviour.
    *
    * ## Synchronous vs Asynchronous
    *
    * By default the call is created asynchronously and this endpoint returns
-   * `202 Accepted` immediately with a `pending` call object. Set the `wait` field to
-   * `true` to block until the call completes (up to 30 seconds):
+   * `202 Accepted` immediately with a `pending` call object. Set `wait` to `true` to
+   * block until the call completes (up to 30 seconds):
    *
    * - On success: returns `200 OK` with the completed call, `outputs` populated
    * - On failure: returns `500 Internal Server Error` with the call and an `error`
@@ -93,12 +102,13 @@ export class Workflows extends APIResource {
    */
   call(
     workflowName: string,
-    body: WorkflowCallParams,
+    params: WorkflowCallParams,
     options?: RequestOptions,
   ): APIPromise<CallsAPI.CallGetResponse> {
+    const { wait, ...body } = params;
     return this._client.post(
       path`/v3/workflows/${workflowName}/call`,
-      multipartFormRequestOptions({ body, ...options }, this._client),
+      maybeMultipartFormRequestOptions({ query: { wait }, body, ...options }, this._client),
     );
   }
 
@@ -498,25 +508,102 @@ export interface WorkflowListParams extends WorkflowsPageParams {
 
 export interface WorkflowCallParams {
   /**
-   * Your reference ID for tracking this call.
+   * Body param: Input to the workflow call. Provide exactly one of `singleFile` or
+   * `batchFiles`.
+   */
+  input: WorkflowCallParams.Input;
+
+  /**
+   * Query param: When `true`, the endpoint blocks until the call completes (up to 30
+   * seconds) and returns the finished call object. Default: `false`.
+   */
+  wait?: boolean;
+
+  /**
+   * Body param: Your reference ID for tracking this call.
    */
   callReferenceID?: string;
+}
 
+export namespace WorkflowCallParams {
   /**
-   * Single input file (for transform, analyze, route, and split functions).
+   * Input to the workflow call. Provide exactly one of `singleFile` or `batchFiles`.
    */
-  file?: unknown;
+  export interface Input {
+    batchFiles?: Input.BatchFiles;
 
-  /**
-   * Multiple input files (for join functions).
-   */
-  files?: Array<unknown>;
+    singleFile?: Input.SingleFile;
+  }
 
-  /**
-   * When `true`, the endpoint blocks until the call completes (up to 30 seconds) and
-   * returns the finished call object. Default: `false`.
-   */
-  wait?: string;
+  export namespace Input {
+    export interface BatchFiles {
+      inputs?: Array<BatchFiles.Input>;
+    }
+
+    export namespace BatchFiles {
+      export interface Input {
+        /**
+         * Base64-encoded file content
+         */
+        inputContent: string;
+
+        /**
+         * The input type of the content you're sending for transformation.
+         */
+        inputType:
+          | 'csv'
+          | 'docx'
+          | 'email'
+          | 'heic'
+          | 'html'
+          | 'jpeg'
+          | 'json'
+          | 'heif'
+          | 'm4a'
+          | 'mp3'
+          | 'pdf'
+          | 'png'
+          | 'text'
+          | 'wav'
+          | 'webp'
+          | 'xls'
+          | 'xlsx'
+          | 'xml';
+
+        itemReferenceID?: string;
+      }
+    }
+
+    export interface SingleFile {
+      /**
+       * Base64-encoded file content
+       */
+      inputContent: string;
+
+      /**
+       * The input type of the content you're sending for transformation.
+       */
+      inputType:
+        | 'csv'
+        | 'docx'
+        | 'email'
+        | 'heic'
+        | 'html'
+        | 'jpeg'
+        | 'json'
+        | 'heif'
+        | 'm4a'
+        | 'mp3'
+        | 'pdf'
+        | 'png'
+        | 'text'
+        | 'wav'
+        | 'webp'
+        | 'xls'
+        | 'xlsx'
+        | 'xml';
+    }
+  }
 }
 
 export interface WorkflowCopyParams {
