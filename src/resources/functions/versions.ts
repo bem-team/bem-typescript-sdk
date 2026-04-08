@@ -51,6 +51,7 @@ export type FunctionVersion =
   | FunctionVersion.TransformFunctionVersion
   | FunctionVersion.AnalyzeFunctionVersion
   | FunctionVersion.RouteFunctionVersion
+  | FunctionVersion.SendFunctionVersion
   | FunctionVersion.SplitFunctionVersion
   | FunctionVersion.JoinFunctionVersion
   | FunctionVersion.EnrichFunctionVersion
@@ -236,6 +237,65 @@ export namespace FunctionVersion {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export interface SendFunctionVersion {
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'send';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    googleDriveFolderId?: string;
+
+    s3Bucket?: string;
+
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+
+    webhookSigningEnabled?: boolean;
+
+    webhookUrl?: string;
   }
 
   export interface SplitFunctionVersion {

@@ -122,8 +122,8 @@ describe('resource workflows', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('call', async () => {
-    const responsePromise = client.workflows.call('workflowName', {});
+  test.skip('call: only required params', async () => {
+    const responsePromise = client.workflows.call('workflowName', { input: {} });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -131,6 +131,26 @@ describe('resource workflows', () => {
     const dataAndResponse = await responsePromise.withResponse();
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('call: required and optional params', async () => {
+    const response = await client.workflows.call('workflowName', {
+      input: {
+        batchFiles: {
+          inputs: [
+            {
+              inputContent: 'inputContent',
+              inputType: 'csv',
+              itemReferenceID: 'itemReferenceID',
+            },
+          ],
+        },
+        singleFile: { inputContent: 'inputContent', inputType: 'csv' },
+      },
+      wait: true,
+      callReferenceID: 'callReferenceID',
+    });
   });
 
   // Mock server tests are disabled
