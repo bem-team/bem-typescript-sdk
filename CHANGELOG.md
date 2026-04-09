@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 (2026-04-09)
+
+Full Changelog: [v0.4.2...v0.5.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.4.2...v0.5.0)
+
+### Features
+
+* **api:** OIDC publishing update for NPM ([e0726bc](https://github.com/bem-team/bem-typescript-sdk/commit/e0726bc683e09a355f6344cbb37b6a9ee9e6325c))
+
 ## 0.4.2 (2026-04-09)
 
 Full Changelog: [v0.4.1...v0.4.2](https://github.com/bem-team/bem-typescript-sdk/compare/v0.4.1...v0.4.2)
