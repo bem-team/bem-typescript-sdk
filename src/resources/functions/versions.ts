@@ -293,6 +293,10 @@ export namespace FunctionVersion {
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
 
+    /**
+     * Whether webhook deliveries are signed with an HMAC-SHA256 `bem-signature`
+     * header.
+     */
     webhookSigningEnabled?: boolean;
 
     webhookUrl?: string;

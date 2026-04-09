@@ -228,7 +228,9 @@ export namespace CreateFunction {
     tags?: Array<string>;
 
     /**
-     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     * Whether to sign webhook deliveries with an HMAC-SHA256 `bem-signature` header.
+     * Defaults to `true` when omitted — signing is on by default for new send
+     * functions. Set explicitly to `false` to disable.
      */
     webhookSigningEnabled?: boolean;
 
@@ -788,7 +790,7 @@ export namespace Function {
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
 
     /**
-     * Whether webhook payloads are signed with an HMAC-SHA256 signature.
+     * Whether webhook payloads are signed with an HMAC-SHA256 `bem-signature` header.
      */
     webhookSigningEnabled?: boolean;
 
@@ -1302,7 +1304,9 @@ export namespace UpdateFunction {
     tags?: Array<string>;
 
     /**
-     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     * Whether to sign webhook deliveries with an HMAC-SHA256 `bem-signature` header.
+     * Defaults to `true` when omitted — signing is on by default for new send
+     * functions. Set explicitly to `false` to disable.
      */
     webhookSigningEnabled?: boolean;
 
@@ -1657,7 +1661,9 @@ export declare namespace FunctionCreateParams {
     tags?: Array<string>;
 
     /**
-     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     * Whether to sign webhook deliveries with an HMAC-SHA256 `bem-signature` header.
+     * Defaults to `true` when omitted — signing is on by default for new send
+     * functions. Set explicitly to `false` to disable.
      */
     webhookSigningEnabled?: boolean;
 
@@ -1965,7 +1971,9 @@ export declare namespace FunctionUpdateParams {
     tags?: Array<string>;
 
     /**
-     * Whether to sign webhook payloads with an HMAC-SHA256 signature.
+     * Whether to sign webhook deliveries with an HMAC-SHA256 `bem-signature` header.
+     * Defaults to `true` when omitted — signing is on by default for new send
+     * functions. Set explicitly to `false` to disable.
      */
     webhookSigningEnabled?: boolean;
 
