@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1 (2026-04-09)
+
+Full Changelog: [v0.4.0...v0.4.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.4.0...v0.4.1)
+
+### Chores
+
+* **internal:** codegen related update ([ca4ace4](https://github.com/bem-team/bem-typescript-sdk/commit/ca4ace4612ef68d9dbbc8f36f40698bfb2e970aa))
+* **mcp-server:** increase local docs search result count from 5 to 10 ([bcdb0e5](https://github.com/bem-team/bem-typescript-sdk/commit/bcdb0e562fa14080a86040095177ce3eb59dd0a0))
+
 ## 0.4.0 (2026-04-08)
 
 Full Changelog: [v0.3.0...v0.4.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.3.0...v0.4.0)
