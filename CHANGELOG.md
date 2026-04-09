@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1 (2026-04-09)
+
+Full Changelog: [v0.5.0...v0.5.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.5.0...v0.5.1)
+
 ## 0.5.0 (2026-04-09)
 
 Full Changelog: [v0.4.2...v0.5.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.4.2...v0.5.0)
