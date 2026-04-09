@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.2 (2026-04-09)
+
+Full Changelog: [v0.4.1...v0.4.2](https://github.com/bem-team/bem-typescript-sdk/compare/v0.4.1...v0.4.2)
+
+### Chores
+
+* update SDK settings ([862be67](https://github.com/bem-team/bem-typescript-sdk/commit/862be676033083d6b4a3419353c205130c55f491))
+* update SDK settings ([72b655d](https://github.com/bem-team/bem-typescript-sdk/commit/72b655daaa2a8da30a96cef5131d26083a98c5f1))
+
 ## 0.4.1 (2026-04-09)
 
 Full Changelog: [v0.4.0...v0.4.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.4.0...v0.4.1)
