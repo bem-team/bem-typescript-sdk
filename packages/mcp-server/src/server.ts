@@ -28,7 +28,7 @@ export const newMcpServer = async ({
   new McpServer(
     {
       name: 'bem_ai_sdk_api',
-      version: '0.4.1',
+      version: '0.4.2',
     },
     {
       instructions: await getInstructions({ stainlessApiKey, customInstructionsPath }),
