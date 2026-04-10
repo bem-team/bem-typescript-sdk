@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 (2026-04-10)
+
+Full Changelog: [v0.5.2...v0.6.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.5.2...v0.6.0)
+
+### Features
+
+* **api:** api update ([5bcc4bc](https://github.com/bem-team/bem-typescript-sdk/commit/5bcc4bc0ff6dc03468f65441248f244b85a5890e))
+
+
+### Chores
+
+* **internal:** show error causes in MCP servers when running in local mode ([164d8d1](https://github.com/bem-team/bem-typescript-sdk/commit/164d8d17b9abc23fb13be1552055704c1146a539))
+
 ## 0.5.2 (2026-04-09)
 
 Full Changelog: [v0.5.1...v0.5.2](https://github.com/bem-team/bem-typescript-sdk/compare/v0.5.1...v0.5.2)
