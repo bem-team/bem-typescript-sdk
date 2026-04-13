@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.0 (2026-04-13)
+
+Full Changelog: [v0.6.1...v0.7.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.6.1...v0.7.0)
+
+### Features
+
+* **api:** fix Terraform config with publish field ([570b2c7](https://github.com/bem-team/bem-typescript-sdk/commit/570b2c72ddc7f904ad5d10183f8fd202a401d964))
+
+
+### Chores
+
+* configure new SDK language ([b4e0bf3](https://github.com/bem-team/bem-typescript-sdk/commit/b4e0bf31f6c4e88ec7967b9b19f568fa9e25456c))
+
 ## 0.6.1 (2026-04-11)
 
 Full Changelog: [v0.6.0...v0.6.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.6.0...v0.6.1)
