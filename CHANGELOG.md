@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 (2026-04-11)
+
+Full Changelog: [v0.6.0...v0.6.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.6.0...v0.6.1)
+
+### Bug Fixes
+
+* **go:** properly generate examples for body root unions ([6774800](https://github.com/bem-team/bem-typescript-sdk/commit/67748001ea19d7f6aab4a5634f50801227a90752))
+
 ## 0.6.0 (2026-04-10)
 
 Full Changelog: [v0.5.2...v0.6.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.5.2...v0.6.0)
