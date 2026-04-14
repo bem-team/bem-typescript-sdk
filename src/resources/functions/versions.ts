@@ -49,6 +49,7 @@ export class Versions extends APIResource {
  */
 export type FunctionVersion =
   | FunctionVersion.TransformFunctionVersion
+  | FunctionVersion.ExtractFunctionVersion
   | FunctionVersion.AnalyzeFunctionVersion
   | FunctionVersion.RouteFunctionVersion
   | FunctionVersion.SendFunctionVersion
@@ -92,6 +93,66 @@ export namespace FunctionVersion {
     tabularChunkingEnabled: boolean;
 
     type: 'transform';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export interface ExtractFunctionVersion {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
+     */
+    tabularChunkingEnabled: boolean;
+
+    type: 'extract';
 
     /**
      * Version number of function.

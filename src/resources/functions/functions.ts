@@ -85,6 +85,7 @@ export type FunctionsFunctionsPage = FunctionsPage<Function>;
 
 export type CreateFunction =
   | CreateFunction.TransformFunction
+  | CreateFunction.ExtractFunction
   | CreateFunction.AnalyzeFunction
   | CreateFunction.RouteFunction
   | CreateFunction.SendFunction
@@ -120,6 +121,41 @@ export namespace CreateFunction {
     /**
      * Whether tabular chunking is enabled on the pipeline. This processes tables in
      * CSV/Excel in row batches, rather than all rows at once.
+     */
+    tabularChunkingEnabled?: boolean;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export interface ExtractFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'extract';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema?: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName?: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
      */
     tabularChunkingEnabled?: boolean;
 
@@ -544,12 +580,13 @@ export interface EnrichStep {
 }
 
 /**
- * A function that delivers workflow outputs to an external destination. Send
- * functions receive the output of an upstream workflow node and forward it to a
- * webhook, S3 bucket, or Google Drive folder.
+ * A function that extracts structured JSON from documents and images. Accepts a
+ * wide range of input types including PDFs, images, spreadsheets, emails, and
+ * more.
  */
 export type Function =
   | Function.TransformFunction
+  | Function.ExtractFunction
   | Function.AnalyzeFunction
   | Function.RouteFunction
   | Function.SendFunction
@@ -593,6 +630,66 @@ export namespace Function {
     tabularChunkingEnabled: boolean;
 
     type: 'transform';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  /**
+   * A function that extracts structured JSON from documents and images. Accepts a
+   * wide range of input types including PDFs, images, spreadsheets, emails, and
+   * more.
+   */
+  export interface ExtractFunction {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
+     */
+    tabularChunkingEnabled: boolean;
+
+    type: 'extract';
 
     /**
      * Version number of function.
@@ -1076,9 +1173,9 @@ export interface FunctionAudit {
  */
 export interface FunctionResponse {
   /**
-   * A function that delivers workflow outputs to an external destination. Send
-   * functions receive the output of an upstream workflow node and forward it to a
-   * webhook, S3 bucket, or Google Drive folder.
+   * A function that extracts structured JSON from documents and images. Accepts a
+   * wide range of input types including PDFs, images, spreadsheets, emails, and
+   * more.
    */
   function: Function;
 }
@@ -1088,6 +1185,7 @@ export interface FunctionResponse {
  */
 export type FunctionType =
   | 'transform'
+  | 'extract'
   | 'route'
   | 'send'
   | 'split'
@@ -1161,6 +1259,7 @@ export interface SplitFunctionSemanticPageItemClass {
  */
 export type UpdateFunction =
   | UpdateFunction.TransformFunction
+  | UpdateFunction.ExtractFunction
   | UpdateFunction.AnalyzeFunction
   | UpdateFunction.RouteFunction
   | UpdateFunction.SendFunction
@@ -1196,6 +1295,41 @@ export namespace UpdateFunction {
     /**
      * Whether tabular chunking is enabled on the pipeline. This processes tables in
      * CSV/Excel in row batches, rather than all rows at once.
+     */
+    tabularChunkingEnabled?: boolean;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export interface ExtractFunction {
+    type: 'extract';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema?: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName?: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
      */
     tabularChunkingEnabled?: boolean;
 
@@ -1518,6 +1652,7 @@ export interface WorkflowUsageInfo {
 
 export type FunctionCreateParams =
   | FunctionCreateParams.CreateTransformFunction
+  | FunctionCreateParams.CreateExtractFunction
   | FunctionCreateParams.CreateAnalyzeFunction
   | FunctionCreateParams.CreateRouteFunction
   | FunctionCreateParams.CreateSendFunction
@@ -1553,6 +1688,41 @@ export declare namespace FunctionCreateParams {
     /**
      * Whether tabular chunking is enabled on the pipeline. This processes tables in
      * CSV/Excel in row batches, rather than all rows at once.
+     */
+    tabularChunkingEnabled?: boolean;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export interface CreateExtractFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'extract';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema?: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName?: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
      */
     tabularChunkingEnabled?: boolean;
 
@@ -1828,6 +1998,7 @@ export declare namespace FunctionCreateParams {
 
 export type FunctionUpdateParams =
   | FunctionUpdateParams.UpsertTransformFunction
+  | FunctionUpdateParams.UpsertExtractFunction
   | FunctionUpdateParams.UpsertAnalyzeFunction
   | FunctionUpdateParams.UpsertRouteFunction
   | FunctionUpdateParams.UpsertSendFunction
@@ -1863,6 +2034,41 @@ export declare namespace FunctionUpdateParams {
     /**
      * Whether tabular chunking is enabled on the pipeline. This processes tables in
      * CSV/Excel in row batches, rather than all rows at once.
+     */
+    tabularChunkingEnabled?: boolean;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export interface UpsertExtractFunction {
+    type: 'extract';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema?: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName?: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
      */
     tabularChunkingEnabled?: boolean;
 
