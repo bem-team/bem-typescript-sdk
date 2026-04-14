@@ -866,7 +866,20 @@ export class Bem {
    */
   outputs: API.Outputs = new API.Outputs(this);
   /**
-   * Workflow operations
+   * Workflows orchestrate one or more functions into a directed acyclic graph (DAG) for document processing.
+   *
+   * Use these endpoints to create, update, list, and manage workflows, and to invoke them
+   * with file input via `POST /v3/workflows/{workflowName}/call`.
+   *
+   * The call endpoint accepts files as either multipart form data or JSON with base64-encoded
+   * content. In the Bem CLI, use `@path/to/file` inside JSON values to automatically read and
+   * encode files:
+   *
+   * ```
+   * bem workflows call --workflow-name my-workflow \
+   *   --input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' \
+   *   --wait
+   * ```
    */
   workflows: API.Workflows = new API.Workflows(this);
   /**
