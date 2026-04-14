@@ -39,12 +39,20 @@ export class InferSchema extends APIResource {
    *
    * Maximum file size is **20 MB**.
    *
-   * ## Example
+   * ## Examples
+   *
+   * Using curl:
    *
    * ```bash
    * curl -X POST https://api.bem.ai/v3/infer-schema \
    *   -H "x-api-key: YOUR_API_KEY" \
    *   -F "file=@invoice.pdf"
+   * ```
+   *
+   * Using the Bem CLI:
+   *
+   * ```bash
+   * bem infer-schema create --file @invoice.pdf
    * ```
    */
   create(body: InferSchemaCreateParams, options?: RequestOptions): APIPromise<InferSchemaCreateResponse> {
