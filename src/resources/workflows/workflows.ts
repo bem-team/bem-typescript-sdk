@@ -568,14 +568,19 @@ export interface WorkflowListParams extends WorkflowsPageParams {
 
 export interface WorkflowCallParams {
   /**
-   * Body param: Input to the workflow call. Provide exactly one of `singleFile` or
+   * Body param: Input file(s) for a call. Provide exactly one of `singleFile` or
    * `batchFiles`.
+   *
+   * In the CLI, use the nested flags `--input.single-file` or `--input.batch-files`
+   * with `@path/to/file` for automatic file embedding:
+   * `--input.single-file '{"inputContent": "@invoice.pdf", "inputType": "pdf"}' --wait`
    */
   input: WorkflowCallParams.Input;
 
   /**
-   * Query param: When `true`, the endpoint blocks until the call completes (up to 30
-   * seconds) and returns the finished call object. Default: `false`.
+   * Query param: Block until the call completes (up to 30 seconds) and return the
+   * finished call object. Default: `false`. This is a boolean flag — use `--wait` or
+   * `--wait=true`, not `--wait true`.
    */
   wait?: boolean;
 
@@ -587,9 +592,17 @@ export interface WorkflowCallParams {
 
 export namespace WorkflowCallParams {
   /**
-   * Input to the workflow call. Provide exactly one of `singleFile` or `batchFiles`.
+   * Input file(s) for a call. Provide exactly one of `singleFile` or `batchFiles`.
+   *
+   * In the CLI, use the nested flags `--input.single-file` or `--input.batch-files`
+   * with `@path/to/file` for automatic file embedding:
+   * `--input.single-file '{"inputContent": "@invoice.pdf", "inputType": "pdf"}' --wait`
    */
   export interface Input {
+    /**
+     * Multiple files to process in one call. Each item in the `inputs` array has its
+     * own `inputContent` and `inputType`.
+     */
     batchFiles?: Input.BatchFiles;
 
     /**
@@ -597,12 +610,16 @@ export namespace WorkflowCallParams {
      *
      * When using the Bem CLI, use `@path/to/file` in the `inputContent` field to
      * automatically read and base64-encode the file:
-     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}'`
+     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
      */
     singleFile?: Input.SingleFile;
   }
 
   export namespace Input {
+    /**
+     * Multiple files to process in one call. Each item in the `inputs` array has its
+     * own `inputContent` and `inputType`.
+     */
     export interface BatchFiles {
       inputs?: Array<BatchFiles.Input>;
     }
@@ -647,7 +664,7 @@ export namespace WorkflowCallParams {
      *
      * When using the Bem CLI, use `@path/to/file` in the `inputContent` field to
      * automatically read and base64-encode the file:
-     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}'`
+     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
      */
     export interface SingleFile {
       /**
