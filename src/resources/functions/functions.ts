@@ -179,6 +179,15 @@ export namespace CreateFunction {
     displayName?: string;
 
     /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted. Enabling this automatically
+     * configures the function to use the bounding box model. Disabling resets to the
+     * default.
+     */
+    enableBoundingBoxes?: boolean;
+
+    /**
      * Desired output structure defined in standard JSON Schema convention.
      */
     outputSchema?: unknown;
@@ -718,6 +727,13 @@ export namespace Function {
   }
 
   export interface AnalyzeFunction {
+    /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted.
+     */
+    enableBoundingBoxes: boolean;
+
     /**
      * Unique identifier of function.
      */
@@ -1348,6 +1364,15 @@ export namespace UpdateFunction {
     displayName?: string;
 
     /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted. Enabling this automatically
+     * configures the function to use the bounding box model. Disabling resets to the
+     * default.
+     */
+    enableBoundingBoxes?: boolean;
+
+    /**
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName?: string;
@@ -1746,6 +1771,15 @@ export declare namespace FunctionCreateParams {
     displayName?: string;
 
     /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted. Enabling this automatically
+     * configures the function to use the bounding box model. Disabling resets to the
+     * default.
+     */
+    enableBoundingBoxes?: boolean;
+
+    /**
      * Desired output structure defined in standard JSON Schema convention.
      */
     outputSchema?: unknown;
@@ -2085,6 +2119,15 @@ export declare namespace FunctionUpdateParams {
      * Display name of function. Human-readable name to help you identify the function.
      */
     displayName?: string;
+
+    /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted. Enabling this automatically
+     * configures the function to use the bounding box model. Disabling resets to the
+     * default.
+     */
+    enableBoundingBoxes?: boolean;
 
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.

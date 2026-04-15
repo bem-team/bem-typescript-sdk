@@ -187,6 +187,13 @@ export namespace FunctionVersion {
 
   export interface AnalyzeFunctionVersion {
     /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted.
+     */
+    enableBoundingBoxes: boolean;
+
+    /**
      * Unique identifier of function.
      */
     functionID: string;
