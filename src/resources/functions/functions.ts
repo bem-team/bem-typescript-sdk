@@ -198,6 +198,12 @@ export namespace CreateFunction {
     outputSchemaName?: string;
 
     /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
@@ -753,6 +759,12 @@ export namespace Function {
      * Name of output schema object.
      */
     outputSchemaName: string;
+
+    /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency.
+     */
+    preCount: boolean;
 
     type: 'analyze';
 
@@ -1388,6 +1400,12 @@ export namespace UpdateFunction {
     outputSchemaName?: string;
 
     /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
@@ -1790,6 +1808,12 @@ export declare namespace FunctionCreateParams {
     outputSchemaName?: string;
 
     /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
@@ -2143,6 +2167,12 @@ export declare namespace FunctionUpdateParams {
      * Name of output schema object.
      */
     outputSchemaName?: string;
+
+    /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
 
     /**
      * Array of tags to categorize and organize functions.

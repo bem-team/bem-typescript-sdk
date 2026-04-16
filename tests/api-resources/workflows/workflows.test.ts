@@ -150,6 +150,7 @@ describe('resource workflows', () => {
       },
       wait: true,
       callReferenceID: 'callReferenceID',
+      metadata: {},
     });
   });
 
