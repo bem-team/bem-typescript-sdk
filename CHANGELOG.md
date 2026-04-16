@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.0 (2026-04-16)
+
+Full Changelog: [v0.10.0...v0.11.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.10.0...v0.11.0)
+
+### Features
+
+* **api:** api update ([6b08bfa](https://github.com/bem-team/bem-typescript-sdk/commit/6b08bfa7d0cdfb5c26f5efdacc803be42617047c))
+* **api:** CLI homebrew publishing ([84e9627](https://github.com/bem-team/bem-typescript-sdk/commit/84e9627c412a93f54f91ad0a498b22ed8dfcb597))
+
 ## 0.10.0 (2026-04-15)
 
 Full Changelog: [v0.9.0...v0.10.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.9.0...v0.10.0)
