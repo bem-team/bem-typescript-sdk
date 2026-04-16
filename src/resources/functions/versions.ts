@@ -213,6 +213,12 @@ export namespace FunctionVersion {
      */
     outputSchemaName: string;
 
+    /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency.
+     */
+    preCount: boolean;
+
     type: 'analyze';
 
     /**
