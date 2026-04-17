@@ -36,7 +36,19 @@ describe('resource workflows', () => {
             name: 'name',
             versionNum: 0,
           },
+          metadata: {},
           name: 'name',
+        },
+      ],
+      connectors: [
+        {
+          name: 'name',
+          type: 'paragon',
+          connectorID: 'connectorID',
+          paragon: {
+            configuration: {},
+            integration: 'integration',
+          },
         },
       ],
       displayName: 'displayName',
@@ -45,6 +57,7 @@ describe('resource workflows', () => {
           destinationNodeName: 'destinationNodeName',
           sourceNodeName: 'sourceNodeName',
           destinationName: 'destinationName',
+          metadata: {},
         },
       ],
       tags: ['string'],
