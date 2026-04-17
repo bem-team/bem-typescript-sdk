@@ -588,6 +588,13 @@ export interface WorkflowCallParams {
    * Body param: Your reference ID for tracking this call.
    */
   callReferenceID?: string;
+
+  /**
+   * Body param: Arbitrary JSON object attached to this call. Stored on the call
+   * record and injected into `transformedContent` under the reserved `_metadata` key
+   * (alongside `referenceID`). Must be a JSON object. Maximum size: 4 KB.
+   */
+  metadata?: unknown;
 }
 
 export namespace WorkflowCallParams {
