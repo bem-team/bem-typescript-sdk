@@ -1229,7 +1229,7 @@ const EMBEDDED_READMES: { language: string; content: string }[] = [
   {
     language: 'csharp',
     content:
-      '# Bem C# API Library\n\nThe Bem C# SDK provides convenient access to the [Bem REST API](docs.bem.ai) from applications written in   C#.\n\n## Installation\n\n```bash\ngit clone git@github.com:bem-team/bem-csharp-sdk.git\ndotnet add reference bem-csharp-sdk/src/Bem\n```\n\n## Requirements\n\nThis library requires .NET Standard 2.0 or later.\n\n## Usage\n\nSee the [`examples`](examples) directory for complete and runnable examples.\n\n```csharp\nBemClient client = new();\n\nFunctionCreateParams parameters = new()\n{\n    CreateFunction = new Transform("functionName")\n};\n\nvar functionResponse = await client.Functions.Create(parameters);\n\nConsole.WriteLine(functionResponse);\n```',
+      '# Bem C# API Library\n\nThe Bem C# SDK provides convenient access to the [Bem REST API](docs.bem.ai) from applications written in   C#.\n\n## Installation\n\nInstall the package from [NuGet](https://www.nuget.org/packages/Bem):\n\n```bash\ndotnet add package Bem\n```\n\n## Requirements\n\nThis library requires .NET Standard 2.0 or later.\n\n## Usage\n\nSee the [`examples`](examples) directory for complete and runnable examples.\n\n```csharp\nBemClient client = new();\n\nFunctionCreateParams parameters = new()\n{\n    CreateFunction = new Transform("functionName")\n};\n\nvar functionResponse = await client.Functions.Create(parameters);\n\nConsole.WriteLine(functionResponse);\n```',
   },
   {
     language: 'cli',
