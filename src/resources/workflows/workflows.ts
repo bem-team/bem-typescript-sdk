@@ -212,6 +212,13 @@ export interface Workflow {
   id: string;
 
   /**
+   * Connectors currently attached to this workflow. For version-scoped reads
+   * (`/versions/{n}`) this is always empty — connectors are current-state and not
+   * part of version history.
+   */
+  connectors: Array<Workflow.Connector>;
+
+  /**
    * The date and time the workflow was created.
    */
   createdAt: string;
@@ -267,6 +274,55 @@ export interface Workflow {
   tags?: Array<string>;
 }
 
+export namespace Workflow {
+  /**
+   * A connector attached to a workflow. Ingestion point that triggers the workflow.
+   */
+  export interface Connector {
+    /**
+     * Unique connector API ID.
+     */
+    connectorID: string;
+
+    /**
+     * Human-friendly connector name.
+     */
+    name: string;
+
+    /**
+     * Discriminator for a workflow connector. V3 supports `paragon` only.
+     */
+    type: 'paragon';
+
+    /**
+     * Paragon-integration configuration on a workflow connector.
+     */
+    paragon?: Connector.Paragon;
+  }
+
+  export namespace Connector {
+    /**
+     * Paragon-integration configuration on a workflow connector.
+     */
+    export interface Paragon {
+      /**
+       * Opaque per-integration configuration (e.g. `{"folderId": "..."}`).
+       */
+      configuration: unknown;
+
+      /**
+       * Paragon integration key (e.g. "googledrive").
+       */
+      integration: string;
+
+      /**
+       * Paragon sync ID managed by the server. Read-only.
+       */
+      syncID: string;
+    }
+  }
+}
+
 export interface WorkflowAudit {
   /**
    * Information about who created the current version.
@@ -302,6 +358,12 @@ export interface WorkflowEdgeResponse {
    * Labelled outlet on the source node, if any.
    */
   destinationName?: string;
+
+  /**
+   * Opaque free-form JSON object attached to this edge on create/update. Returned
+   * verbatim; never interpreted by the server.
+   */
+  metadata?: unknown;
 }
 
 /**
@@ -317,9 +379,21 @@ export interface WorkflowNodeResponse {
    * Name of this call site, unique within the workflow version.
    */
   name: string;
+
+  /**
+   * Opaque free-form JSON object attached to this node on create/update. Returned
+   * verbatim; never interpreted by the server.
+   */
+  metadata?: unknown;
 }
 
 export interface WorkflowCreateResponse {
+  /**
+   * Per-connector failures from the diff/apply phase. Empty or omitted when all
+   * operations succeeded.
+   */
+  connectorErrors?: Array<WorkflowCreateResponse.ConnectorError>;
+
   /**
    * Error message if the workflow creation failed.
    */
@@ -329,6 +403,38 @@ export interface WorkflowCreateResponse {
    * V3 read representation of a workflow version.
    */
   workflow?: Workflow;
+}
+
+export namespace WorkflowCreateResponse {
+  /**
+   * Per-connector failure surfaced alongside a successful workflow DAG save.
+   */
+  export interface ConnectorError {
+    /**
+     * Machine-readable error code.
+     */
+    code: string;
+
+    /**
+     * Human-readable error message.
+     */
+    message: string;
+
+    /**
+     * Which diff operation was attempted.
+     */
+    operation: 'create' | 'update' | 'delete';
+
+    /**
+     * Populated for update/delete failures.
+     */
+    connectorID?: string;
+
+    /**
+     * Populated for create failures.
+     */
+    name?: string;
+  }
 }
 
 export interface WorkflowRetrieveResponse {
@@ -345,6 +451,12 @@ export interface WorkflowRetrieveResponse {
 
 export interface WorkflowUpdateResponse {
   /**
+   * Per-connector failures from the diff/apply phase. Empty or omitted when all
+   * operations succeeded.
+   */
+  connectorErrors?: Array<WorkflowUpdateResponse.ConnectorError>;
+
+  /**
    * Error message if the workflow update failed.
    */
   error?: string;
@@ -353,6 +465,38 @@ export interface WorkflowUpdateResponse {
    * V3 read representation of a workflow version.
    */
   workflow?: Workflow;
+}
+
+export namespace WorkflowUpdateResponse {
+  /**
+   * Per-connector failure surfaced alongside a successful workflow DAG save.
+   */
+  export interface ConnectorError {
+    /**
+     * Machine-readable error code.
+     */
+    code: string;
+
+    /**
+     * Human-readable error message.
+     */
+    message: string;
+
+    /**
+     * Which diff operation was attempted.
+     */
+    operation: 'create' | 'update' | 'delete';
+
+    /**
+     * Populated for update/delete failures.
+     */
+    connectorID?: string;
+
+    /**
+     * Populated for create failures.
+     */
+    name?: string;
+  }
 }
 
 export interface WorkflowCopyResponse {
@@ -429,6 +573,12 @@ export interface WorkflowCreateParams {
   nodes: Array<WorkflowCreateParams.Node>;
 
   /**
+   * Connectors to attach to the workflow at creation. If any entry fails to
+   * provision, the entire workflow creation is rolled back.
+   */
+  connectors?: Array<WorkflowCreateParams.Connector>;
+
+  /**
    * Human-readable display name.
    */
   displayName?: string;
@@ -455,10 +605,61 @@ export namespace WorkflowCreateParams {
     function: WorkflowsAPI.FunctionVersionIdentifier;
 
     /**
+     * Opaque free-form JSON object attached to this node. Stored and returned
+     * verbatim; the server does not interpret it. Intended for client-side concerns
+     * such as canvas display properties (position, color, collapsed state, etc.).
+     */
+    metadata?: unknown;
+
+    /**
      * Name for this call site. Must be unique within the workflow version. Defaults to
      * the function's own name when omitted.
      */
     name?: string;
+  }
+
+  /**
+   * Create/update entry for a connector inline with the workflow.
+   */
+  export interface Connector {
+    /**
+     * Human-friendly connector name.
+     */
+    name: string;
+
+    /**
+     * Discriminator for a workflow connector. V3 supports `paragon` only.
+     */
+    type: 'paragon';
+
+    /**
+     * Present → update. Absent → create.
+     */
+    connectorID?: string;
+
+    /**
+     * Request-side config block for a Paragon connector. Fields absent on update are
+     * unchanged.
+     */
+    paragon?: Connector.Paragon;
+  }
+
+  export namespace Connector {
+    /**
+     * Request-side config block for a Paragon connector. Fields absent on update are
+     * unchanged.
+     */
+    export interface Paragon {
+      /**
+       * Opaque per-integration configuration. Required on create.
+       */
+      configuration?: unknown;
+
+      /**
+       * Paragon integration key. Required on create.
+       */
+      integration?: string;
+    }
   }
 
   /**
@@ -480,10 +681,24 @@ export namespace WorkflowCreateParams {
      * default (unlabelled) outlet.
      */
     destinationName?: string;
+
+    /**
+     * Opaque free-form JSON object attached to this edge. Stored and returned
+     * verbatim; the server does not interpret it.
+     */
+    metadata?: unknown;
   }
 }
 
 export interface WorkflowUpdateParams {
+  /**
+   * Declarative, full-desired-state array of connectors. If omitted, existing
+   * connectors are left unchanged. If provided, it replaces the current set: entries
+   * with `connectorID` are updates, entries without are creates, and existing
+   * connectors whose `connectorID` is absent are deleted.
+   */
+  connectors?: Array<WorkflowUpdateParams.Connector>;
+
   /**
    * Human-readable display name.
    */
@@ -513,6 +728,50 @@ export interface WorkflowUpdateParams {
 
 export namespace WorkflowUpdateParams {
   /**
+   * Create/update entry for a connector inline with the workflow.
+   */
+  export interface Connector {
+    /**
+     * Human-friendly connector name.
+     */
+    name: string;
+
+    /**
+     * Discriminator for a workflow connector. V3 supports `paragon` only.
+     */
+    type: 'paragon';
+
+    /**
+     * Present → update. Absent → create.
+     */
+    connectorID?: string;
+
+    /**
+     * Request-side config block for a Paragon connector. Fields absent on update are
+     * unchanged.
+     */
+    paragon?: Connector.Paragon;
+  }
+
+  export namespace Connector {
+    /**
+     * Request-side config block for a Paragon connector. Fields absent on update are
+     * unchanged.
+     */
+    export interface Paragon {
+      /**
+       * Opaque per-integration configuration. Required on create.
+       */
+      configuration?: unknown;
+
+      /**
+       * Paragon integration key. Required on create.
+       */
+      integration?: string;
+    }
+  }
+
+  /**
    * A directed edge between two named call-site nodes.
    */
   export interface Edge {
@@ -531,6 +790,12 @@ export namespace WorkflowUpdateParams {
      * default (unlabelled) outlet.
      */
     destinationName?: string;
+
+    /**
+     * Opaque free-form JSON object attached to this edge. Stored and returned
+     * verbatim; the server does not interpret it.
+     */
+    metadata?: unknown;
   }
 
   /**
@@ -541,6 +806,13 @@ export namespace WorkflowUpdateParams {
      * The function (and version) to execute at this call site.
      */
     function: WorkflowsAPI.FunctionVersionIdentifier;
+
+    /**
+     * Opaque free-form JSON object attached to this node. Stored and returned
+     * verbatim; the server does not interpret it. Intended for client-side concerns
+     * such as canvas display properties (position, color, collapsed state, etc.).
+     */
+    metadata?: unknown;
 
     /**
      * Name for this call site. Must be unique within the workflow version. Defaults to
