@@ -2,26 +2,22 @@
 
 Types:
 
-- <code><a href="./src/resources/functions/functions.ts">CreateFunction</a></code>
 - <code><a href="./src/resources/functions/functions.ts">EnrichConfig</a></code>
 - <code><a href="./src/resources/functions/functions.ts">EnrichStep</a></code>
-- <code><a href="./src/resources/functions/functions.ts">Function</a></code>
 - <code><a href="./src/resources/functions/functions.ts">FunctionAudit</a></code>
 - <code><a href="./src/resources/functions/functions.ts">FunctionResponse</a></code>
 - <code><a href="./src/resources/functions/functions.ts">FunctionType</a></code>
-- <code><a href="./src/resources/functions/functions.ts">ListFunctionsResponse</a></code>
-- <code><a href="./src/resources/functions/functions.ts">RouteListItem</a></code>
 - <code><a href="./src/resources/functions/functions.ts">SplitFunctionSemanticPageItemClass</a></code>
-- <code><a href="./src/resources/functions/functions.ts">UpdateFunction</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UserActionSummary</a></code>
 - <code><a href="./src/resources/functions/functions.ts">WorkflowUsageInfo</a></code>
+- <code><a href="./src/resources/functions/functions.ts">FunctionListResponse</a></code>
 
 Methods:
 
 - <code title="post /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">create</a>({ ...params }) -> FunctionResponse</code>
 - <code title="get /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">retrieve</a>(functionName) -> FunctionResponse</code>
 - <code title="patch /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">update</a>(pathFunctionName, { ...params }) -> FunctionResponse</code>
-- <code title="get /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">list</a>({ ...params }) -> FunctionsFunctionsPage</code>
+- <code title="get /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">list</a>({ ...params }) -> FunctionListResponsesFunctionsPage</code>
 - <code title="delete /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">delete</a>(functionName) -> void</code>
 
 ## Copy
@@ -38,14 +34,13 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/functions/versions.ts">FunctionVersion</a></code>
-- <code><a href="./src/resources/functions/versions.ts">ListFunctionVersionsResponse</a></code>
 - <code><a href="./src/resources/functions/versions.ts">VersionRetrieveResponse</a></code>
+- <code><a href="./src/resources/functions/versions.ts">VersionListResponse</a></code>
 
 Methods:
 
 - <code title="get /v3/functions/{functionName}/versions/{versionNum}">client.functions.versions.<a href="./src/resources/functions/versions.ts">retrieve</a>(versionNum, { ...params }) -> VersionRetrieveResponse</code>
-- <code title="get /v3/functions/{functionName}/versions">client.functions.versions.<a href="./src/resources/functions/versions.ts">list</a>(functionName) -> ListFunctionVersionsResponse</code>
+- <code title="get /v3/functions/{functionName}/versions">client.functions.versions.<a href="./src/resources/functions/versions.ts">list</a>(functionName) -> VersionListResponse</code>
 
 # Calls
 

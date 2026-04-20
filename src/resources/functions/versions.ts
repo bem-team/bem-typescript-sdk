@@ -9,13 +9,13 @@ import { path } from '../../internal/utils/path';
 /**
  * Functions are the core building blocks of data transformation in Bem. Each function type serves a specific purpose:
  *
- * - **Transform**: Extract structured JSON data from unstructured documents (PDFs, emails, images)
- * - **Analyze**: Perform visual analysis on documents to extract layout-aware information
+ * - **Extract**: Extract structured JSON data from unstructured documents (PDFs, emails, images, spreadsheets), with optional layout-aware bounding-box extraction
  * - **Route**: Direct data to different processing paths based on conditions
  * - **Split**: Break multi-page documents into individual pages for parallel processing
  * - **Join**: Combine outputs from multiple function calls into a single result
  * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
  * - **Enrich**: Enhance data with semantic search against collections
+ * - **Send**: Deliver workflow outputs to downstream destinations
  *
  * Use these endpoints to create, update, list, and manage your functions.
  */
@@ -35,30 +35,32 @@ export class Versions extends APIResource {
   /**
    * List Function Versions
    */
-  list(functionName: string, options?: RequestOptions): APIPromise<ListFunctionVersionsResponse> {
+  list(functionName: string, options?: RequestOptions): APIPromise<VersionListResponse> {
     return this._client.get(path`/v3/functions/${functionName}/versions`, options);
   }
 }
 
 /**
- * A version of a payload shaping function that transforms and customizes input
- * payloads using JMESPath expressions. Payload shaping allows you to extract
- * specific data, perform calculations, and reshape complex input structures into
- * simplified, standardized output formats tailored to your downstream systems or
- * business requirements.
+ * Single-function-version response wrapper used by V3 endpoints.
  */
-export type FunctionVersion =
-  | FunctionVersion.TransformFunctionVersion
-  | FunctionVersion.ExtractFunctionVersion
-  | FunctionVersion.AnalyzeFunctionVersion
-  | FunctionVersion.RouteFunctionVersion
-  | FunctionVersion.SendFunctionVersion
-  | FunctionVersion.SplitFunctionVersion
-  | FunctionVersion.JoinFunctionVersion
-  | FunctionVersion.EnrichFunctionVersion
-  | FunctionVersion.PayloadShapingFunctionVersion;
+export interface VersionRetrieveResponse {
+  /**
+   * V3 read-side union for function versions. Same shape as the shared
+   * `FunctionVersion` union but with `classify` in place of `route`.
+   */
+  function:
+    | VersionRetrieveResponse.TransformFunctionVersion
+    | VersionRetrieveResponse.ExtractFunctionVersion
+    | VersionRetrieveResponse.AnalyzeFunctionVersion
+    | VersionRetrieveResponse.ClassifyFunctionVersion
+    | VersionRetrieveResponse.SendFunctionVersion
+    | VersionRetrieveResponse.SplitFunctionVersion
+    | VersionRetrieveResponse.JoinFunctionVersion
+    | VersionRetrieveResponse.EnrichFunctionVersion
+    | VersionRetrieveResponse.PayloadShapingFunctionVersion;
+}
 
-export namespace FunctionVersion {
+export namespace VersionRetrieveResponse {
   export interface TransformFunctionVersion {
     /**
      * Email address automatically created by bem. You can forward emails with or
@@ -252,16 +254,36 @@ export namespace FunctionVersion {
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
   }
 
-  export interface RouteFunctionVersion {
+  /**
+   * V3 read-side shape of a Classify (internally Route) function version. Mirrors {
+   */
+  export interface ClassifyFunctionVersion {
     /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
+     */
+    classifications: Array<ClassifyFunctionVersion.Classification>;
+
+    /**
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description: string;
 
     /**
      * Email address automatically created by bem. You can forward emails with or
-     * without attachments, to be routed.
+     * without attachments, to be classified.
      */
     emailAddress: string;
 
@@ -275,12 +297,7 @@ export namespace FunctionVersion {
      */
     functionName: string;
 
-    /**
-     * List of routes.
-     */
-    routes: Array<FunctionsAPI.RouteListItem>;
-
-    type: 'route';
+    type: 'classify';
 
     /**
      * Version number of function.
@@ -311,6 +328,40 @@ export namespace FunctionVersion {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace ClassifyFunctionVersion {
+    export interface Classification {
+      name: string;
+
+      description?: string;
+
+      functionID?: string;
+
+      functionName?: string;
+
+      isErrorFallback?: boolean;
+
+      origin?: Classification.Origin;
+
+      regex?: Classification.Regex;
+    }
+
+    export namespace Classification {
+      export interface Origin {
+        email?: Origin.Email;
+      }
+
+      export namespace Origin {
+        export interface Email {
+          patterns?: Array<string>;
+        }
+      }
+
+      export interface Regex {
+        patterns?: Array<string>;
+      }
+    }
   }
 
   export interface SendFunctionVersion {
@@ -634,19 +685,589 @@ export namespace FunctionVersion {
   }
 }
 
-export interface ListFunctionVersionsResponse {
+export interface VersionListResponse {
   /**
    * The total number of results available.
    */
   totalCount?: number;
 
-  versions?: Array<FunctionVersion>;
+  versions?: Array<
+    | VersionListResponse.TransformFunctionVersion
+    | VersionListResponse.ExtractFunctionVersion
+    | VersionListResponse.AnalyzeFunctionVersion
+    | VersionListResponse.ClassifyFunctionVersion
+    | VersionListResponse.SendFunctionVersion
+    | VersionListResponse.SplitFunctionVersion
+    | VersionListResponse.JoinFunctionVersion
+    | VersionListResponse.EnrichFunctionVersion
+    | VersionListResponse.PayloadShapingFunctionVersion
+  >;
 }
 
-/**
- * Single-function-version response wrapper used by V3 endpoints.
- */
-export interface VersionRetrieveResponse {
+export namespace VersionListResponse {
+  export interface TransformFunctionVersion {
+    /**
+     * Email address automatically created by bem. You can forward emails with or
+     * without attachments, to be transformed.
+     */
+    emailAddress: string;
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName: string;
+
+    /**
+     * Whether tabular chunking is enabled on the pipeline. This processes tables in
+     * CSV/Excel in row batches, rather than all rows at once.
+     */
+    tabularChunkingEnabled: boolean;
+
+    type: 'transform';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export interface ExtractFunctionVersion {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName: string;
+
+    /**
+     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
+     * processed in row batches rather than all at once.
+     */
+    tabularChunkingEnabled: boolean;
+
+    type: 'extract';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export interface AnalyzeFunctionVersion {
+    /**
+     * Whether bounding box extraction is enabled. Only applicable to analyze and
+     * extract functions. When true, the function returns the document regions (page,
+     * coordinates) from which each field was extracted.
+     */
+    enableBoundingBoxes: boolean;
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName: string;
+
+    /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency.
+     */
+    preCount: boolean;
+
+    type: 'analyze';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  /**
+   * V3 read-side shape of a Classify (internally Route) function version. Mirrors {
+   */
+  export interface ClassifyFunctionVersion {
+    /**
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
+     */
+    classifications: Array<ClassifyFunctionVersion.Classification>;
+
+    /**
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
+     */
+    description: string;
+
+    /**
+     * Email address automatically created by bem. You can forward emails with or
+     * without attachments, to be classified.
+     */
+    emailAddress: string;
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'classify';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace ClassifyFunctionVersion {
+    export interface Classification {
+      name: string;
+
+      description?: string;
+
+      functionID?: string;
+
+      functionName?: string;
+
+      isErrorFallback?: boolean;
+
+      origin?: Classification.Origin;
+
+      regex?: Classification.Regex;
+    }
+
+    export namespace Classification {
+      export interface Origin {
+        email?: Origin.Email;
+      }
+
+      export namespace Origin {
+        export interface Email {
+          patterns?: Array<string>;
+        }
+      }
+
+      export interface Regex {
+        patterns?: Array<string>;
+      }
+    }
+  }
+
+  export interface SendFunctionVersion {
+    /**
+     * Destination type for a Send function.
+     */
+    destinationType: 'webhook' | 's3' | 'google_drive';
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'send';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    googleDriveFolderId?: string;
+
+    s3Bucket?: string;
+
+    s3Prefix?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+
+    /**
+     * Whether webhook deliveries are signed with an HMAC-SHA256 `bem-signature`
+     * header.
+     */
+    webhookSigningEnabled?: boolean;
+
+    webhookUrl?: string;
+  }
+
+  export interface SplitFunctionVersion {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    splitType: 'print_page' | 'semantic_page';
+
+    type: 'split';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    printPageSplitConfig?: SplitFunctionVersion.PrintPageSplitConfig;
+
+    semanticPageSplitConfig?: SplitFunctionVersion.SemanticPageSplitConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace SplitFunctionVersion {
+    export interface PrintPageSplitConfig {
+      nextFunctionID?: string;
+    }
+
+    export interface SemanticPageSplitConfig {
+      itemClasses?: Array<FunctionsAPI.SplitFunctionSemanticPageItemClass>;
+    }
+  }
+
+  export interface JoinFunctionVersion {
+    /**
+     * Description of join function.
+     */
+    description: string;
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * The type of join to perform.
+     */
+    joinType: 'standard';
+
+    /**
+     * Desired output structure defined in standard JSON Schema convention.
+     */
+    outputSchema: unknown;
+
+    /**
+     * Name of output schema object.
+     */
+    outputSchemaName: string;
+
+    type: 'join';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export interface EnrichFunctionVersion {
+    /**
+     * Configuration for enrich function with semantic search steps.
+     *
+     * **How Enrich Functions Work:**
+     *
+     * Enrich functions use semantic search to augment JSON data with relevant
+     * information from collections. They take JSON input (typically from a transform
+     * function), extract specified fields, perform vector-based semantic search
+     * against collections, and inject the results back into the data.
+     *
+     * **Input Requirements:**
+     *
+     * - Must receive JSON input (typically uploaded to S3 from a previous function)
+     * - Can be chained after transform or other functions that produce JSON output
+     *
+     * **Example Use Cases:**
+     *
+     * - Match product descriptions to SKU codes from a product catalog
+     * - Enrich customer data with account information
+     * - Link order line items to inventory records
+     *
+     * **Configuration:**
+     *
+     * - Define one or more enrichment steps
+     * - Each step extracts values, searches a collection, and injects results
+     * - Steps are executed sequentially
+     */
+    config: FunctionsAPI.EnrichConfig;
+
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'enrich';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
   /**
    * A version of a payload shaping function that transforms and customizes input
    * payloads using JMESPath expressions. Payload shaping allows you to extract
@@ -654,7 +1275,58 @@ export interface VersionRetrieveResponse {
    * simplified, standardized output formats tailored to your downstream systems or
    * business requirements.
    */
-  function: FunctionVersion;
+  export interface PayloadShapingFunctionVersion {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * JMESPath expression that defines how to transform and customize the input
+     * payload structure. Payload shaping allows you to extract, reshape, and
+     * reorganize data from complex input payloads into a simplified, standardized
+     * output format. Use JMESPath syntax to select specific fields, perform
+     * calculations, and create new data structures tailored to your needs.
+     */
+    shapingSchema: string;
+
+    type: 'payload_shaping';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function version.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * The date and time the function version was created.
+     */
+    createdAt?: string;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
 }
 
 export interface VersionRetrieveParams {
@@ -663,9 +1335,8 @@ export interface VersionRetrieveParams {
 
 export declare namespace Versions {
   export {
-    type FunctionVersion as FunctionVersion,
-    type ListFunctionVersionsResponse as ListFunctionVersionsResponse,
     type VersionRetrieveResponse as VersionRetrieveResponse,
+    type VersionListResponse as VersionListResponse,
     type VersionRetrieveParams as VersionRetrieveParams,
   };
 }

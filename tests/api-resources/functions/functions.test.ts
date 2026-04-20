@@ -10,7 +10,7 @@ const client = new Bem({
 describe('resource functions', () => {
   // Mock server tests are disabled
   test.skip('create: only required params', async () => {
-    const responsePromise = client.functions.create({ functionName: 'functionName', type: 'transform' });
+    const responsePromise = client.functions.create({ functionName: 'functionName', type: 'extract' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -24,7 +24,7 @@ describe('resource functions', () => {
   test.skip('create: required and optional params', async () => {
     const response = await client.functions.create({
       functionName: 'functionName',
-      type: 'transform',
+      type: 'extract',
       displayName: 'displayName',
       outputSchema: {},
       outputSchemaName: 'outputSchemaName',
@@ -47,7 +47,7 @@ describe('resource functions', () => {
 
   // Mock server tests are disabled
   test.skip('update: only required params', async () => {
-    const responsePromise = client.functions.update('functionName', { type: 'transform' });
+    const responsePromise = client.functions.update('functionName', { type: 'extract' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -60,7 +60,7 @@ describe('resource functions', () => {
   // Mock server tests are disabled
   test.skip('update: required and optional params', async () => {
     const response = await client.functions.update('functionName', {
-      type: 'transform',
+      type: 'extract',
       displayName: 'displayName',
       functionName: 'functionName',
       outputSchema: {},
