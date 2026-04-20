@@ -143,13 +143,13 @@ List methods in the Bem API are paginated.
 You can use the `for await … of` syntax to iterate through items across all pages:
 
 ```ts
-async function fetchAllFunctionListResponses(params) {
-  const allFunctionListResponses = [];
+async function fetchAllFunctions(params) {
+  const allFunctions = [];
   // Automatically fetches more pages as needed.
-  for await (const functionListResponse of client.functions.list()) {
-    allFunctionListResponses.push(functionListResponse);
+  for await (const _function of client.functions.list()) {
+    allFunctions.push(_function);
   }
-  return allFunctionListResponses;
+  return allFunctions;
 }
 ```
 
@@ -157,8 +157,8 @@ Alternatively, you can request a single page at a time:
 
 ```ts
 let page = await client.functions.list();
-for (const functionListResponse of page.functions) {
-  console.log(functionListResponse);
+for (const _function of page.functions) {
+  console.log(_function);
 }
 
 // Convenience methods are provided for manually paginating:
