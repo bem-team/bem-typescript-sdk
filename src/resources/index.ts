@@ -11,23 +11,19 @@ export {
 } from './errors';
 export {
   Functions,
-  type CreateFunction,
   type EnrichConfig,
   type EnrichStep,
-  type Function,
   type FunctionAudit,
   type FunctionResponse,
   type FunctionType,
-  type ListFunctionsResponse,
-  type RouteListItem,
   type SplitFunctionSemanticPageItemClass,
-  type UpdateFunction,
   type UserActionSummary,
   type WorkflowUsageInfo,
+  type FunctionListResponse,
   type FunctionCreateParams,
   type FunctionUpdateParams,
   type FunctionListParams,
-  type FunctionsFunctionsPage,
+  type FunctionListResponsesFunctionsPage,
 } from './functions/functions';
 export { InferSchema, type InferSchemaCreateResponse, type InferSchemaCreateParams } from './infer-schema';
 export {

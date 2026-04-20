@@ -52,22 +52,18 @@ import {
   Outputs,
 } from './resources/outputs';
 import {
-  CreateFunction,
   EnrichConfig,
   EnrichStep,
-  Function,
   FunctionAudit,
   FunctionCreateParams,
   FunctionListParams,
+  FunctionListResponse,
+  FunctionListResponsesFunctionsPage,
   FunctionResponse,
   FunctionType,
   FunctionUpdateParams,
   Functions,
-  FunctionsFunctionsPage,
-  ListFunctionsResponse,
-  RouteListItem,
   SplitFunctionSemanticPageItemClass,
-  UpdateFunction,
   UserActionSummary,
   WorkflowUsageInfo,
 } from './resources/functions/functions';
@@ -813,13 +809,13 @@ export class Bem {
   /**
    * Functions are the core building blocks of data transformation in Bem. Each function type serves a specific purpose:
    *
-   * - **Transform**: Extract structured JSON data from unstructured documents (PDFs, emails, images)
-   * - **Analyze**: Perform visual analysis on documents to extract layout-aware information
+   * - **Extract**: Extract structured JSON data from unstructured documents (PDFs, emails, images, spreadsheets), with optional layout-aware bounding-box extraction
    * - **Route**: Direct data to different processing paths based on conditions
    * - **Split**: Break multi-page documents into individual pages for parallel processing
    * - **Join**: Combine outputs from multiple function calls into a single result
    * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
    * - **Enrich**: Enhance data with semantic search against collections
+   * - **Send**: Deliver workflow outputs to downstream destinations
    *
    * Use these endpoints to create, update, list, and manage your functions.
    */
@@ -887,7 +883,7 @@ export class Bem {
    *
    * Upload a file (PDF, image, spreadsheet, email, etc.) and receive a general-purpose JSON Schema
    * that captures the document's structure. The inferred schema can be used directly as the
-   * `outputSchema` when creating Transform functions.
+   * `outputSchema` when creating Extract functions.
    *
    * The schema is designed to be broadly applicable to documents of the same type, not just
    * the specific file uploaded.
@@ -934,20 +930,16 @@ export declare namespace Bem {
 
   export {
     Functions as Functions,
-    type CreateFunction as CreateFunction,
     type EnrichConfig as EnrichConfig,
     type EnrichStep as EnrichStep,
-    type Function as Function,
     type FunctionAudit as FunctionAudit,
     type FunctionResponse as FunctionResponse,
     type FunctionType as FunctionType,
-    type ListFunctionsResponse as ListFunctionsResponse,
-    type RouteListItem as RouteListItem,
     type SplitFunctionSemanticPageItemClass as SplitFunctionSemanticPageItemClass,
-    type UpdateFunction as UpdateFunction,
     type UserActionSummary as UserActionSummary,
     type WorkflowUsageInfo as WorkflowUsageInfo,
-    type FunctionsFunctionsPage as FunctionsFunctionsPage,
+    type FunctionListResponse as FunctionListResponse,
+    type FunctionListResponsesFunctionsPage as FunctionListResponsesFunctionsPage,
     type FunctionCreateParams as FunctionCreateParams,
     type FunctionUpdateParams as FunctionUpdateParams,
     type FunctionListParams as FunctionListParams,
