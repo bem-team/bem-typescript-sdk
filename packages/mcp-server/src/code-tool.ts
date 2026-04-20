@@ -25,7 +25,7 @@ For example:
 
 \`\`\`
 async function run(client) {
-  const functionResponse = await client.functions.create({ functionName: 'functionName', type: 'transform' });
+  const functionResponse = await client.functions.create({ functionName: 'functionName', type: 'extract' });
 
   console.log(functionResponse['function']);
 }

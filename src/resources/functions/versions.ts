@@ -9,13 +9,13 @@ import { path } from '../../internal/utils/path';
 /**
  * Functions are the core building blocks of data transformation in Bem. Each function type serves a specific purpose:
  *
- * - **Transform**: Extract structured JSON data from unstructured documents (PDFs, emails, images)
- * - **Analyze**: Perform visual analysis on documents to extract layout-aware information
+ * - **Extract**: Extract structured JSON data from unstructured documents (PDFs, emails, images, spreadsheets), with optional layout-aware bounding-box extraction
  * - **Route**: Direct data to different processing paths based on conditions
  * - **Split**: Break multi-page documents into individual pages for parallel processing
  * - **Join**: Combine outputs from multiple function calls into a single result
  * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
  * - **Enrich**: Enhance data with semantic search against collections
+ * - **Send**: Deliver workflow outputs to downstream destinations
  *
  * Use these endpoints to create, update, list, and manage your functions.
  */
@@ -41,17 +41,14 @@ export class Versions extends APIResource {
 }
 
 /**
- * A version of a payload shaping function that transforms and customizes input
- * payloads using JMESPath expressions. Payload shaping allows you to extract
- * specific data, perform calculations, and reshape complex input structures into
- * simplified, standardized output formats tailored to your downstream systems or
- * business requirements.
+ * V3 read-side union for function versions. Same shape as the shared
+ * `FunctionVersion` union but with `classify` in place of `route`.
  */
 export type FunctionVersion =
   | FunctionVersion.TransformFunctionVersion
   | FunctionVersion.ExtractFunctionVersion
   | FunctionVersion.AnalyzeFunctionVersion
-  | FunctionVersion.RouteFunctionVersion
+  | FunctionVersion.ClassifyFunctionVersion
   | FunctionVersion.SendFunctionVersion
   | FunctionVersion.SplitFunctionVersion
   | FunctionVersion.JoinFunctionVersion
@@ -252,16 +249,36 @@ export namespace FunctionVersion {
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
   }
 
-  export interface RouteFunctionVersion {
+  /**
+   * V3 read-side shape of a Classify (internally Route) function version. Mirrors {
+   */
+  export interface ClassifyFunctionVersion {
     /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
+     */
+    classifications: Array<FunctionsAPI.ClassificationListItem>;
+
+    /**
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description: string;
 
     /**
      * Email address automatically created by bem. You can forward emails with or
-     * without attachments, to be routed.
+     * without attachments, to be classified.
      */
     emailAddress: string;
 
@@ -275,12 +292,7 @@ export namespace FunctionVersion {
      */
     functionName: string;
 
-    /**
-     * List of routes.
-     */
-    routes: Array<FunctionsAPI.RouteListItem>;
-
-    type: 'route';
+    type: 'classify';
 
     /**
      * Version number of function.
@@ -648,11 +660,8 @@ export interface ListFunctionVersionsResponse {
  */
 export interface VersionRetrieveResponse {
   /**
-   * A version of a payload shaping function that transforms and customizes input
-   * payloads using JMESPath expressions. Payload shaping allows you to extract
-   * specific data, perform calculations, and reshape complex input structures into
-   * simplified, standardized output formats tailored to your downstream systems or
-   * business requirements.
+   * V3 read-side union for function versions. Same shape as the shared
+   * `FunctionVersion` union but with `classify` in place of `route`.
    */
   function: FunctionVersion;
 }

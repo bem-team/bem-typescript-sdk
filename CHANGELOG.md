@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.13.0 (2026-04-20)
+
+Full Changelog: [v0.12.0...v0.13.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.12.0...v0.13.0)
+
+### Features
+
+* **api:** api update ([22c5505](https://github.com/bem-team/bem-typescript-sdk/commit/22c550511d36b6b447b8451f4e4cc8e753bf7584))
+* **api:** api update ([2542fb3](https://github.com/bem-team/bem-typescript-sdk/commit/2542fb31933b46d89c12708c4de4245442c5439e))
+* **api:** fix model references in Stainless config ([b1d63d1](https://github.com/bem-team/bem-typescript-sdk/commit/b1d63d110fd2d63f0d67c7d8dbc772b371966283))
+
 ## 0.12.0 (2026-04-17)
 
 Full Changelog: [v0.11.0...v0.12.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.11.0...v0.12.0)

@@ -21,13 +21,13 @@ import { path } from '../../internal/utils/path';
 /**
  * Functions are the core building blocks of data transformation in Bem. Each function type serves a specific purpose:
  *
- * - **Transform**: Extract structured JSON data from unstructured documents (PDFs, emails, images)
- * - **Analyze**: Perform visual analysis on documents to extract layout-aware information
+ * - **Extract**: Extract structured JSON data from unstructured documents (PDFs, emails, images, spreadsheets), with optional layout-aware bounding-box extraction
  * - **Route**: Direct data to different processing paths based on conditions
  * - **Split**: Break multi-page documents into individual pages for parallel processing
  * - **Join**: Combine outputs from multiple function calls into a single result
  * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
  * - **Enrich**: Enhance data with semantic search against collections
+ * - **Send**: Deliver workflow outputs to downstream destinations
  *
  * Use these endpoints to create, update, list, and manage your functions.
  */
@@ -83,11 +83,44 @@ export class Functions extends APIResource {
 
 export type FunctionsFunctionsPage = FunctionsPage<Function>;
 
+export interface ClassificationListItem {
+  name: string;
+
+  description?: string;
+
+  functionID?: string;
+
+  functionName?: string;
+
+  isErrorFallback?: boolean;
+
+  origin?: ClassificationListItem.Origin;
+
+  regex?: ClassificationListItem.Regex;
+}
+
+export namespace ClassificationListItem {
+  export interface Origin {
+    email?: Origin.Email;
+  }
+
+  export namespace Origin {
+    export interface Email {
+      patterns?: Array<string>;
+    }
+  }
+
+  export interface Regex {
+    patterns?: Array<string>;
+  }
+}
+
+/**
+ * V3 wire form of the Route (classify) function create payload. Mirrors {
+ */
 export type CreateFunction =
-  | CreateFunction.TransformFunction
   | CreateFunction.ExtractFunction
-  | CreateFunction.AnalyzeFunction
-  | CreateFunction.RouteFunction
+  | CreateFunction.ClassifyFunction
   | CreateFunction.SendFunction
   | CreateFunction.SplitFunction
   | CreateFunction.JoinFunction
@@ -95,41 +128,6 @@ export type CreateFunction =
   | CreateFunction.EnrichFunction;
 
 export namespace CreateFunction {
-  export interface TransformFunction {
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName: string;
-
-    type: 'transform';
-
-    /**
-     * Display name of function. Human-readable name to help you identify the function.
-     */
-    displayName?: string;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Whether tabular chunking is enabled on the pipeline. This processes tables in
-     * CSV/Excel in row batches, rather than all rows at once.
-     */
-    tabularChunkingEnabled?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
   export interface ExtractFunction {
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.
@@ -165,61 +163,37 @@ export namespace CreateFunction {
     tags?: Array<string>;
   }
 
-  export interface AnalyzeFunction {
+  /**
+   * V3 wire form of the Route (classify) function create payload. Mirrors {
+   */
+  export interface ClassifyFunction {
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName: string;
 
-    type: 'analyze';
+    type: 'classify';
 
     /**
-     * Display name of function. Human-readable name to help you identify the function.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
      */
-    displayName?: string;
+    classifications?: Array<FunctionsAPI.ClassificationListItem>;
 
     /**
-     * Whether bounding box extraction is enabled. Only applicable to analyze and
-     * extract functions. When true, the function returns the document regions (page,
-     * coordinates) from which each field was extracted. Enabling this automatically
-     * configures the function to use the bounding box model. Disabling resets to the
-     * default.
-     */
-    enableBoundingBoxes?: boolean;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Reducing the risk of the model stopping early on long documents. Trade-off:
-     * Increases total latency. Compatible with `enableBoundingBoxes`.
-     */
-    preCount?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
-  export interface RouteFunction {
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName: string;
-
-    type: 'route';
-
-    /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description?: string;
 
@@ -227,11 +201,6 @@ export namespace CreateFunction {
      * Display name of function. Human-readable name to help you identify the function.
      */
     displayName?: string;
-
-    /**
-     * List of routes.
-     */
-    routes?: Array<FunctionsAPI.RouteListItem>;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -595,15 +564,15 @@ export interface EnrichStep {
 }
 
 /**
- * A function that extracts structured JSON from documents and images. Accepts a
- * wide range of input types including PDFs, images, spreadsheets, emails, and
- * more.
+ * V3 read-side union. Same shape as the shared `Function` union but with
+ * `classify` in place of `route`. Legacy `transform` and `analyze` functions
+ * remain readable via V3.
  */
 export type Function =
   | Function.TransformFunction
   | Function.ExtractFunction
   | Function.AnalyzeFunction
-  | Function.RouteFunction
+  | Function.ClassifyFunction
   | Function.SendFunction
   | Function.SplitFunction
   | Function.JoinFunction
@@ -794,16 +763,36 @@ export namespace Function {
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
   }
 
-  export interface RouteFunction {
+  /**
+   * V3 read-side shape of a Classify (internally Route) function. Mirrors {
+   */
+  export interface ClassifyFunction {
     /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
+     */
+    classifications: Array<FunctionsAPI.ClassificationListItem>;
+
+    /**
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description: string;
 
     /**
      * Email address automatically created by bem. You can forward emails with or
-     * without attachments, to be routed.
+     * without attachments, to be classified.
      */
     emailAddress: string;
 
@@ -817,12 +806,7 @@ export namespace Function {
      */
     functionName: string;
 
-    /**
-     * List of routes.
-     */
-    routes: Array<FunctionsAPI.RouteListItem>;
-
-    type: 'route';
+    type: 'classify';
 
     /**
      * Version number of function.
@@ -1201,9 +1185,9 @@ export interface FunctionAudit {
  */
 export interface FunctionResponse {
   /**
-   * A function that extracts structured JSON from documents and images. Accepts a
-   * wide range of input types including PDFs, images, spreadsheets, emails, and
-   * more.
+   * V3 read-side union. Same shape as the shared `Function` union but with
+   * `classify` in place of `route`. Legacy `transform` and `analyze` functions
+   * remain readable via V3.
    */
   function: Function;
 }
@@ -1231,38 +1215,6 @@ export interface ListFunctionsResponse {
   totalCount?: number;
 }
 
-export interface RouteListItem {
-  name: string;
-
-  description?: string;
-
-  functionID?: string;
-
-  functionName?: string;
-
-  isErrorFallback?: boolean;
-
-  origin?: RouteListItem.Origin;
-
-  regex?: RouteListItem.Regex;
-}
-
-export namespace RouteListItem {
-  export interface Origin {
-    email?: Origin.Email;
-  }
-
-  export namespace Origin {
-    export interface Email {
-      patterns?: Array<string>;
-    }
-  }
-
-  export interface Regex {
-    patterns?: Array<string>;
-  }
-}
-
 export interface SplitFunctionSemanticPageItemClass {
   name: string;
 
@@ -1280,16 +1232,11 @@ export interface SplitFunctionSemanticPageItemClass {
 }
 
 /**
- * A function that transforms and customizes input payloads using JMESPath
- * expressions. Payload shaping allows you to extract specific data, perform
- * calculations, and reshape complex input structures into simplified, standardized
- * output formats tailored to your downstream systems or business requirements.
+ * V3 wire form of the Route (classify) function upsert payload. Mirrors {
  */
 export type UpdateFunction =
-  | UpdateFunction.TransformFunction
   | UpdateFunction.ExtractFunction
-  | UpdateFunction.AnalyzeFunction
-  | UpdateFunction.RouteFunction
+  | UpdateFunction.ClassifyFunction
   | UpdateFunction.SendFunction
   | UpdateFunction.SplitFunction
   | UpdateFunction.JoinFunction
@@ -1297,41 +1244,6 @@ export type UpdateFunction =
   | UpdateFunction.UpsertEnrichFunction;
 
 export namespace UpdateFunction {
-  export interface TransformFunction {
-    type: 'transform';
-
-    /**
-     * Display name of function. Human-readable name to help you identify the function.
-     */
-    displayName?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName?: string;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Whether tabular chunking is enabled on the pipeline. This processes tables in
-     * CSV/Excel in row batches, rather than all rows at once.
-     */
-    tabularChunkingEnabled?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
   export interface ExtractFunction {
     type: 'extract';
 
@@ -1367,56 +1279,32 @@ export namespace UpdateFunction {
     tags?: Array<string>;
   }
 
-  export interface AnalyzeFunction {
-    type: 'analyze';
+  /**
+   * V3 wire form of the Route (classify) function upsert payload. Mirrors {
+   */
+  export interface ClassifyFunction {
+    type: 'classify';
 
     /**
-     * Display name of function. Human-readable name to help you identify the function.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
      */
-    displayName?: string;
+    classifications?: Array<FunctionsAPI.ClassificationListItem>;
 
     /**
-     * Whether bounding box extraction is enabled. Only applicable to analyze and
-     * extract functions. When true, the function returns the document regions (page,
-     * coordinates) from which each field was extracted. Enabling this automatically
-     * configures the function to use the bounding box model. Disabling resets to the
-     * default.
-     */
-    enableBoundingBoxes?: boolean;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName?: string;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Reducing the risk of the model stopping early on long documents. Trade-off:
-     * Increases total latency. Compatible with `enableBoundingBoxes`.
-     */
-    preCount?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
-  export interface RouteFunction {
-    type: 'route';
-
-    /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description?: string;
 
@@ -1429,11 +1317,6 @@ export namespace UpdateFunction {
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName?: string;
-
-    /**
-     * List of routes.
-     */
-    routes?: Array<FunctionsAPI.RouteListItem>;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -1694,10 +1577,8 @@ export interface WorkflowUsageInfo {
 }
 
 export type FunctionCreateParams =
-  | FunctionCreateParams.CreateTransformFunction
   | FunctionCreateParams.CreateExtractFunction
-  | FunctionCreateParams.CreateAnalyzeFunction
-  | FunctionCreateParams.CreateRouteFunction
+  | FunctionCreateParams.CreateClassifyFunction
   | FunctionCreateParams.CreateSendFunction
   | FunctionCreateParams.CreateSplitFunction
   | FunctionCreateParams.CreateJoinFunction
@@ -1705,41 +1586,6 @@ export type FunctionCreateParams =
   | FunctionCreateParams.CreateEnrichFunction;
 
 export declare namespace FunctionCreateParams {
-  export interface CreateTransformFunction {
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName: string;
-
-    type: 'transform';
-
-    /**
-     * Display name of function. Human-readable name to help you identify the function.
-     */
-    displayName?: string;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Whether tabular chunking is enabled on the pipeline. This processes tables in
-     * CSV/Excel in row batches, rather than all rows at once.
-     */
-    tabularChunkingEnabled?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
   export interface CreateExtractFunction {
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.
@@ -1775,61 +1621,34 @@ export declare namespace FunctionCreateParams {
     tags?: Array<string>;
   }
 
-  export interface CreateAnalyzeFunction {
+  export interface CreateClassifyFunction {
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName: string;
 
-    type: 'analyze';
+    type: 'classify';
 
     /**
-     * Display name of function. Human-readable name to help you identify the function.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
      */
-    displayName?: string;
+    classifications?: Array<ClassificationListItem>;
 
     /**
-     * Whether bounding box extraction is enabled. Only applicable to analyze and
-     * extract functions. When true, the function returns the document regions (page,
-     * coordinates) from which each field was extracted. Enabling this automatically
-     * configures the function to use the bounding box model. Disabling resets to the
-     * default.
-     */
-    enableBoundingBoxes?: boolean;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Reducing the risk of the model stopping early on long documents. Trade-off:
-     * Increases total latency. Compatible with `enableBoundingBoxes`.
-     */
-    preCount?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
-  export interface CreateRouteFunction {
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName: string;
-
-    type: 'route';
-
-    /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description?: string;
 
@@ -1837,11 +1656,6 @@ export declare namespace FunctionCreateParams {
      * Display name of function. Human-readable name to help you identify the function.
      */
     displayName?: string;
-
-    /**
-     * List of routes.
-     */
-    routes?: Array<RouteListItem>;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -2055,10 +1869,8 @@ export declare namespace FunctionCreateParams {
 }
 
 export type FunctionUpdateParams =
-  | FunctionUpdateParams.UpsertTransformFunction
   | FunctionUpdateParams.UpsertExtractFunction
-  | FunctionUpdateParams.UpsertAnalyzeFunction
-  | FunctionUpdateParams.UpsertRouteFunction
+  | FunctionUpdateParams.UpsertClassifyFunction
   | FunctionUpdateParams.UpsertSendFunction
   | FunctionUpdateParams.UpsertSplitFunction
   | FunctionUpdateParams.UpsertJoinFunction
@@ -2066,41 +1878,6 @@ export type FunctionUpdateParams =
   | FunctionUpdateParams.UpsertEnrichFunction;
 
 export declare namespace FunctionUpdateParams {
-  export interface UpsertTransformFunction {
-    type: 'transform';
-
-    /**
-     * Display name of function. Human-readable name to help you identify the function.
-     */
-    displayName?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName?: string;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Whether tabular chunking is enabled on the pipeline. This processes tables in
-     * CSV/Excel in row batches, rather than all rows at once.
-     */
-    tabularChunkingEnabled?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
   export interface UpsertExtractFunction {
     type: 'extract';
 
@@ -2136,56 +1913,29 @@ export declare namespace FunctionUpdateParams {
     tags?: Array<string>;
   }
 
-  export interface UpsertAnalyzeFunction {
-    type: 'analyze';
+  export interface UpsertClassifyFunction {
+    type: 'classify';
 
     /**
-     * Display name of function. Human-readable name to help you identify the function.
+     * V3 create/update variants of the shared function payloads.
+     *
+     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+     * function types when creating new functions or updating existing ones — both have
+     * been unified under `extract`. Existing functions of those types remain readable
+     * and callable via V3, so the V3 read-side unions still include `transform` and
+     * `analyze` variants.
+     *
+     * The V3 API also renames the internal `route` function type to `classify` on the
+     * wire, and the associated `routes` field to `classifications` (type
+     * `ClassificationList`). Platform-internal storage and processing still use
+     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
+     * name for the list of classifications a classify function can produce.
      */
-    displayName?: string;
+    classifications?: Array<ClassificationListItem>;
 
     /**
-     * Whether bounding box extraction is enabled. Only applicable to analyze and
-     * extract functions. When true, the function returns the document regions (page,
-     * coordinates) from which each field was extracted. Enabling this automatically
-     * configures the function to use the bounding box model. Disabling resets to the
-     * default.
-     */
-    enableBoundingBoxes?: boolean;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis.
-     */
-    functionName?: string;
-
-    /**
-     * Desired output structure defined in standard JSON Schema convention.
-     */
-    outputSchema?: unknown;
-
-    /**
-     * Name of output schema object.
-     */
-    outputSchemaName?: string;
-
-    /**
-     * Reducing the risk of the model stopping early on long documents. Trade-off:
-     * Increases total latency. Compatible with `enableBoundingBoxes`.
-     */
-    preCount?: boolean;
-
-    /**
-     * Array of tags to categorize and organize functions.
-     */
-    tags?: Array<string>;
-  }
-
-  export interface UpsertRouteFunction {
-    type: 'route';
-
-    /**
-     * Description of router. Can be used to provide additional context on router's
-     * purpose and expected inputs.
+     * Description of classifier. Can be used to provide additional context on
+     * classifier's purpose and expected inputs.
      */
     description?: string;
 
@@ -2198,11 +1948,6 @@ export declare namespace FunctionUpdateParams {
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName?: string;
-
-    /**
-     * List of routes.
-     */
-    routes?: Array<RouteListItem>;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -2423,6 +2168,7 @@ Functions.Versions = Versions;
 
 export declare namespace Functions {
   export {
+    type ClassificationListItem as ClassificationListItem,
     type CreateFunction as CreateFunction,
     type EnrichConfig as EnrichConfig,
     type EnrichStep as EnrichStep,
@@ -2431,7 +2177,6 @@ export declare namespace Functions {
     type FunctionResponse as FunctionResponse,
     type FunctionType as FunctionType,
     type ListFunctionsResponse as ListFunctionsResponse,
-    type RouteListItem as RouteListItem,
     type SplitFunctionSemanticPageItemClass as SplitFunctionSemanticPageItemClass,
     type UpdateFunction as UpdateFunction,
     type UserActionSummary as UserActionSummary,

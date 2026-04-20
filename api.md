@@ -2,6 +2,7 @@
 
 Types:
 
+- <code><a href="./src/resources/functions/functions.ts">ClassificationListItem</a></code>
 - <code><a href="./src/resources/functions/functions.ts">CreateFunction</a></code>
 - <code><a href="./src/resources/functions/functions.ts">EnrichConfig</a></code>
 - <code><a href="./src/resources/functions/functions.ts">EnrichStep</a></code>
@@ -10,7 +11,6 @@ Types:
 - <code><a href="./src/resources/functions/functions.ts">FunctionResponse</a></code>
 - <code><a href="./src/resources/functions/functions.ts">FunctionType</a></code>
 - <code><a href="./src/resources/functions/functions.ts">ListFunctionsResponse</a></code>
-- <code><a href="./src/resources/functions/functions.ts">RouteListItem</a></code>
 - <code><a href="./src/resources/functions/functions.ts">SplitFunctionSemanticPageItemClass</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UpdateFunction</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UserActionSummary</a></code>

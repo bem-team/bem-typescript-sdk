@@ -10,7 +10,7 @@ import { multipartFormRequestOptions } from '../internal/uploads';
  *
  * Upload a file (PDF, image, spreadsheet, email, etc.) and receive a general-purpose JSON Schema
  * that captures the document's structure. The inferred schema can be used directly as the
- * `outputSchema` when creating Transform functions.
+ * `outputSchema` when creating Extract functions.
  *
  * The schema is designed to be broadly applicable to documents of the same type, not just
  * the specific file uploaded.

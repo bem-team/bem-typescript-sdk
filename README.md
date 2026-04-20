@@ -37,7 +37,7 @@ const client = new Bem({
 
 const functionResponse = await client.functions.create({
   functionName: 'functionName',
-  type: 'transform',
+  type: 'extract',
 });
 
 console.log(functionResponse['function']);
@@ -55,7 +55,7 @@ const client = new Bem({
   apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted
 });
 
-const params: Bem.FunctionCreateParams = { functionName: 'functionName', type: 'transform' };
+const params: Bem.FunctionCreateParams = { functionName: 'functionName', type: 'extract' };
 const functionResponse: Bem.FunctionResponse = await client.functions.create(params);
 ```
 
@@ -70,7 +70,7 @@ a subclass of `APIError` will be thrown:
 <!-- prettier-ignore -->
 ```ts
 const functionResponse = await client.functions
-  .create({ functionName: 'functionName', type: 'transform' })
+  .create({ functionName: 'functionName', type: 'extract' })
   .catch(async (err) => {
     if (err instanceof Bem.APIError) {
       console.log(err.status); // 400
@@ -111,7 +111,7 @@ const client = new Bem({
 });
 
 // Or, configure per-request:
-await client.functions.create({ functionName: 'functionName', type: 'transform' }, {
+await client.functions.create({ functionName: 'functionName', type: 'extract' }, {
   maxRetries: 5,
 });
 ```
@@ -128,7 +128,7 @@ const client = new Bem({
 });
 
 // Override per-request:
-await client.functions.create({ functionName: 'functionName', type: 'transform' }, {
+await client.functions.create({ functionName: 'functionName', type: 'extract' }, {
   timeout: 5 * 1000,
 });
 ```
@@ -183,13 +183,13 @@ Unlike `.asResponse()` this method consumes the body, returning once it is parse
 const client = new Bem();
 
 const response = await client.functions
-  .create({ functionName: 'functionName', type: 'transform' })
+  .create({ functionName: 'functionName', type: 'extract' })
   .asResponse();
 console.log(response.headers.get('X-My-Header'));
 console.log(response.statusText); // access the underlying Response object
 
 const { data: functionResponse, response: raw } = await client.functions
-  .create({ functionName: 'functionName', type: 'transform' })
+  .create({ functionName: 'functionName', type: 'extract' })
   .withResponse();
 console.log(raw.headers.get('X-My-Header'));
 console.log(functionResponse['function']);

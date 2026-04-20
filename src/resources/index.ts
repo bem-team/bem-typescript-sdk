@@ -11,6 +11,7 @@ export {
 } from './errors';
 export {
   Functions,
+  type ClassificationListItem,
   type CreateFunction,
   type EnrichConfig,
   type EnrichStep,
@@ -19,7 +20,6 @@ export {
   type FunctionResponse,
   type FunctionType,
   type ListFunctionsResponse,
-  type RouteListItem,
   type SplitFunctionSemanticPageItemClass,
   type UpdateFunction,
   type UserActionSummary,
