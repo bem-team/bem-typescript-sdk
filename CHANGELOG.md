@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.14.0 (2026-04-22)
+
+Full Changelog: [v0.13.0...v0.14.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.13.0...v0.14.0)
+
+### Features
+
+* **api:** manual updates ([cb7243d](https://github.com/bem-team/bem-typescript-sdk/commit/cb7243d6729022d0ba9fe05d80334df30373c755))
+
+
+### Chores
+
+* **internal:** more robust bootstrap script ([5b928c2](https://github.com/bem-team/bem-typescript-sdk/commit/5b928c2ba95df91534eda13d1cb3fe9cb64c23fc))
+* **internal:** update docs ordering ([bc160c7](https://github.com/bem-team/bem-typescript-sdk/commit/bc160c71aa961d32d6793eac5d92b96969fec9b6))
+
 ## 0.13.0 (2026-04-20)
 
 Full Changelog: [v0.12.0...v0.13.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.12.0...v0.13.0)
