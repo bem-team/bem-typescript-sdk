@@ -13,7 +13,6 @@ export {
   type WorkflowAudit,
   type WorkflowEdgeResponse,
   type WorkflowNodeResponse,
-  type WorkflowCreateResponse,
   type WorkflowRetrieveResponse,
   type WorkflowUpdateResponse,
   type WorkflowCopyResponse,

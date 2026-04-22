@@ -94,14 +94,13 @@ Types:
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowAudit</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowEdgeResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowNodeResponse</a></code>
-- <code><a href="./src/resources/workflows/workflows.ts">WorkflowCreateResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowRetrieveResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowUpdateResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowCopyResponse</a></code>
 
 Methods:
 
-- <code title="post /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">create</a>({ ...params }) -> WorkflowCreateResponse</code>
+- <code title="post /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">create</a>({ ...params }) -> Workflow</code>
 - <code title="get /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">retrieve</a>(workflowName) -> WorkflowRetrieveResponse</code>
 - <code title="patch /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">update</a>(workflowName, { ...params }) -> WorkflowUpdateResponse</code>
 - <code title="get /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">list</a>({ ...params }) -> WorkflowsWorkflowsPage</code>

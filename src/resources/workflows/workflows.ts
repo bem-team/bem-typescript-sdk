@@ -40,8 +40,10 @@ export class Workflows extends APIResource {
   /**
    * Create a Workflow
    */
-  create(body: WorkflowCreateParams, options?: RequestOptions): APIPromise<WorkflowCreateResponse> {
-    return this._client.post('/v3/workflows', { body, ...options });
+  create(body: WorkflowCreateParams, options?: RequestOptions): APIPromise<Workflow> {
+    return (
+      this._client.post('/v3/workflows', { body, ...options }) as APIPromise<{ workflow: Workflow }>
+    )._thenUnwrap((obj) => obj.workflow);
   }
 
   /**
@@ -385,56 +387,6 @@ export interface WorkflowNodeResponse {
    * verbatim; never interpreted by the server.
    */
   metadata?: unknown;
-}
-
-export interface WorkflowCreateResponse {
-  /**
-   * Per-connector failures from the diff/apply phase. Empty or omitted when all
-   * operations succeeded.
-   */
-  connectorErrors?: Array<WorkflowCreateResponse.ConnectorError>;
-
-  /**
-   * Error message if the workflow creation failed.
-   */
-  error?: string;
-
-  /**
-   * V3 read representation of a workflow version.
-   */
-  workflow?: Workflow;
-}
-
-export namespace WorkflowCreateResponse {
-  /**
-   * Per-connector failure surfaced alongside a successful workflow DAG save.
-   */
-  export interface ConnectorError {
-    /**
-     * Machine-readable error code.
-     */
-    code: string;
-
-    /**
-     * Human-readable error message.
-     */
-    message: string;
-
-    /**
-     * Which diff operation was attempted.
-     */
-    operation: 'create' | 'update' | 'delete';
-
-    /**
-     * Populated for update/delete failures.
-     */
-    connectorID?: string;
-
-    /**
-     * Populated for create failures.
-     */
-    name?: string;
-  }
 }
 
 export interface WorkflowRetrieveResponse {
@@ -1024,7 +976,6 @@ export declare namespace Workflows {
     type WorkflowAudit as WorkflowAudit,
     type WorkflowEdgeResponse as WorkflowEdgeResponse,
     type WorkflowNodeResponse as WorkflowNodeResponse,
-    type WorkflowCreateResponse as WorkflowCreateResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
     type WorkflowCopyResponse as WorkflowCopyResponse,
