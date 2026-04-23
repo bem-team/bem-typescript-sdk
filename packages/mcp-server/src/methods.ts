@@ -71,6 +71,12 @@ export const sdkMethods: SdkMethod[] = [
     httpPath: '/v3/calls',
   },
   {
+    clientCallName: 'client.calls.retrieveTrace',
+    fullyQualifiedName: 'calls.retrieveTrace',
+    httpMethod: 'get',
+    httpPath: '/v3/calls/{callID}/trace',
+  },
+  {
     clientCallName: 'client.errors.retrieve',
     fullyQualifiedName: 'errors.retrieve',
     httpMethod: 'get',
@@ -153,6 +159,78 @@ export const sdkMethods: SdkMethod[] = [
     fullyQualifiedName: 'inferSchema.create',
     httpMethod: 'post',
     httpPath: '/v3/infer-schema',
+  },
+  {
+    clientCallName: 'client.collections.create',
+    fullyQualifiedName: 'collections.create',
+    httpMethod: 'post',
+    httpPath: '/v3/collections',
+  },
+  {
+    clientCallName: 'client.collections.list',
+    fullyQualifiedName: 'collections.list',
+    httpMethod: 'get',
+    httpPath: '/v3/collections',
+  },
+  {
+    clientCallName: 'client.collections.delete',
+    fullyQualifiedName: 'collections.delete',
+    httpMethod: 'delete',
+    httpPath: '/v3/collections',
+  },
+  {
+    clientCallName: 'client.collections.countTokens',
+    fullyQualifiedName: 'collections.countTokens',
+    httpMethod: 'post',
+    httpPath: '/v3/collections/token-count',
+  },
+  {
+    clientCallName: 'client.collections.items.retrieve',
+    fullyQualifiedName: 'collections.items.retrieve',
+    httpMethod: 'get',
+    httpPath: '/v3/collections/items',
+  },
+  {
+    clientCallName: 'client.collections.items.update',
+    fullyQualifiedName: 'collections.items.update',
+    httpMethod: 'put',
+    httpPath: '/v3/collections/items',
+  },
+  {
+    clientCallName: 'client.collections.items.delete',
+    fullyQualifiedName: 'collections.items.delete',
+    httpMethod: 'delete',
+    httpPath: '/v3/collections/items',
+  },
+  {
+    clientCallName: 'client.collections.items.add',
+    fullyQualifiedName: 'collections.items.add',
+    httpMethod: 'post',
+    httpPath: '/v3/collections/items',
+  },
+  {
+    clientCallName: 'client.events.submitFeedback',
+    fullyQualifiedName: 'events.submitFeedback',
+    httpMethod: 'post',
+    httpPath: '/v3/events/{eventID}/feedback',
+  },
+  {
+    clientCallName: 'client.webhookSecret.create',
+    fullyQualifiedName: 'webhookSecret.create',
+    httpMethod: 'post',
+    httpPath: '/v3/webhook-secret',
+  },
+  {
+    clientCallName: 'client.webhookSecret.retrieve',
+    fullyQualifiedName: 'webhookSecret.retrieve',
+    httpMethod: 'get',
+    httpPath: '/v3/webhook-secret',
+  },
+  {
+    clientCallName: 'client.webhookSecret.revoke',
+    fullyQualifiedName: 'webhookSecret.revoke',
+    httpMethod: 'delete',
+    httpPath: '/v3/webhook-secret',
   },
 ];
 

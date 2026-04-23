@@ -1,6 +1,23 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-export { Calls, type Call, type CallGetResponse, type CallListParams, type CallsCallsPage } from './calls';
+export {
+  Calls,
+  type Call,
+  type CallGetResponse,
+  type CallRetrieveTraceResponse,
+  type CallListParams,
+  type CallsCallsPage,
+} from './calls';
+export {
+  Collections,
+  type CollectionCreateResponse,
+  type CollectionListResponse,
+  type CollectionCountTokensResponse,
+  type CollectionCreateParams,
+  type CollectionListParams,
+  type CollectionDeleteParams,
+  type CollectionCountTokensParams,
+} from './collections/collections';
 export {
   Errors,
   type ErrorEvent,
@@ -9,6 +26,7 @@ export {
   type ErrorListParams,
   type ErrorEventsErrorsPage,
 } from './errors';
+export { Events, type EventSubmitFeedbackResponse, type EventSubmitFeedbackParams } from './events';
 export {
   Functions,
   type ClassificationListItem,
@@ -38,6 +56,11 @@ export {
   type OutputListParams,
   type EventsOutputsPage,
 } from './outputs';
+export {
+  WebhookSecret,
+  type WebhookSecretCreateResponse,
+  type WebhookSecretRetrieveResponse,
+} from './webhook-secret';
 export {
   Workflows,
   type FunctionVersionIdentifier,

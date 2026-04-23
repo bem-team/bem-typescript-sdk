@@ -53,11 +53,13 @@ Types:
 
 - <code><a href="./src/resources/calls.ts">Call</a></code>
 - <code><a href="./src/resources/calls.ts">CallGetResponse</a></code>
+- <code><a href="./src/resources/calls.ts">CallRetrieveTraceResponse</a></code>
 
 Methods:
 
 - <code title="get /v3/calls/{callID}">client.calls.<a href="./src/resources/calls.ts">retrieve</a>(callID) -> CallGetResponse</code>
 - <code title="get /v3/calls">client.calls.<a href="./src/resources/calls.ts">list</a>({ ...params }) -> CallsCallsPage</code>
+- <code title="get /v3/calls/{callID}/trace">client.calls.<a href="./src/resources/calls.ts">retrieveTrace</a>(callID) -> CallRetrieveTraceResponse</code>
 
 # Errors
 
@@ -128,3 +130,56 @@ Types:
 Methods:
 
 - <code title="post /v3/infer-schema">client.inferSchema.<a href="./src/resources/infer-schema.ts">create</a>({ ...params }) -> InferSchemaCreateResponse</code>
+
+# Collections
+
+Types:
+
+- <code><a href="./src/resources/collections/collections.ts">CollectionCreateResponse</a></code>
+- <code><a href="./src/resources/collections/collections.ts">CollectionListResponse</a></code>
+- <code><a href="./src/resources/collections/collections.ts">CollectionCountTokensResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">create</a>({ ...params }) -> CollectionCreateResponse</code>
+- <code title="get /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">list</a>({ ...params }) -> CollectionListResponse</code>
+- <code title="delete /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">delete</a>({ ...params }) -> void</code>
+- <code title="post /v3/collections/token-count">client.collections.<a href="./src/resources/collections/collections.ts">countTokens</a>({ ...params }) -> CollectionCountTokensResponse</code>
+
+## Items
+
+Types:
+
+- <code><a href="./src/resources/collections/items.ts">ItemRetrieveResponse</a></code>
+- <code><a href="./src/resources/collections/items.ts">ItemUpdateResponse</a></code>
+- <code><a href="./src/resources/collections/items.ts">ItemAddResponse</a></code>
+
+Methods:
+
+- <code title="get /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">retrieve</a>({ ...params }) -> ItemRetrieveResponse</code>
+- <code title="put /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">update</a>({ ...params }) -> ItemUpdateResponse</code>
+- <code title="delete /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">delete</a>({ ...params }) -> void</code>
+- <code title="post /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">add</a>({ ...params }) -> ItemAddResponse</code>
+
+# Events
+
+Types:
+
+- <code><a href="./src/resources/events.ts">EventSubmitFeedbackResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/events/{eventID}/feedback">client.events.<a href="./src/resources/events.ts">submitFeedback</a>(eventID, { ...params }) -> EventSubmitFeedbackResponse</code>
+
+# WebhookSecret
+
+Types:
+
+- <code><a href="./src/resources/webhook-secret.ts">WebhookSecretCreateResponse</a></code>
+- <code><a href="./src/resources/webhook-secret.ts">WebhookSecretRetrieveResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">create</a>() -> WebhookSecretCreateResponse</code>
+- <code title="get /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">retrieve</a>() -> WebhookSecretRetrieveResponse</code>
+- <code title="delete /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">revoke</a>() -> void</code>
