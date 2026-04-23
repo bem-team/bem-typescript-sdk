@@ -516,6 +516,50 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     },
   },
   {
+    name: 'retrieve_trace',
+    endpoint: '/v3/calls/{callID}/trace',
+    httpMethod: 'get',
+    summary: 'Get Call Trace',
+    description:
+      "**Retrieve the full execution trace of a workflow call.**\n\nReturns all function calls and events emitted during the call as flat arrays.\nThe DAG can be reconstructed using `FunctionCallResponseBase.sourceEventID`\n(the event that spawned each function call) and each event's `functionCallID`\n(the function call that emitted it).\n\n## Graph structure\n\n- A function call with no `sourceEventID` is the root.\n- An event's `functionCallID` points to the function call that emitted it.\n- A function call's `sourceEventID` points to the event that triggered it.\n- `workflowNodeName` identifies the DAG node; `incomingDestinationName` identifies\nthe labelled outlet used to reach this call (absent for unlabelled edges and root calls).\n\nThe trace is available as soon as the call exists and grows as execution proceeds.",
+    stainlessPath: '(resource) calls > (method) retrieve_trace',
+    qualified: 'client.calls.retrieveTrace',
+    params: ['callID: string;'],
+    response:
+      "{ error?: string; trace?: { events: object[]; functionCalls: { functionCallID: string; functionID: string; functionName: string; referenceID: string; startedAt: string; status: 'pending' | 'running' | 'completed' | 'failed'; type: function_type; activity?: object[]; finishedAt?: string; functionVersionNum?: number; incomingDestinationName?: string; inputs?: object[]; inputType?: string; s3URL?: string; sourceEventID?: string; sourceFunctionCallID?: string; workflowCallID?: string; workflowNodeName?: string; }[]; }; }",
+    markdown:
+      "## retrieve_trace\n\n`client.calls.retrieveTrace(callID: string): { error?: string; trace?: object; }`\n\n**get** `/v3/calls/{callID}/trace`\n\n**Retrieve the full execution trace of a workflow call.**\n\nReturns all function calls and events emitted during the call as flat arrays.\nThe DAG can be reconstructed using `FunctionCallResponseBase.sourceEventID`\n(the event that spawned each function call) and each event's `functionCallID`\n(the function call that emitted it).\n\n## Graph structure\n\n- A function call with no `sourceEventID` is the root.\n- An event's `functionCallID` points to the function call that emitted it.\n- A function call's `sourceEventID` points to the event that triggered it.\n- `workflowNodeName` identifies the DAG node; `incomingDestinationName` identifies\nthe labelled outlet used to reach this call (absent for unlabelled edges and root calls).\n\nThe trace is available as soon as the call exists and grows as execution proceeds.\n\n### Parameters\n\n- `callID: string`\n\n### Returns\n\n- `{ error?: string; trace?: { events: object[]; functionCalls: { functionCallID: string; functionID: string; functionName: string; referenceID: string; startedAt: string; status: 'pending' | 'running' | 'completed' | 'failed'; type: function_type; activity?: object[]; finishedAt?: string; functionVersionNum?: number; incomingDestinationName?: string; inputs?: object[]; inputType?: string; s3URL?: string; sourceEventID?: string; sourceFunctionCallID?: string; workflowCallID?: string; workflowNodeName?: string; }[]; }; }`\n  Response from `GET /v3/calls/{callID}/trace`.\n\nContains the full execution DAG as flat arrays of function calls and events. Reconstruct the\ngraph using `FunctionCallResponseBase.sourceEventID` (the event that spawned each function call)\nand each event's `functionCallID` (the function call that emitted it).\n\n  - `error?: string`\n  - `trace?: { events: object[]; functionCalls: { functionCallID: string; functionID: string; functionName: string; referenceID: string; startedAt: string; status: 'pending' | 'running' | 'completed' | 'failed'; type: string; activity?: { displayName?: string; status?: 'pending' | 'running' | 'completed' | 'failed'; }[]; finishedAt?: string; functionVersionNum?: number; incomingDestinationName?: string; inputs?: { inputType?: string; itemReferenceID?: string; s3URL?: string; }[]; inputType?: string; s3URL?: string; sourceEventID?: string; sourceFunctionCallID?: string; workflowCallID?: string; workflowNodeName?: string; }[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.calls.retrieveTrace('callID');\n\nconsole.log(response);\n```",
+    perLanguage: {
+      cli: {
+        method: 'calls retrieve_trace',
+        example: "bem calls retrieve-trace \\\n  --api-key 'My API Key' \\\n  --call-id callID",
+      },
+      csharp: {
+        method: 'Calls.RetrieveTrace',
+        example:
+          'CallRetrieveTraceParams parameters = new() { CallID = "callID" };\n\nvar response = await client.Calls.RetrieveTrace(parameters);\n\nConsole.WriteLine(response);',
+      },
+      go: {
+        method: 'client.Calls.GetTrace',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Calls.GetTrace(context.TODO(), "callID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Error)\n}\n',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/calls/$CALL_ID/trace \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'calls.retrieve_trace',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.calls.retrieve_trace(\n    "callID",\n)\nprint(response.error)',
+      },
+      typescript: {
+        method: 'client.calls.retrieveTrace',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.calls.retrieveTrace('callID');\n\nconsole.log(response.error);",
+      },
+    },
+  },
+  {
     name: 'list',
     endpoint: '/v3/errors',
     httpMethod: 'get',
@@ -1202,6 +1246,541 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         method: 'client.inferSchema.create',
         example:
           "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst inferSchema = await client.inferSchema.create({ file: {} });\n\nconsole.log(inferSchema.analysis);",
+      },
+    },
+  },
+  {
+    name: 'delete',
+    endpoint: '/v3/collections',
+    httpMethod: 'delete',
+    summary: 'Delete a Collection',
+    description: 'Delete a Collection',
+    stainlessPath: '(resource) collections > (method) delete',
+    qualified: 'client.collections.delete',
+    params: ['collectionName: string;'],
+    markdown:
+      "## delete\n\n`client.collections.delete(collectionName: string): void`\n\n**delete** `/v3/collections`\n\nDelete a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection to delete. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.collections.delete({ collectionName: 'collectionName' })\n```",
+    perLanguage: {
+      cli: {
+        method: 'collections delete',
+        example: "bem collections delete \\\n  --api-key 'My API Key' \\\n  --collection-name collectionName",
+      },
+      csharp: {
+        method: 'Collections.Delete',
+        example:
+          'CollectionDeleteParams parameters = new() { CollectionName = "collectionName" };\n\nawait client.Collections.Delete(parameters);',
+      },
+      go: {
+        method: 'client.Collections.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Collections.Delete(context.TODO(), bem.CollectionDeleteParams{\n\t\tCollectionName: "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/collections \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'collections.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.collections.delete(\n    collection_name="collectionName",\n)',
+      },
+      typescript: {
+        method: 'client.collections.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.collections.delete({ collectionName: 'collectionName' });",
+      },
+    },
+  },
+  {
+    name: 'list',
+    endpoint: '/v3/collections',
+    httpMethod: 'get',
+    summary: 'List Collections',
+    description: 'List Collections',
+    stainlessPath: '(resource) collections > (method) list',
+    qualified: 'client.collections.list',
+    params: [
+      'collectionNameSearch?: string;',
+      'limit?: number;',
+      'page?: number;',
+      'parentCollectionName?: string;',
+    ],
+    response:
+      '{ collections: { collectionID: string; collectionName: string; createdAt: string; itemCount: number; updatedAt?: string; }[]; limit: number; page: number; totalCount: number; totalPages: number; }',
+    markdown:
+      '## list\n\n`client.collections.list(collectionNameSearch?: string, limit?: number, page?: number, parentCollectionName?: string): { collections: object[]; limit: number; page: number; totalCount: number; totalPages: number; }`\n\n**get** `/v3/collections`\n\nList Collections\n\n### Parameters\n\n- `collectionNameSearch?: string`\n  Optional substring search filter for collection names (case-insensitive).\nFor example, "premium" will match "customers.premium", "products.premium", etc.\n\n- `limit?: number`\n  Number of collections per page\n\n- `page?: number`\n  Page number for pagination\n\n- `parentCollectionName?: string`\n  Optional filter to list only collections under a specific parent collection path.\nFor example, "customers" will return "customers", "customers.premium", "customers.premium.vip", etc.\n\n### Returns\n\n- `{ collections: { collectionID: string; collectionName: string; createdAt: string; itemCount: number; updatedAt?: string; }[]; limit: number; page: number; totalCount: number; totalPages: number; }`\n  Response for listing collections\n\n  - `collections: { collectionID: string; collectionName: string; createdAt: string; itemCount: number; updatedAt?: string; }[]`\n  - `limit: number`\n  - `page: number`\n  - `totalCount: number`\n  - `totalPages: number`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst collections = await client.collections.list();\n\nconsole.log(collections);\n```',
+    perLanguage: {
+      cli: {
+        method: 'collections list',
+        example: "bem collections list \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'Collections.List',
+        example:
+          'CollectionListParams parameters = new();\n\nvar collections = await client.Collections.List(parameters);\n\nConsole.WriteLine(collections);',
+      },
+      go: {
+        method: 'client.Collections.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcollections, err := client.Collections.List(context.TODO(), bem.CollectionListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", collections.Collections)\n}\n',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/collections \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'collections.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncollections = client.collections.list()\nprint(collections.collections)',
+      },
+      typescript: {
+        method: 'client.collections.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst collections = await client.collections.list();\n\nconsole.log(collections.collections);",
+      },
+    },
+  },
+  {
+    name: 'create',
+    endpoint: '/v3/collections',
+    httpMethod: 'post',
+    summary: 'Create a Collection',
+    description: 'Create a Collection',
+    stainlessPath: '(resource) collections > (method) create',
+    qualified: 'client.collections.create',
+    params: ['collectionName: string;'],
+    response:
+      '{ collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }',
+    markdown:
+      "## create\n\n`client.collections.create(collectionName: string): { collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: object[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n\n**post** `/v3/collections`\n\nCreate a Collection\n\n### Parameters\n\n- `collectionName: string`\n  Unique name/path for the collection. Supports dot notation for hierarchical paths.\n\n- Only letters (a-z, A-Z), digits (0-9), underscores (_), and dots (.) are allowed\n- Each segment (between dots) must start with a letter or underscore (not a digit)\n- Segments cannot consist only of digits\n- Each segment must be 1-256 characters\n- No leading, trailing, or consecutive dots\n- Invalid names are rejected with a 400 Bad Request error\n\n**Valid Examples:**\n- 'product_catalog'\n- 'orders.line_items.sku'\n- 'customer_data'\n- 'price_v2'\n\n**Invalid Examples:**\n- 'product-catalog' (contains hyphen)\n- '123items' (starts with digit)\n- 'items..data' (consecutive dots)\n- 'order#123' (contains invalid character #)\n\n### Returns\n\n- `{ collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n  Collection details\n\n  - `collectionID: string`\n  - `collectionName: string`\n  - `createdAt: string`\n  - `itemCount: number`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n  - `limit?: number`\n  - `page?: number`\n  - `totalPages?: number`\n  - `updatedAt?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst collection = await client.collections.create({ collectionName: 'product_catalog' });\n\nconsole.log(collection);\n```",
+    perLanguage: {
+      cli: {
+        method: 'collections create',
+        example:
+          "bem collections create \\\n  --api-key 'My API Key' \\\n  --collection-name product_catalog",
+      },
+      csharp: {
+        method: 'Collections.Create',
+        example:
+          'CollectionCreateParams parameters = new()\n{\n    CollectionName = "product_catalog"\n};\n\nvar collection = await client.Collections.Create(parameters);\n\nConsole.WriteLine(collection);',
+      },
+      go: {
+        method: 'client.Collections.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcollection, err := client.Collections.New(context.TODO(), bem.CollectionNewParams{\n\t\tCollectionName: "product_catalog",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", collection.CollectionID)\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/collections \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "collectionName": "product_catalog"\n        }\'',
+      },
+      python: {
+        method: 'collections.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncollection = client.collections.create(\n    collection_name="product_catalog",\n)\nprint(collection.collection_id)',
+      },
+      typescript: {
+        method: 'client.collections.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst collection = await client.collections.create({ collectionName: 'product_catalog' });\n\nconsole.log(collection.collectionID);",
+      },
+    },
+  },
+  {
+    name: 'count_tokens',
+    endpoint: '/v3/collections/token-count',
+    httpMethod: 'post',
+    summary: 'Count tokens for texts',
+    description:
+      "Count the number of tokens in the provided texts using the BGE M3 tokenizer.\nThis is useful for checking if texts will fit within the embedding model's token limit\n(8,192 tokens per text) before sending them for embedding.",
+    stainlessPath: '(resource) collections > (method) count_tokens',
+    qualified: 'client.collections.countTokens',
+    params: ['texts: string[];'],
+    response:
+      '{ max_token_limit?: number; texts_exceeding_limit?: number; token_counts?: { char_count?: number; exceeds_limit?: boolean; index?: number; token_count?: number; }[]; total_tokens?: number; }',
+    markdown:
+      "## count_tokens\n\n`client.collections.countTokens(texts: string[]): { max_token_limit?: number; texts_exceeding_limit?: number; token_counts?: object[]; total_tokens?: number; }`\n\n**post** `/v3/collections/token-count`\n\nCount the number of tokens in the provided texts using the BGE M3 tokenizer.\nThis is useful for checking if texts will fit within the embedding model's token limit\n(8,192 tokens per text) before sending them for embedding.\n\n### Parameters\n\n- `texts: string[]`\n  One or more texts to tokenize.\n\n### Returns\n\n- `{ max_token_limit?: number; texts_exceeding_limit?: number; token_counts?: { char_count?: number; exceeds_limit?: boolean; index?: number; token_count?: number; }[]; total_tokens?: number; }`\n  Response for the token count endpoint.\n\n  - `max_token_limit?: number`\n  - `texts_exceeding_limit?: number`\n  - `token_counts?: { char_count?: number; exceeds_limit?: boolean; index?: number; token_count?: number; }[]`\n  - `total_tokens?: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.collections.countTokens({ texts: ['string'] });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      cli: {
+        method: 'collections count_tokens',
+        example: "bem collections count-tokens \\\n  --api-key 'My API Key' \\\n  --text string",
+      },
+      csharp: {
+        method: 'Collections.CountTokens',
+        example:
+          'CollectionCountTokensParams parameters = new()\n{\n    Texts =\n    [\n        "string"\n    ],\n};\n\nvar response = await client.Collections.CountTokens(parameters);\n\nConsole.WriteLine(response);',
+      },
+      go: {
+        method: 'client.Collections.CountTokens',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Collections.CountTokens(context.TODO(), bem.CollectionCountTokensParams{\n\t\tTexts: []string{"string"},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.MaxTokenLimit)\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/collections/token-count \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "texts": [\n            "string"\n          ]\n        }\'',
+      },
+      python: {
+        method: 'collections.count_tokens',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.collections.count_tokens(\n    texts=["string"],\n)\nprint(response.max_token_limit)',
+      },
+      typescript: {
+        method: 'client.collections.countTokens',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.collections.countTokens({ texts: ['string'] });\n\nconsole.log(response.max_token_limit);",
+      },
+    },
+  },
+  {
+    name: 'delete',
+    endpoint: '/v3/collections/items',
+    httpMethod: 'delete',
+    summary: 'Delete an item from a Collection',
+    description: 'Delete an item from a Collection',
+    stainlessPath: '(resource) collections.items > (method) delete',
+    qualified: 'client.collections.items.delete',
+    params: ['collectionItemID: string;', 'collectionName: string;'],
+    markdown:
+      "## delete\n\n`client.collections.items.delete(collectionItemID: string, collectionName: string): void`\n\n**delete** `/v3/collections/items`\n\nDelete an item from a Collection\n\n### Parameters\n\n- `collectionItemID: string`\n  The unique identifier of the item to delete\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.collections.items.delete({ collectionItemID: 'collectionItemID', collectionName: 'collectionName' })\n```",
+    perLanguage: {
+      cli: {
+        method: 'items delete',
+        example:
+          "bem collections:items delete \\\n  --api-key 'My API Key' \\\n  --collection-item-id collectionItemID \\\n  --collection-name collectionName",
+      },
+      csharp: {
+        method: 'Collections.Items.Delete',
+        example:
+          'ItemDeleteParams parameters = new()\n{\n    CollectionItemID = "collectionItemID",\n    CollectionName = "collectionName",\n};\n\nawait client.Collections.Items.Delete(parameters);',
+      },
+      go: {
+        method: 'client.Collections.Items.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Collections.Items.Delete(context.TODO(), bem.CollectionItemDeleteParams{\n\t\tCollectionItemID: "collectionItemID",\n\t\tCollectionName:   "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/collections/items \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'collections.items.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.collections.items.delete(\n    collection_item_id="collectionItemID",\n    collection_name="collectionName",\n)',
+      },
+      typescript: {
+        method: 'client.collections.items.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.collections.items.delete({\n  collectionItemID: 'collectionItemID',\n  collectionName: 'collectionName',\n});",
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/collections/items',
+    httpMethod: 'get',
+    summary: 'Get a Collection',
+    description: 'Get a Collection',
+    stainlessPath: '(resource) collections.items > (method) retrieve',
+    qualified: 'client.collections.items.retrieve',
+    params: [
+      'collectionName: string;',
+      'includeSubcollections?: boolean;',
+      'limit?: number;',
+      'page?: number;',
+    ],
+    response:
+      '{ collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }',
+    markdown:
+      '## retrieve\n\n`client.collections.items.retrieve(collectionName: string, includeSubcollections?: boolean, limit?: number, page?: number): { collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: object[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n\n**get** `/v3/collections/items`\n\nGet a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n- `includeSubcollections?: boolean`\n  When true, includes items from all subcollections under the specified collection path.\nFor example, querying "customers" with this flag will return items from "customers",\n"customers.premium", "customers.premium.vip", etc.\n\n- `limit?: number`\n  Number of items per page\n\n- `page?: number`\n  Page number for pagination\n\n### Returns\n\n- `{ collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n  Collection details\n\n  - `collectionID: string`\n  - `collectionName: string`\n  - `createdAt: string`\n  - `itemCount: number`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n  - `limit?: number`\n  - `page?: number`\n  - `totalPages?: number`\n  - `updatedAt?: string`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst item = await client.collections.items.retrieve({ collectionName: \'collectionName\' });\n\nconsole.log(item);\n```',
+    perLanguage: {
+      cli: {
+        method: 'items retrieve',
+        example:
+          "bem collections:items retrieve \\\n  --api-key 'My API Key' \\\n  --collection-name collectionName",
+      },
+      csharp: {
+        method: 'Collections.Items.Retrieve',
+        example:
+          'ItemRetrieveParams parameters = new() { CollectionName = "collectionName" };\n\nvar item = await client.Collections.Items.Retrieve(parameters);\n\nConsole.WriteLine(item);',
+      },
+      go: {
+        method: 'client.Collections.Items.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\titem, err := client.Collections.Items.Get(context.TODO(), bem.CollectionItemGetParams{\n\t\tCollectionName: "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", item.CollectionID)\n}\n',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/collections/items \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'collections.items.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nitem = client.collections.items.retrieve(\n    collection_name="collectionName",\n)\nprint(item.collection_id)',
+      },
+      typescript: {
+        method: 'client.collections.items.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst item = await client.collections.items.retrieve({ collectionName: 'collectionName' });\n\nconsole.log(item.collectionID);",
+      },
+    },
+  },
+  {
+    name: 'add',
+    endpoint: '/v3/collections/items',
+    httpMethod: 'post',
+    summary: 'Add new items to a Collection',
+    description: 'Add new items to a Collection',
+    stainlessPath: '(resource) collections.items > (method) add',
+    qualified: 'client.collections.items.add',
+    params: ['collectionName: string;', 'items: { data: string | object; }[];'],
+    response:
+      "{ eventID: string; message: string; status: 'pending'; addedCount?: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; }",
+    markdown:
+      "## add\n\n`client.collections.items.add(collectionName: string, items: { data: string | object; }[]): { eventID: string; message: string; status: 'pending'; addedCount?: number; items?: object[]; }`\n\n**post** `/v3/collections/items`\n\nAdd new items to a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n- `items: { data: string | object; }[]`\n  Array of items to add (maximum 100 items per request)\n\n### Returns\n\n- `{ eventID: string; message: string; status: 'pending'; addedCount?: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; }`\n  Response after queuing items for async processing\n\n  - `eventID: string`\n  - `message: string`\n  - `status: 'pending'`\n  - `addedCount?: number`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.collections.items.add({ collectionName: 'product_catalog', items: [{ data: {\n  sku: 'SKU-11111',\n  name: 'Deluxe Component',\n  category: 'Hardware',\n  price: 299.99,\n} }, { data: {\n  sku: 'SKU-22222',\n  name: 'Standard Part',\n  category: 'Tools',\n  price: 49.99,\n} }] });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      cli: {
+        method: 'items add',
+        example:
+          "bem collections:items add \\\n  --api-key 'My API Key' \\\n  --collection-name product_catalog \\\n  --item '{data: {sku: SKU-11111, name: Deluxe Component, category: Hardware, price: 299.99}}' \\\n  --item '{data: {sku: SKU-22222, name: Standard Part, category: Tools, price: 49.99}}'",
+      },
+      csharp: {
+        method: 'Collections.Items.Add',
+        example:
+          'ItemAddParams parameters = new()\n{\n    CollectionName = "product_catalog",\n    Items =\n    [\n        new(\n            new Data(\n                JsonSerializer.Deserialize<JsonElement>(\n                    """\n                    {\n                      "sku": "SKU-11111",\n                      "name": "Deluxe Component",\n                      "category": "Hardware",\n                      "price": 299.99\n                    }\n                    """\n                )\n            )\n        ),\n        new(\n            new Data(\n                JsonSerializer.Deserialize<JsonElement>(\n                    """\n                    {\n                      "sku": "SKU-22222",\n                      "name": "Standard Part",\n                      "category": "Tools",\n                      "price": 49.99\n                    }\n                    """\n                )\n            )\n        ),\n    ],\n};\n\nvar response = await client.Collections.Items.Add(parameters);\n\nConsole.WriteLine(response);',
+      },
+      go: {
+        method: 'client.Collections.Items.Add',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Collections.Items.Add(context.TODO(), bem.CollectionItemAddParams{\n\t\tCollectionName: "product_catalog",\n\t\tItems: []bem.CollectionItemAddParamsItem{{\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-11111",\n\t\t\t\t"name":     "Deluxe Component",\n\t\t\t\t"category": "Hardware",\n\t\t\t\t"price":    299.99,\n\t\t\t},\n\t\t}, {\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-22222",\n\t\t\t\t"name":     "Standard Part",\n\t\t\t\t"category": "Tools",\n\t\t\t\t"price":    49.99,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.EventID)\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/collections/items \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "collectionName": "product_catalog",\n          "items": [\n            {\n              "data": {\n                "sku": "SKU-11111",\n                "name": "Deluxe Component",\n                "category": "Hardware",\n                "price": 299.99\n              }\n            },\n            {\n              "data": {\n                "sku": "SKU-22222",\n                "name": "Standard Part",\n                "category": "Tools",\n                "price": 49.99\n              }\n            }\n          ]\n        }\'',
+      },
+      python: {
+        method: 'collections.items.add',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.collections.items.add(\n    collection_name="product_catalog",\n    items=[{\n        "data": {\n            "sku": "SKU-11111",\n            "name": "Deluxe Component",\n            "category": "Hardware",\n            "price": 299.99,\n        }\n    }, {\n        "data": {\n            "sku": "SKU-22222",\n            "name": "Standard Part",\n            "category": "Tools",\n            "price": 49.99,\n        }\n    }],\n)\nprint(response.event_id)',
+      },
+      typescript: {
+        method: 'client.collections.items.add',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.collections.items.add({\n  collectionName: 'product_catalog',\n  items: [\n    {\n      data: {\n        sku: 'SKU-11111',\n        name: 'Deluxe Component',\n        category: 'Hardware',\n        price: 299.99,\n      },\n    },\n    {\n      data: {\n        sku: 'SKU-22222',\n        name: 'Standard Part',\n        category: 'Tools',\n        price: 49.99,\n      },\n    },\n  ],\n});\n\nconsole.log(response.eventID);",
+      },
+    },
+  },
+  {
+    name: 'update',
+    endpoint: '/v3/collections/items',
+    httpMethod: 'put',
+    summary: 'Update existing items in a Collection',
+    description: 'Update existing items in a Collection',
+    stainlessPath: '(resource) collections.items > (method) update',
+    qualified: 'client.collections.items.update',
+    params: ['collectionName: string;', 'items: { collectionItemID: string; data: string | object; }[];'],
+    response:
+      "{ eventID: string; message: string; status: 'pending'; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; updatedCount?: number; }",
+    markdown:
+      "## update\n\n`client.collections.items.update(collectionName: string, items: { collectionItemID: string; data: string | object; }[]): { eventID: string; message: string; status: 'pending'; items?: object[]; updatedCount?: number; }`\n\n**put** `/v3/collections/items`\n\nUpdate existing items in a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n- `items: { collectionItemID: string; data: string | object; }[]`\n  Array of items to update (maximum 100 items per request)\n\n### Returns\n\n- `{ eventID: string; message: string; status: 'pending'; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; updatedCount?: number; }`\n  Response after queuing items for async update\n\n  - `eventID: string`\n  - `message: string`\n  - `status: 'pending'`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n  - `updatedCount?: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst item = await client.collections.items.update({ collectionName: 'product_catalog', items: [{ collectionItemID: 'clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP', data: 'SKU-12345: Updated Industrial Widget - Premium Edition' }, {\n  collectionItemID: 'clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ',\n  data: {\n  sku: 'SKU-67890',\n  name: 'Updated Premium Gear',\n  category: 'Hardware',\n  price: 399.99,\n},\n}] });\n\nconsole.log(item);\n```",
+    perLanguage: {
+      cli: {
+        method: 'items update',
+        example:
+          "bem collections:items update \\\n  --api-key 'My API Key' \\\n  --collection-name product_catalog \\\n  --item \"{collectionItemID: clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP, data: 'SKU-12345: Updated Industrial Widget - Premium Edition'}\" \\\n  --item '{collectionItemID: clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ, data: {sku: SKU-67890, name: Updated Premium Gear, category: Hardware, price: 399.99}}'",
+      },
+      csharp: {
+        method: 'Collections.Items.Update',
+        example:
+          'ItemUpdateParams parameters = new()\n{\n    CollectionName = "product_catalog",\n    Items =\n    [\n        new()\n        {\n            CollectionItemID = "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n            Data = "SKU-12345: Updated Industrial Widget - Premium Edition",\n        },\n        new()\n        {\n            CollectionItemID = "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n            Data = JsonSerializer.Deserialize<JsonElement>(\n                """\n                {\n                  "sku": "SKU-67890",\n                  "name": "Updated Premium Gear",\n                  "category": "Hardware",\n                  "price": 399.99\n                }\n                """\n            ),\n        },\n    ],\n};\n\nvar item = await client.Collections.Items.Update(parameters);\n\nConsole.WriteLine(item);',
+      },
+      go: {
+        method: 'client.Collections.Items.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\titem, err := client.Collections.Items.Update(context.TODO(), bem.CollectionItemUpdateParams{\n\t\tCollectionName: "product_catalog",\n\t\tItems: []bem.CollectionItemUpdateParamsItem{{\n\t\t\tCollectionItemID: "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n\t\t\tData:             "SKU-12345: Updated Industrial Widget - Premium Edition",\n\t\t}, {\n\t\t\tCollectionItemID: "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-67890",\n\t\t\t\t"name":     "Updated Premium Gear",\n\t\t\t\t"category": "Hardware",\n\t\t\t\t"price":    399.99,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", item.EventID)\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/collections/items \\\n    -X PUT \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "collectionName": "product_catalog",\n          "items": [\n            {\n              "collectionItemID": "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n              "data": "SKU-12345: Updated Industrial Widget - Premium Edition"\n            },\n            {\n              "collectionItemID": "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n              "data": {\n                "sku": "SKU-67890",\n                "name": "Updated Premium Gear",\n                "category": "Hardware",\n                "price": 399.99\n              }\n            }\n          ]\n        }\'',
+      },
+      python: {
+        method: 'collections.items.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nitem = client.collections.items.update(\n    collection_name="product_catalog",\n    items=[{\n        "collection_item_id": "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n        "data": "SKU-12345: Updated Industrial Widget - Premium Edition",\n    }, {\n        "collection_item_id": "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n        "data": {\n            "sku": "SKU-67890",\n            "name": "Updated Premium Gear",\n            "category": "Hardware",\n            "price": 399.99,\n        },\n    }],\n)\nprint(item.event_id)',
+      },
+      typescript: {
+        method: 'client.collections.items.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst item = await client.collections.items.update({\n  collectionName: 'product_catalog',\n  items: [\n    {\n      collectionItemID: 'clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP',\n      data: 'SKU-12345: Updated Industrial Widget - Premium Edition',\n    },\n    {\n      collectionItemID: 'clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ',\n      data: {\n        sku: 'SKU-67890',\n        name: 'Updated Premium Gear',\n        category: 'Hardware',\n        price: 399.99,\n      },\n    },\n  ],\n});\n\nconsole.log(item.eventID);",
+      },
+    },
+  },
+  {
+    name: 'submit_feedback',
+    endpoint: '/v3/events/{eventID}/feedback',
+    httpMethod: 'post',
+    summary: 'Submit Event Feedback',
+    description:
+      "**Submit a correction for an event.**\n\nAccepts training corrections for `extract`, `classify`, and `join` events.\nFor extract/join events, `correction` is a JSON object matching the function's\noutput schema. For classify events, `correction` is a JSON string matching\none of the function version's declared classifications.\n\nSubmitting feedback again for the same event overwrites the previous correction.\n\nUnsupported function types (split, enrich) return `400`.",
+    stainlessPath: '(resource) events > (method) submit_feedback',
+    qualified: 'client.events.submitFeedback',
+    params: ['eventID: string;', 'correction: object;', 'orderMatching?: boolean;'],
+    response:
+      "{ correction: object; createdAt: string; eventID: string; functionType: 'extract' | 'classify' | 'join'; }",
+    markdown:
+      "## submit_feedback\n\n`client.events.submitFeedback(eventID: string, correction: object, orderMatching?: boolean): { correction: object; createdAt: string; eventID: string; functionType: 'extract' | 'classify' | 'join'; }`\n\n**post** `/v3/events/{eventID}/feedback`\n\n**Submit a correction for an event.**\n\nAccepts training corrections for `extract`, `classify`, and `join` events.\nFor extract/join events, `correction` is a JSON object matching the function's\noutput schema. For classify events, `correction` is a JSON string matching\none of the function version's declared classifications.\n\nSubmitting feedback again for the same event overwrites the previous correction.\n\nUnsupported function types (split, enrich) return `400`.\n\n### Parameters\n\n- `eventID: string`\n\n- `correction: object`\n\n- `orderMatching?: boolean`\n\n### Returns\n\n- `{ correction: object; createdAt: string; eventID: string; functionType: 'extract' | 'classify' | 'join'; }`\n  Echoed response after a correction is recorded.\n\n  - `correction: object`\n  - `createdAt: string`\n  - `eventID: string`\n  - `functionType: 'extract' | 'classify' | 'join'`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.events.submitFeedback('eventID', { correction: {} });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      cli: {
+        method: 'events submit_feedback',
+        example:
+          "bem events submit-feedback \\\n  --api-key 'My API Key' \\\n  --event-id eventID \\\n  --correction '{}'",
+      },
+      csharp: {
+        method: 'Events.SubmitFeedback',
+        example:
+          'EventSubmitFeedbackParams parameters = new()\n{\n    EventID = "eventID",\n    Correction = JsonSerializer.Deserialize<JsonElement>("{}"),\n};\n\nvar response = await client.Events.SubmitFeedback(parameters);\n\nConsole.WriteLine(response);',
+      },
+      go: {
+        method: 'client.Events.SubmitFeedback',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Events.SubmitFeedback(\n\t\tcontext.TODO(),\n\t\t"eventID",\n\t\tbem.EventSubmitFeedbackParams{\n\t\t\tCorrection: map[string]any{},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Correction)\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/events/$EVENT_ID/feedback \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "correction": {}\n        }\'',
+      },
+      python: {
+        method: 'events.submit_feedback',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.events.submit_feedback(\n    event_id="eventID",\n    correction={},\n)\nprint(response.correction)',
+      },
+      typescript: {
+        method: 'client.events.submitFeedback',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.events.submitFeedback('eventID', { correction: {} });\n\nconsole.log(response.correction);",
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/webhook-secret',
+    httpMethod: 'get',
+    summary: 'Get Webhook Secret',
+    description:
+      '**Get the current webhook signing secret.**\n\nReturns the active secret used to sign outbound webhook deliveries via the `bem-signature`\nheader. Returns 404 if no secret has been generated for this environment yet.\n\nUse the secret to verify incoming webhook payloads:\n1. Parse `bem-signature: t={timestamp},v1={signature}`.\n2. Construct the signed string: `{timestamp}.{raw request body}`.\n3. Compute HMAC-SHA256 of that string using the secret.\n4. Compare the hex digest against `v1`.\n5. Reject requests where the timestamp is more than a few minutes old.',
+    stainlessPath: '(resource) webhook_secret > (method) retrieve',
+    qualified: 'client.webhookSecret.retrieve',
+    response: '{ secret: string; }',
+    markdown:
+      "## retrieve\n\n`client.webhookSecret.retrieve(): { secret: string; }`\n\n**get** `/v3/webhook-secret`\n\n**Get the current webhook signing secret.**\n\nReturns the active secret used to sign outbound webhook deliveries via the `bem-signature`\nheader. Returns 404 if no secret has been generated for this environment yet.\n\nUse the secret to verify incoming webhook payloads:\n1. Parse `bem-signature: t={timestamp},v1={signature}`.\n2. Construct the signed string: `{timestamp}.{raw request body}`.\n3. Compute HMAC-SHA256 of that string using the secret.\n4. Compare the hex digest against `v1`.\n5. Reject requests where the timestamp is more than a few minutes old.\n\n### Returns\n\n- `{ secret: string; }`\n  Webhook signing secret used to verify `bem-signature` headers on delivered webhooks.\n\n  - `secret: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst webhookSecret = await client.webhookSecret.retrieve();\n\nconsole.log(webhookSecret);\n```",
+    perLanguage: {
+      cli: {
+        method: 'webhook_secret retrieve',
+        example: "bem webhook-secret retrieve \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'WebhookSecret.Retrieve',
+        example:
+          'WebhookSecretRetrieveParams parameters = new();\n\nvar webhookSecret = await client.WebhookSecret.Retrieve(parameters);\n\nConsole.WriteLine(webhookSecret);',
+      },
+      go: {
+        method: 'client.WebhookSecret.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\twebhookSecret, err := client.WebhookSecret.Get(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", webhookSecret.Secret)\n}\n',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/webhook-secret \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'webhook_secret.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nwebhook_secret = client.webhook_secret.retrieve()\nprint(webhook_secret.secret)',
+      },
+      typescript: {
+        method: 'client.webhookSecret.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst webhookSecret = await client.webhookSecret.retrieve();\n\nconsole.log(webhookSecret.secret);",
+      },
+    },
+  },
+  {
+    name: 'create',
+    endpoint: '/v3/webhook-secret',
+    httpMethod: 'post',
+    summary: 'Generate Webhook Secret',
+    description:
+      '**Generate a new webhook signing secret.**\n\nCreates a new signing secret for this environment (or replaces the existing one).\nThe new secret is returned in full exactly once — store it securely.\n\nAfter rotation all newly delivered webhooks will be signed with the new secret.\nUpdate your verification logic before calling this endpoint if you need zero-downtime rotation.',
+    stainlessPath: '(resource) webhook_secret > (method) create',
+    qualified: 'client.webhookSecret.create',
+    response: '{ secret: string; }',
+    markdown:
+      "## create\n\n`client.webhookSecret.create(): { secret: string; }`\n\n**post** `/v3/webhook-secret`\n\n**Generate a new webhook signing secret.**\n\nCreates a new signing secret for this environment (or replaces the existing one).\nThe new secret is returned in full exactly once — store it securely.\n\nAfter rotation all newly delivered webhooks will be signed with the new secret.\nUpdate your verification logic before calling this endpoint if you need zero-downtime rotation.\n\n### Returns\n\n- `{ secret: string; }`\n  Webhook signing secret used to verify `bem-signature` headers on delivered webhooks.\n\n  - `secret: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst webhookSecret = await client.webhookSecret.create();\n\nconsole.log(webhookSecret);\n```",
+    perLanguage: {
+      cli: {
+        method: 'webhook_secret create',
+        example: "bem webhook-secret create \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'WebhookSecret.Create',
+        example:
+          'WebhookSecretCreateParams parameters = new();\n\nvar webhookSecret = await client.WebhookSecret.Create(parameters);\n\nConsole.WriteLine(webhookSecret);',
+      },
+      go: {
+        method: 'client.WebhookSecret.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\twebhookSecret, err := client.WebhookSecret.New(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", webhookSecret.Secret)\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/webhook-secret \\\n    -X POST \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'webhook_secret.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nwebhook_secret = client.webhook_secret.create()\nprint(webhook_secret.secret)',
+      },
+      typescript: {
+        method: 'client.webhookSecret.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst webhookSecret = await client.webhookSecret.create();\n\nconsole.log(webhookSecret.secret);",
+      },
+    },
+  },
+  {
+    name: 'revoke',
+    endpoint: '/v3/webhook-secret',
+    httpMethod: 'delete',
+    summary: 'Revoke Webhook Secret',
+    description:
+      '**Revoke the current webhook signing secret.**\n\nDeletes the active signing secret. Webhook deliveries will continue but will no longer\ninclude a `bem-signature` header until a new secret is generated.',
+    stainlessPath: '(resource) webhook_secret > (method) revoke',
+    qualified: 'client.webhookSecret.revoke',
+    markdown:
+      "## revoke\n\n`client.webhookSecret.revoke(): void`\n\n**delete** `/v3/webhook-secret`\n\n**Revoke the current webhook signing secret.**\n\nDeletes the active signing secret. Webhook deliveries will continue but will no longer\ninclude a `bem-signature` header until a new secret is generated.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.webhookSecret.revoke()\n```",
+    perLanguage: {
+      cli: {
+        method: 'webhook_secret revoke',
+        example: "bem webhook-secret revoke \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'WebhookSecret.Revoke',
+        example:
+          'WebhookSecretRevokeParams parameters = new();\n\nawait client.WebhookSecret.Revoke(parameters);',
+      },
+      go: {
+        method: 'client.WebhookSecret.Revoke',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.WebhookSecret.Revoke(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/webhook-secret \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+      python: {
+        method: 'webhook_secret.revoke',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.webhook_secret.revoke()',
+      },
+      typescript: {
+        method: 'client.webhookSecret.revoke',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.webhookSecret.revoke();",
       },
     },
   },
