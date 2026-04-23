@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.15.0 (2026-04-23)
+
+Full Changelog: [v0.14.0...v0.15.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.14.0...v0.15.0)
+
+### Features
+
+* **api:** new endpoints ([2e3eb40](https://github.com/bem-team/bem-typescript-sdk/commit/2e3eb40d3c78d75b3d43f819e8c0f99e5dc01aaa))
+
 ## 0.14.0 (2026-04-22)
 
 Full Changelog: [v0.13.0...v0.14.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.13.0...v0.14.0)
