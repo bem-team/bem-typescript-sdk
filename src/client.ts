@@ -33,7 +33,14 @@ import {
 import * as Uploads from './core/uploads';
 import * as API from './resources/index';
 import { APIPromise } from './core/api-promise';
-import { Call, CallGetResponse, CallListParams, Calls, CallsCallsPage } from './resources/calls';
+import {
+  Call,
+  CallGetResponse,
+  CallListParams,
+  CallRetrieveTraceResponse,
+  Calls,
+  CallsCallsPage,
+} from './resources/calls';
 import {
   ErrorEvent,
   ErrorEventsErrorsPage,
@@ -42,6 +49,7 @@ import {
   Errors as ErrorsAPIErrors,
   InboundEmailEvent,
 } from './resources/errors';
+import { EventSubmitFeedbackParams, EventSubmitFeedbackResponse, Events } from './resources/events';
 import { InferSchema, InferSchemaCreateParams, InferSchemaCreateResponse } from './resources/infer-schema';
 import {
   AnyType,
@@ -51,6 +59,21 @@ import {
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
+import {
+  WebhookSecret,
+  WebhookSecretCreateResponse,
+  WebhookSecretRetrieveResponse,
+} from './resources/webhook-secret';
+import {
+  CollectionCountTokensParams,
+  CollectionCountTokensResponse,
+  CollectionCreateParams,
+  CollectionCreateResponse,
+  CollectionDeleteParams,
+  CollectionListParams,
+  CollectionListResponse,
+  Collections,
+} from './resources/collections/collections';
 import {
   ClassificationListItem,
   CreateFunction,
@@ -892,6 +915,55 @@ export class Bem {
    * the specific file uploaded.
    */
   inferSchema: API.InferSchema = new API.InferSchema(this);
+  /**
+   * Collections are named groups of embedded items used by Enrich functions for semantic search.
+   *
+   * Each collection is referenced by a `collectionName`, which supports dot notation for
+   * hierarchical paths (e.g. `customers.premium.vip`). Names must contain only letters,
+   * digits, underscores, and dots, and each segment must start with a letter or underscore.
+   *
+   * ## Items
+   *
+   * Items carry either a string or a JSON object in their `data` field. When items are added
+   * or updated, their `data` is embedded asynchronously — `POST /v3/collections/items` and
+   * `PUT /v3/collections/items` return immediately with a `pending` status and an `eventID`
+   * that can be correlated with webhook notifications once processing completes.
+   *
+   * ## Listing and hierarchy
+   *
+   * Use `GET /v3/collections` with `parentCollectionName` to list collections under a path,
+   * or `collectionNameSearch` for a case-insensitive substring match. `GET /v3/collections/items`
+   * retrieves a specific collection's items; pass `includeSubcollections=true` to fold in items
+   * from all descendant collections.
+   *
+   * ## Token counting
+   *
+   * Use `POST /v3/collections/token-count` to check whether texts fit within the embedding
+   * model's 8,192-token-per-text limit before submitting them for embedding.
+   */
+  collections: API.Collections = new API.Collections(this);
+  /**
+   * Submit training corrections for `extract`, `classify`, and `join` events.
+   *
+   * Feedback is event-centric — each correction is attached to an event by its `eventID`,
+   * and the server resolves the correct underlying storage (extract/join transformations
+   * or classify route events) from the event's function type.
+   *
+   * Split and enrich function types do not support feedback.
+   */
+  events: API.Events = new API.Events(this);
+  /**
+   * Manage the webhook signing secret used to authenticate outbound webhook deliveries.
+   *
+   * When a signing secret is active, every webhook delivery includes a `bem-signature` header
+   * in the format `t={unix_timestamp},v1={hex_hmac_sha256}`. The signature covers
+   * `{timestamp}.{raw_request_body}` and can be verified using HMAC-SHA256 with your secret.
+   *
+   * Rotate the secret at any time with `POST /v3/webhook-secret`. To avoid downtime during
+   * rotation, update your verification logic to accept both the old and new secret briefly
+   * before revoking the old one.
+   */
+  webhookSecret: API.WebhookSecret = new API.WebhookSecret(this);
 }
 
 Bem.Functions = Functions;
@@ -900,6 +972,9 @@ Bem.Errors = ErrorsAPIErrors;
 Bem.Outputs = Outputs;
 Bem.Workflows = Workflows;
 Bem.InferSchema = InferSchema;
+Bem.Collections = Collections;
+Bem.Events = Events;
+Bem.WebhookSecret = WebhookSecret;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -956,6 +1031,7 @@ export declare namespace Bem {
     Calls as Calls,
     type Call as Call,
     type CallGetResponse as CallGetResponse,
+    type CallRetrieveTraceResponse as CallRetrieveTraceResponse,
     type CallsCallsPage as CallsCallsPage,
     type CallListParams as CallListParams,
   };
@@ -1000,5 +1076,28 @@ export declare namespace Bem {
     InferSchema as InferSchema,
     type InferSchemaCreateResponse as InferSchemaCreateResponse,
     type InferSchemaCreateParams as InferSchemaCreateParams,
+  };
+
+  export {
+    Collections as Collections,
+    type CollectionCreateResponse as CollectionCreateResponse,
+    type CollectionListResponse as CollectionListResponse,
+    type CollectionCountTokensResponse as CollectionCountTokensResponse,
+    type CollectionCreateParams as CollectionCreateParams,
+    type CollectionListParams as CollectionListParams,
+    type CollectionDeleteParams as CollectionDeleteParams,
+    type CollectionCountTokensParams as CollectionCountTokensParams,
+  };
+
+  export {
+    Events as Events,
+    type EventSubmitFeedbackResponse as EventSubmitFeedbackResponse,
+    type EventSubmitFeedbackParams as EventSubmitFeedbackParams,
+  };
+
+  export {
+    WebhookSecret as WebhookSecret,
+    type WebhookSecretCreateResponse as WebhookSecretCreateResponse,
+    type WebhookSecretRetrieveResponse as WebhookSecretRetrieveResponse,
   };
 }

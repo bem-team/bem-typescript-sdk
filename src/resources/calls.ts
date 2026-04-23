@@ -3,6 +3,7 @@
 import { APIResource } from '../core/resource';
 import * as ErrorsAPI from './errors';
 import * as OutputsAPI from './outputs';
+import * as FunctionsAPI from './functions/functions';
 import { APIPromise } from '../core/api-promise';
 import { CallsPage, type CallsPageParams, PagePromise } from '../core/pagination';
 import { RequestOptions } from '../internal/request-options';
@@ -65,6 +66,30 @@ export class Calls extends APIResource {
     options?: RequestOptions,
   ): PagePromise<CallsCallsPage, Call> {
     return this._client.getAPIList('/v3/calls', CallsPage<Call>, { query, ...options });
+  }
+
+  /**
+   * **Retrieve the full execution trace of a workflow call.**
+   *
+   * Returns all function calls and events emitted during the call as flat arrays.
+   * The DAG can be reconstructed using `FunctionCallResponseBase.sourceEventID` (the
+   * event that spawned each function call) and each event's `functionCallID` (the
+   * function call that emitted it).
+   *
+   * ## Graph structure
+   *
+   * - A function call with no `sourceEventID` is the root.
+   * - An event's `functionCallID` points to the function call that emitted it.
+   * - A function call's `sourceEventID` points to the event that triggered it.
+   * - `workflowNodeName` identifies the DAG node; `incomingDestinationName`
+   *   identifies the labelled outlet used to reach this call (absent for unlabelled
+   *   edges and root calls).
+   *
+   * The trace is available as soon as the call exists and grows as execution
+   * proceeds.
+   */
+  retrieveTrace(callID: string, options?: RequestOptions): APIPromise<CallRetrieveTraceResponse> {
+    return this._client.get(path`/v3/calls/${callID}/trace`, options);
   }
 }
 
@@ -232,6 +257,168 @@ export interface CallGetResponse {
   error?: string;
 }
 
+/**
+ * Response from `GET /v3/calls/{callID}/trace`.
+ *
+ * Contains the full execution DAG as flat arrays of function calls and events.
+ * Reconstruct the graph using `FunctionCallResponseBase.sourceEventID` (the event
+ * that spawned each function call) and each event's `functionCallID` (the function
+ * call that emitted it).
+ */
+export interface CallRetrieveTraceResponse {
+  /**
+   * Error message if trace retrieval failed.
+   */
+  error?: string;
+
+  /**
+   * Full execution DAG of a call as flat arrays. Reconstruct the graph using
+   * FunctionCallResponseBase.sourceEventID and each event's functionCallID.
+   */
+  trace?: CallRetrieveTraceResponse.Trace;
+}
+
+export namespace CallRetrieveTraceResponse {
+  /**
+   * Full execution DAG of a call as flat arrays. Reconstruct the graph using
+   * FunctionCallResponseBase.sourceEventID and each event's functionCallID.
+   */
+  export interface Trace {
+    /**
+     * All events emitted within this call, polymorphic by eventType.
+     */
+    events: Array<unknown>;
+
+    /**
+     * All function calls executed within this call.
+     */
+    functionCalls: Array<Trace.FunctionCall>;
+  }
+
+  export namespace Trace {
+    export interface FunctionCall {
+      /**
+       * Unique identifier for this function call
+       */
+      functionCallID: string;
+
+      /**
+       * ID of the function that was called
+       */
+      functionID: string;
+
+      /**
+       * Name of the function that was called
+       */
+      functionName: string;
+
+      /**
+       * User-provided reference ID for tracking
+       */
+      referenceID: string;
+
+      /**
+       * The date and time this function call started.
+       */
+      startedAt: string;
+
+      /**
+       * The status of the action.
+       */
+      status: 'pending' | 'running' | 'completed' | 'failed';
+
+      /**
+       * The type of the function.
+       */
+      type: FunctionsAPI.FunctionType;
+
+      /**
+       * Array of activity steps for this function call
+       */
+      activity?: Array<FunctionCall.Activity>;
+
+      /**
+       * The date and time this function call finished. Absent while still running.
+       */
+      finishedAt?: string;
+
+      /**
+       * Version number of the function
+       */
+      functionVersionNum?: number;
+
+      /**
+       * The labelled outlet on the upstream node that routed execution to this call.
+       * Absent for root calls, unlabelled edges, and pre-migration rows.
+       */
+      incomingDestinationName?: string;
+
+      /**
+       * Array of all file inputs with their S3 URLs
+       */
+      inputs?: Array<FunctionCall.Input>;
+
+      /**
+       * Input type for single file input (set when there's exactly one file input)
+       */
+      inputType?: string;
+
+      /**
+       * Presigned S3 URL for single file input (set when there's exactly one file input)
+       */
+      s3URL?: string;
+
+      /**
+       * ID of the event that spawned this function call (for DAG reconstruction). Nil
+       * for the root function call.
+       */
+      sourceEventID?: string;
+
+      /**
+       * ID of the function call that spawned this function call (for DAG reconstruction)
+       */
+      sourceFunctionCallID?: string;
+
+      /**
+       * ID of the workflow call this function call belongs to (top-level execution
+       * context)
+       */
+      workflowCallID?: string;
+
+      /**
+       * Name of the workflow DAG call-site node this function call is executing. Absent
+       * for non-workflow calls and pre-migration rows.
+       */
+      workflowNodeName?: string;
+    }
+
+    export namespace FunctionCall {
+      export interface Activity {
+        displayName?: string;
+
+        status?: 'pending' | 'running' | 'completed' | 'failed';
+      }
+
+      export interface Input {
+        /**
+         * Input type of the file
+         */
+        inputType?: string;
+
+        /**
+         * Item reference ID for batch inputs
+         */
+        itemReferenceID?: string;
+
+        /**
+         * Presigned S3 URL for the file input
+         */
+        s3URL?: string;
+      }
+    }
+  }
+}
+
 export interface CallListParams extends CallsPageParams {
   callIDs?: Array<string>;
 
@@ -258,6 +445,7 @@ export declare namespace Calls {
   export {
     type Call as Call,
     type CallGetResponse as CallGetResponse,
+    type CallRetrieveTraceResponse as CallRetrieveTraceResponse,
     type CallsCallsPage as CallsCallsPage,
     type CallListParams as CallListParams,
   };

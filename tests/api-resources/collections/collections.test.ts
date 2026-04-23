@@ -7,10 +7,10 @@ const client = new Bem({
   baseURL: process.env['TEST_API_BASE_URL'] ?? 'http://127.0.0.1:4010',
 });
 
-describe('resource calls', () => {
+describe('resource collections', () => {
   // Mock server tests are disabled
-  test.skip('retrieve', async () => {
-    const responsePromise = client.calls.retrieve('callID');
+  test.skip('create: only required params', async () => {
+    const responsePromise = client.collections.create({ collectionName: 'product_catalog' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -21,8 +21,13 @@ describe('resource calls', () => {
   });
 
   // Mock server tests are disabled
+  test.skip('create: required and optional params', async () => {
+    const response = await client.collections.create({ collectionName: 'product_catalog' });
+  });
+
+  // Mock server tests are disabled
   test.skip('list', async () => {
-    const responsePromise = client.calls.list();
+    const responsePromise = client.collections.list();
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -36,18 +41,12 @@ describe('resource calls', () => {
   test.skip('list: request options and params are passed correctly', async () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
     await expect(
-      client.calls.list(
+      client.collections.list(
         {
-          callIDs: ['string'],
-          endingBefore: 'endingBefore',
+          collectionNameSearch: 'collectionNameSearch',
           limit: 1,
-          referenceIDs: ['string'],
-          referenceIDSubstring: 'referenceIDSubstring',
-          sortOrder: 'asc',
-          startingAfter: 'startingAfter',
-          statuses: ['pending'],
-          workflowIDs: ['string'],
-          workflowNames: ['string'],
+          page: 1,
+          parentCollectionName: 'parentCollectionName',
         },
         { path: '/_stainless_unknown_path' },
       ),
@@ -55,8 +54,8 @@ describe('resource calls', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('retrieveTrace', async () => {
-    const responsePromise = client.calls.retrieveTrace('callID');
+  test.skip('delete: only required params', async () => {
+    const responsePromise = client.collections.delete({ collectionName: 'collectionName' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -64,5 +63,27 @@ describe('resource calls', () => {
     const dataAndResponse = await responsePromise.withResponse();
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('delete: required and optional params', async () => {
+    const response = await client.collections.delete({ collectionName: 'collectionName' });
+  });
+
+  // Mock server tests are disabled
+  test.skip('countTokens: only required params', async () => {
+    const responsePromise = client.collections.countTokens({ texts: ['string'] });
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('countTokens: required and optional params', async () => {
+    const response = await client.collections.countTokens({ texts: ['string'] });
   });
 });
