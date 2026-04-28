@@ -51,10 +51,10 @@ export { InferSchema, type InferSchemaCreateResponse, type InferSchemaCreatePara
 export {
   Outputs,
   type AnyType,
-  type Event,
   type OutputRetrieveResponse,
+  type OutputListResponse,
   type OutputListParams,
-  type EventsOutputsPage,
+  type OutputListResponsesOutputsPage,
 } from './outputs';
 export {
   WebhookSecret,

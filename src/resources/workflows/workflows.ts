@@ -38,7 +38,37 @@ export class Workflows extends APIResource {
   versions: VersionsAPI.Versions = new VersionsAPI.Versions(this._client);
 
   /**
-   * Create a Workflow
+   * **Create a workflow.**
+   *
+   * A workflow is a directed acyclic graph of nodes (each pointing at a function)
+   * with one entry point (`mainNodeName`). The graph runs end-to-end on every call.
+   *
+   * ## Required structure
+   *
+   * - `name`: unique within the environment, alphanumeric plus hyphens and
+   *   underscores.
+   * - `mainNodeName`: must match one of the `nodes[].name` values, and must not be
+   *   the destination of any edge.
+   * - `nodes`: at least one. Each node has a unique `name` and a `function`
+   *   reference (by `functionName` or `functionID`, optionally pinned to a
+   *   `versionNum`).
+   * - `edges`: optional for single-node workflows. For branching sources (Classify,
+   *   semantic Split), each edge carries a `destinationName` matching a
+   *   `classifications[].name` or `itemClasses[].name` on the source function.
+   *
+   * The created workflow is at `versionNum: 1`. Subsequent
+   * `PATCH /v3/workflows/{workflowName}` calls produce new versions.
+   *
+   * ## Common patterns
+   *
+   * - **Single-node**: one extract/classify function, no edges.
+   * - **Sequential**: extract → enrich → payload_shaping (linear edges).
+   * - **Branching**: classify → multiple extracts (one edge per classification
+   *   name).
+   * - **Split-then-process**: split → multiple extracts (one edge per item class).
+   *
+   * See [Workflows explained](/guide/workflows-explained) for end-to-end examples of
+   * each pattern.
    */
   create(body: WorkflowCreateParams, options?: RequestOptions): APIPromise<Workflow> {
     return (
@@ -47,14 +77,41 @@ export class Workflows extends APIResource {
   }
 
   /**
-   * Get a Workflow
+   * **Retrieve a workflow's current version by name.**
+   *
+   * Returns the full workflow record: `currentVersionNum`, `mainNodeName`, the
+   * `nodes` array (with each node's function reference and pinned `versionNum` if
+   * any), and the `edges` array. To inspect a historical version, use
+   * `GET /v3/workflows/{workflowName}/versions/{versionNum}`.
    */
   retrieve(workflowName: string, options?: RequestOptions): APIPromise<WorkflowRetrieveResponse> {
     return this._client.get(path`/v3/workflows/${workflowName}`, options);
   }
 
   /**
-   * Update a Workflow
+   * **Update a workflow. Updates create a new version.**
+   *
+   * The previous version remains addressable and immutable. Pending and running
+   * calls captured at the old version continue against it; new calls run against the
+   * new version.
+   *
+   * ## Topology updates
+   *
+   * To change the graph you must provide `mainNodeName`, `nodes`, AND `edges`
+   * together — partial topology updates are rejected. The full graph is replaced
+   * atomically.
+   *
+   * ## Metadata-only updates
+   *
+   * Omit all three fields to update only `displayName`, `tags`, or `name` while
+   * keeping the topology of the current version.
+   *
+   * ## Reverting
+   *
+   * To roll back, fetch the desired prior version and resubmit its
+   * `mainNodeName`/`nodes`/`edges` as a new update. Versions themselves are
+   * immutable — there is no "pin to version N" operation at the workflow level (use
+   * `nodes[].function.versionNum` to pin individual functions).
    */
   update(
     workflowName: string,
@@ -65,7 +122,24 @@ export class Workflows extends APIResource {
   }
 
   /**
-   * List Workflows
+   * **List workflows in the current environment.**
+   *
+   * Returns each workflow's current version, including its node graph and main node.
+   * Combine filters freely — they AND together.
+   *
+   * ## Filtering
+   *
+   * - `workflowIDs` / `workflowNames`: exact-match identity filters.
+   * - `displayName`: case-insensitive substring match.
+   * - `tags`: returns workflows tagged with any of the supplied tags.
+   * - `functionIDs` / `functionNames`: returns only workflows that reference the
+   *   named functions in any node. Useful for "which workflows depend on this
+   *   function?" lookups before changing or deleting a function.
+   *
+   * ## Pagination
+   *
+   * Cursor-based with `startingAfter` and `endingBefore` (workflowIDs). Default
+   * limit 50, maximum 100.
    */
   list(
     query: WorkflowListParams | null | undefined = {},
@@ -75,7 +149,14 @@ export class Workflows extends APIResource {
   }
 
   /**
-   * Delete a Workflow
+   * **Delete a workflow and every one of its versions.**
+   *
+   * Permanent. Running and queued calls against this workflow continue to completion
+   * against the version they captured at call time; subsequent attempts to call the
+   * workflow return `404 Not Found`.
+   *
+   * Functions referenced by the deleted workflow are not removed — they remain
+   * available to other workflows or for direct reference.
    */
   delete(workflowName: string, options?: RequestOptions): APIPromise<void> {
     return this._client.delete(path`/v3/workflows/${workflowName}`, {
@@ -175,7 +256,15 @@ export class Workflows extends APIResource {
   }
 
   /**
-   * Copy a Workflow
+   * **Copy a workflow to a new name.**
+   *
+   * Forks the source workflow's current version into a brand-new workflow at
+   * `versionNum: 1`. The full node graph and edges are carried over, but the
+   * _functions_ the copied nodes reference are shared, not duplicated — both
+   * workflows now point at the same functions.
+   *
+   * Useful for forking a production workflow to test a topology change without
+   * disturbing the live caller.
    */
   copy(body: WorkflowCopyParams, options?: RequestOptions): APIPromise<WorkflowCopyResponse> {
     return this._client.post('/v3/workflows/copy', { body, ...options });
