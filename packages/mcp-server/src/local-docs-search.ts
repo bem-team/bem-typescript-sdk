@@ -65,6 +65,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     response:
       '{ function: object | object | object | object | object | object | object | object | object | object; }',
     perLanguage: {
+      typescript: {
+        method: 'client.functions.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.create({\n  functionName: 'functionName',\n  type: 'extract',\n});\n\nconsole.log(functionResponse['function']);",
+      },
+      python: {
+        method: 'functions.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.create(\n    function_name="functionName",\n    type="extract",\n)\nprint(function_response.function)',
+      },
+      go: {
+        method: 'client.Functions.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.New(context.TODO(), bem.FunctionNewParams{\n\t\tCreateFunction: bem.CreateFunctionUnionParam{\n\t\t\tOfExtract: &bem.CreateFunctionExtractParam{\n\t\t\t\tFunctionName: "functionName",\n\t\t\t},\n\t\t},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
+      },
       cli: {
         method: 'functions create',
         example:
@@ -75,24 +90,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'FunctionCreateParams parameters = new()\n{\n    CreateFunction = new Extract()\n    {\n        FunctionName = "functionName",\n        DisplayName = "displayName",\n        EnableBoundingBoxes = true,\n        OutputSchema = JsonSerializer.Deserialize<JsonElement>("{}"),\n        OutputSchemaName = "outputSchemaName",\n        PreCount = true,\n        TabularChunkingEnabled = true,\n        Tags =\n        [\n            "string"\n        ],\n    },\n};\n\nvar functionResponse = await client.Functions.Create(parameters);\n\nConsole.WriteLine(functionResponse);',
       },
-      go: {
-        method: 'client.Functions.New',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.New(context.TODO(), bem.FunctionNewParams{\n\t\tCreateFunction: bem.CreateFunctionUnionParam{\n\t\t\tOfExtract: &bem.CreateFunctionExtractParam{\n\t\t\t\tFunctionName: "functionName",\n\t\t\t},\n\t\t},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/functions \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "functionName": "functionName",\n          "type": "extract"\n        }\'',
-      },
-      python: {
-        method: 'functions.create',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.create(\n    function_name="functionName",\n    type="extract",\n)\nprint(function_response.function)',
-      },
-      typescript: {
-        method: 'client.functions.create',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.create({\n  functionName: 'functionName',\n  type: 'extract',\n});\n\nconsole.log(functionResponse['function']);",
       },
     },
   },
@@ -122,6 +122,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.functions.list(displayName?: string, endingBefore?: string, functionIDs?: string[], functionNames?: string[], limit?: number, sortOrder?: 'asc' | 'desc', startingAfter?: string, tags?: string[], types?: string[], workflowIDs?: string[], workflowNames?: string[]): { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'extract'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { classifications: classification_list_item[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: function_audit; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: function_audit; displayName?: string; printPageSplitConfig?: object; semanticPageSplitConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { config: enrich_config; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: function_audit; displayName?: string; parseConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; }`\n\n**get** `/v3/functions`\n\n**List functions in the current environment.**\n\nReturns each function's current version. Combine filters freely —\nthey AND together.\n\n## Filtering\n\n- `functionIDs` / `functionNames`: exact-match identity filters.\n- `displayName`: case-insensitive substring match.\n- `types`: one or more of `extract`, `classify`, `split`, `join`,\n`enrich`, `payload_shaping`. Legacy `transform`, `analyze`, `route`,\nand `send` types remain readable via this filter.\n- `tags`: returns functions tagged with any of the supplied tags.\n- `workflowIDs` / `workflowNames`: returns only functions referenced\nby the named workflows. Useful for \"what functions does this\nworkflow depend on?\" lookups.\n\n## Pagination\n\nCursor-based with `startingAfter` and `endingBefore` (functionIDs).\nDefault limit 50, maximum 100.\n\n### Parameters\n\n- `displayName?: string`\n\n- `endingBefore?: string`\n\n- `functionIDs?: string[]`\n\n- `functionNames?: string[]`\n\n- `limit?: number`\n\n- `sortOrder?: 'asc' | 'desc'`\n\n- `startingAfter?: string`\n\n- `tags?: string[]`\n\n- `types?: string[]`\n\n- `workflowIDs?: string[]`\n\n- `workflowNames?: string[]`\n\n### Returns\n\n- `{ emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'extract'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { classifications: { name: string; description?: string; functionID?: string; functionName?: string; isErrorFallback?: boolean; origin?: object; regex?: object; }[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; printPageSplitConfig?: { nextFunctionID?: string; }; semanticPageSplitConfig?: { itemClasses?: object[]; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { config: { steps: enrich_step[]; }; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; parseConfig?: { extractEntities?: boolean; linkAcrossDocuments?: boolean; schema?: object; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; }`\n  V3 read-side union. Same shape as the shared `Function` union but with\n`classify` in place of `route`. Legacy `transform` and `analyze` functions\nremain readable via V3.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\n// Automatically fetches more pages as needed.\nfor await (const _function of client.functions.list()) {\n  console.log(_function);\n}\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.functions.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const _function of client.functions.list()) {\n  console.log(_function);\n}",
+      },
+      python: {
+        method: 'functions.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.functions.list()\npage = page.functions[0]\nprint(page)',
+      },
+      go: {
+        method: 'client.Functions.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Functions.List(context.TODO(), bem.FunctionListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
+      },
       cli: {
         method: 'functions list',
         example: "bem functions list \\\n  --api-key 'My API Key'",
@@ -131,23 +146,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'FunctionListParams parameters = new();\n\nvar page = await client.Functions.List(parameters);\nawait foreach (var item in page.Paginate())\n{\n    Console.WriteLine(item);\n}',
       },
-      go: {
-        method: 'client.Functions.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Functions.List(context.TODO(), bem.FunctionListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/functions \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'functions.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.functions.list()\npage = page.functions[0]\nprint(page)',
-      },
-      typescript: {
-        method: 'client.functions.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const _function of client.functions.list()) {\n  console.log(_function);\n}",
       },
     },
   },
@@ -164,6 +164,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## delete\n\n`client.functions.delete(functionName: string): void`\n\n**delete** `/v3/functions/{functionName}`\n\n**Delete a function and every one of its versions.**\n\nPermanent. Running and queued calls that reference this function\ncontinue to completion against the version they captured at call\ntime, but no new calls can target it.\n\n## Before deleting\n\nWorkflow nodes that reference this function will fail at call time\nafter deletion. List workflows that reference it first:\n\n```\nGET /v3/workflows?functionNames=my-function\n```\n\nUpdate or remove those workflows, or create a replacement function\nand re-point the workflow nodes, before deleting.\n\n### Parameters\n\n- `functionName: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.functions.delete('functionName')\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.functions.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.functions.delete('functionName');",
+      },
+      python: {
+        method: 'functions.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.functions.delete(\n    "functionName",\n)',
+      },
+      go: {
+        method: 'client.Functions.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Functions.Delete(context.TODO(), "functionName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
       cli: {
         method: 'functions delete',
         example: "bem functions delete \\\n  --api-key 'My API Key' \\\n  --function-name functionName",
@@ -173,24 +188,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'FunctionDeleteParams parameters = new() { FunctionName = "functionName" };\n\nawait client.Functions.Delete(parameters);',
       },
-      go: {
-        method: 'client.Functions.Delete',
-        example:
-          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Functions.Delete(context.TODO(), "functionName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/functions/$FUNCTION_NAME \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'functions.delete',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.functions.delete(\n    "functionName",\n)',
-      },
-      typescript: {
-        method: 'client.functions.delete',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.functions.delete('functionName');",
       },
     },
   },
@@ -209,6 +209,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.functions.retrieve(functionName: string): { function: function; }`\n\n**get** `/v3/functions/{functionName}`\n\n**Retrieve a function's current version by name.**\n\nReturns the function record with its `currentVersionNum` and the\nconfiguration of that version. To inspect a historical version, use\n`GET /v3/functions/{functionName}/versions/{versionNum}`.\n\n### Parameters\n\n- `functionName: string`\n\n### Returns\n\n- `{ function: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'extract'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { classifications: classification_list_item[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: function_audit; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: function_audit; displayName?: string; printPageSplitConfig?: object; semanticPageSplitConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { config: enrich_config; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: function_audit; displayName?: string; parseConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; }; }`\n  Single-function response wrapper used by V3 function endpoints.\nV3 wraps individual function responses in a `{\"function\": ...}` envelope\nfor consistency with other V3 resource endpoints.\n\n  - `function: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'extract'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { classifications: { name: string; description?: string; functionID?: string; functionName?: string; isErrorFallback?: boolean; origin?: object; regex?: object; }[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; printPageSplitConfig?: { nextFunctionID?: string; }; semanticPageSplitConfig?: { itemClasses?: object[]; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { config: { steps: enrich_step[]; }; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; parseConfig?: { extractEntities?: boolean; linkAcrossDocuments?: boolean; schema?: object; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst functionResponse = await client.functions.retrieve('functionName');\n\nconsole.log(functionResponse);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.functions.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.retrieve('functionName');\n\nconsole.log(functionResponse['function']);",
+      },
+      python: {
+        method: 'functions.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.retrieve(\n    "functionName",\n)\nprint(function_response.function)',
+      },
+      go: {
+        method: 'client.Functions.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.Get(context.TODO(), "functionName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
+      },
       cli: {
         method: 'functions retrieve',
         example: "bem functions retrieve \\\n  --api-key 'My API Key' \\\n  --function-name functionName",
@@ -218,23 +233,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'FunctionRetrieveParams parameters = new() { FunctionName = "functionName" };\n\nvar functionResponse = await client.Functions.Retrieve(parameters);\n\nConsole.WriteLine(functionResponse);',
       },
-      go: {
-        method: 'client.Functions.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.Get(context.TODO(), "functionName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/functions/$FUNCTION_NAME \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'functions.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.retrieve(\n    "functionName",\n)\nprint(function_response.function)',
-      },
-      typescript: {
-        method: 'client.functions.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.retrieve('functionName');\n\nconsole.log(functionResponse['function']);",
       },
     },
   },
@@ -254,6 +254,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     response:
       '{ function: object | object | object | object | object | object | object | object | object | object; }',
     perLanguage: {
+      typescript: {
+        method: 'client.functions.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.update('functionName', { type: 'extract' });\n\nconsole.log(functionResponse['function']);",
+      },
+      python: {
+        method: 'functions.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.update(\n    path_function_name="functionName",\n    type="extract",\n)\nprint(function_response.function)',
+      },
+      go: {
+        method: 'client.Functions.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.Update(\n\t\tcontext.TODO(),\n\t\t"functionName",\n\t\tbem.FunctionUpdateParams{\n\t\t\tUpdateFunction: bem.UpdateFunctionUnionParam{\n\t\t\t\tOfExtract: &bem.UpdateFunctionExtractParam{},\n\t\t\t},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
+      },
       cli: {
         method: 'functions update',
         example:
@@ -264,24 +279,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'FunctionUpdateParams parameters = new()\n{\n    PathFunctionName = "functionName",\n    UpdateFunction = new Extract()\n    {\n        DisplayName = "displayName",\n        EnableBoundingBoxes = true,\n        FunctionName = "functionName",\n        OutputSchema = JsonSerializer.Deserialize<JsonElement>("{}"),\n        OutputSchemaName = "outputSchemaName",\n        PreCount = true,\n        TabularChunkingEnabled = true,\n        Tags =\n        [\n            "string"\n        ],\n    },\n};\n\nvar functionResponse = await client.Functions.Update(parameters);\n\nConsole.WriteLine(functionResponse);',
       },
-      go: {
-        method: 'client.Functions.Update',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.Update(\n\t\tcontext.TODO(),\n\t\t"functionName",\n\t\tbem.FunctionUpdateParams{\n\t\t\tUpdateFunction: bem.UpdateFunctionUnionParam{\n\t\t\t\tOfExtract: &bem.UpdateFunctionExtractParam{},\n\t\t\t},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/functions/$PATH_FUNCTION_NAME \\\n    -X PATCH \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "type": "extract"\n        }\'',
-      },
-      python: {
-        method: 'functions.update',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.update(\n    path_function_name="functionName",\n    type="extract",\n)\nprint(function_response.function)',
-      },
-      typescript: {
-        method: 'client.functions.update',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.update('functionName', { type: 'extract' });\n\nconsole.log(functionResponse['function']);",
       },
     },
   },
@@ -306,6 +306,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## create\n\n`client.functions.copy.create(sourceFunctionName: string, targetFunctionName: string, tags?: string[], targetDisplayName?: string, targetEnvironment?: string): { function: function; }`\n\n**post** `/v3/functions/copy`\n\n**Copy a function to a new name within the same environment.**\n\nForks the source function's current configuration into a brand-new\nfunction. The copy starts at `versionNum: 1` regardless of how many\nversions the source has — version history is not carried over.\n\nUseful for experimenting with schema or prompt changes against a\nstable production function without disturbing existing callers.\n\nThe destination name must be unique in the environment. A copy does\nnot migrate workflows: existing workflow nodes continue to reference\nthe original function.\n\n### Parameters\n\n- `sourceFunctionName: string`\n  Name of the function to copy from. Must be a valid existing function name.\n\n- `targetFunctionName: string`\n  Name for the new copied function. Must be unique within the target environment.\n\n- `tags?: string[]`\n  Optional array of tags for the copied function. If not provided, defaults to the source function's tags.\n\n- `targetDisplayName?: string`\n  Optional display name for the copied function. If not provided, defaults to the source function's display name with \" (Copy)\" appended.\n\n- `targetEnvironment?: string`\n  Optional environment name to copy the function to. If not provided, the function will be copied within the same environment.\n\n### Returns\n\n- `{ function: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'extract'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { classifications: classification_list_item[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: function_audit; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: function_audit; displayName?: string; printPageSplitConfig?: object; semanticPageSplitConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { config: enrich_config; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: function_audit; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: function_audit; displayName?: string; parseConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; }; }`\n  Single-function response wrapper used by V3 function endpoints.\nV3 wraps individual function responses in a `{\"function\": ...}` envelope\nfor consistency with other V3 resource endpoints.\n\n  - `function: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'extract'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { classifications: { name: string; description?: string; functionID?: string; functionName?: string; isErrorFallback?: boolean; origin?: object; regex?: object; }[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; printPageSplitConfig?: { nextFunctionID?: string; }; semanticPageSplitConfig?: { itemClasses?: object[]; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { config: { steps: enrich_step[]; }; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; displayName?: string; parseConfig?: { extractEntities?: boolean; linkAcrossDocuments?: boolean; schema?: object; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst functionResponse = await client.functions.copy.create({ sourceFunctionName: 'sourceFunctionName', targetFunctionName: 'targetFunctionName' });\n\nconsole.log(functionResponse);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.functions.copy.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.copy.create({\n  sourceFunctionName: 'sourceFunctionName',\n  targetFunctionName: 'targetFunctionName',\n});\n\nconsole.log(functionResponse['function']);",
+      },
+      python: {
+        method: 'functions.copy.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.copy.create(\n    source_function_name="sourceFunctionName",\n    target_function_name="targetFunctionName",\n)\nprint(function_response.function)',
+      },
+      go: {
+        method: 'client.Functions.Copy.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.Copy.New(context.TODO(), bem.FunctionCopyNewParams{\n\t\tFunctionCopyRequest: bem.FunctionCopyRequestParam{\n\t\t\tSourceFunctionName: "sourceFunctionName",\n\t\t\tTargetFunctionName: "targetFunctionName",\n\t\t},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
+      },
       cli: {
         method: 'copy create',
         example:
@@ -316,24 +331,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CopyCreateParams parameters = new()\n{\n    SourceFunctionName = "sourceFunctionName",\n    TargetFunctionName = "targetFunctionName",\n};\n\nvar functionResponse = await client.Functions.Copy.Create(parameters);\n\nConsole.WriteLine(functionResponse);',
       },
-      go: {
-        method: 'client.Functions.Copy.New',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tfunctionResponse, err := client.Functions.Copy.New(context.TODO(), bem.FunctionCopyNewParams{\n\t\tFunctionCopyRequest: bem.FunctionCopyRequestParam{\n\t\t\tSourceFunctionName: "sourceFunctionName",\n\t\t\tTargetFunctionName: "targetFunctionName",\n\t\t},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", functionResponse.Function)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/functions/copy \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "sourceFunctionName": "sourceFunctionName",\n          "targetFunctionName": "targetFunctionName"\n        }\'',
-      },
-      python: {
-        method: 'functions.copy.create',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nfunction_response = client.functions.copy.create(\n    source_function_name="sourceFunctionName",\n    target_function_name="targetFunctionName",\n)\nprint(function_response.function)',
-      },
-      typescript: {
-        method: 'client.functions.copy.create',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst functionResponse = await client.functions.copy.create({\n  sourceFunctionName: 'sourceFunctionName',\n  targetFunctionName: 'targetFunctionName',\n});\n\nconsole.log(functionResponse['function']);",
       },
     },
   },
@@ -352,6 +352,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.functions.versions.list(functionName: string): { totalCount?: number; versions?: function_version[]; }`\n\n**get** `/v3/functions/{functionName}/versions`\n\n**List every version of a function.**\n\nReturns the full version history, newest-first. Each row captures\nthe configuration the function had between updates. Useful for\naudits (\"when did this schema change?\") and for diffing two\nversions before promoting an update to production.\n\n### Parameters\n\n- `functionName: string`\n\n### Returns\n\n- `{ totalCount?: number; versions?: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; tabularChunkingEnabled: boolean; type: 'extract'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { classifications: classification_list_item[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; printPageSplitConfig?: object; semanticPageSplitConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { config: enrich_config; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; parseConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; }[]; }`\n\n  - `totalCount?: number`\n  - `versions?: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; tabularChunkingEnabled: boolean; type: 'extract'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { classifications: { name: string; description?: string; functionID?: string; functionName?: string; isErrorFallback?: boolean; origin?: object; regex?: object; }[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; printPageSplitConfig?: { nextFunctionID?: string; }; semanticPageSplitConfig?: { itemClasses?: object[]; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { config: { steps: enrich_step[]; }; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; parseConfig?: { extractEntities?: boolean; linkAcrossDocuments?: boolean; schema?: object; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst listFunctionVersionsResponse = await client.functions.versions.list('functionName');\n\nconsole.log(listFunctionVersionsResponse);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.functions.versions.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst listFunctionVersionsResponse = await client.functions.versions.list('functionName');\n\nconsole.log(listFunctionVersionsResponse.totalCount);",
+      },
+      python: {
+        method: 'functions.versions.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nlist_function_versions_response = client.functions.versions.list(\n    "functionName",\n)\nprint(list_function_versions_response.total_count)',
+      },
+      go: {
+        method: 'client.Functions.Versions.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tlistFunctionVersionsResponse, err := client.Functions.Versions.List(context.TODO(), "functionName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", listFunctionVersionsResponse.TotalCount)\n}\n',
+      },
       cli: {
         method: 'versions list',
         example:
@@ -362,24 +377,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'VersionListParams parameters = new() { FunctionName = "functionName" };\n\nvar listFunctionVersionsResponse = await client.Functions.Versions.List(parameters);\n\nConsole.WriteLine(listFunctionVersionsResponse);',
       },
-      go: {
-        method: 'client.Functions.Versions.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tlistFunctionVersionsResponse, err := client.Functions.Versions.List(context.TODO(), "functionName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", listFunctionVersionsResponse.TotalCount)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/functions/$FUNCTION_NAME/versions \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'functions.versions.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nlist_function_versions_response = client.functions.versions.list(\n    "functionName",\n)\nprint(list_function_versions_response.total_count)',
-      },
-      typescript: {
-        method: 'client.functions.versions.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst listFunctionVersionsResponse = await client.functions.versions.list('functionName');\n\nconsole.log(listFunctionVersionsResponse.totalCount);",
       },
     },
   },
@@ -398,6 +398,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.functions.versions.retrieve(functionName: string, versionNum: number): { function: function_version; }`\n\n**get** `/v3/functions/{functionName}/versions/{versionNum}`\n\n**Retrieve a specific historical version of a function.**\n\nVersions are immutable. Use this endpoint to inspect what a function\nlooked like at the moment a particular call was made — every event\nand transformation records the function version it ran against.\n\n### Parameters\n\n- `functionName: string`\n\n- `versionNum: number`\n\n### Returns\n\n- `{ function: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; tabularChunkingEnabled: boolean; type: 'extract'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { classifications: classification_list_item[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; printPageSplitConfig?: object; semanticPageSplitConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { config: enrich_config; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: function_audit; createdAt?: string; displayName?: string; parseConfig?: object; tags?: string[]; usedInWorkflows?: workflow_usage_info[]; }; }`\n  Single-function-version response wrapper used by V3 endpoints.\n\n  - `function: { emailAddress: string; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; tabularChunkingEnabled: boolean; type: 'transform'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; tabularChunkingEnabled: boolean; type: 'extract'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { enableBoundingBoxes: boolean; functionID: string; functionName: string; outputSchema: object; outputSchemaName: string; preCount: boolean; type: 'analyze'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { classifications: { name: string; description?: string; functionID?: string; functionName?: string; isErrorFallback?: boolean; origin?: object; regex?: object; }[]; description: string; emailAddress: string; functionID: string; functionName: string; type: 'classify'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { destinationType: 'webhook' | 's3' | 'google_drive'; functionID: string; functionName: string; type: 'send'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; googleDriveFolderId?: string; s3Bucket?: string; s3Prefix?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; webhookSigningEnabled?: boolean; webhookUrl?: string; } | { functionID: string; functionName: string; splitType: 'print_page' | 'semantic_page'; type: 'split'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; printPageSplitConfig?: { nextFunctionID?: string; }; semanticPageSplitConfig?: { itemClasses?: object[]; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { description: string; functionID: string; functionName: string; joinType: 'standard'; outputSchema: object; outputSchemaName: string; type: 'join'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { config: { steps: enrich_step[]; }; functionID: string; functionName: string; type: 'enrich'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; shapingSchema: string; type: 'payload_shaping'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; } | { functionID: string; functionName: string; type: 'parse'; versionNum: number; audit?: { functionCreatedBy?: user_action_summary; functionLastUpdatedBy?: user_action_summary; versionCreatedBy?: user_action_summary; }; createdAt?: string; displayName?: string; parseConfig?: { extractEntities?: boolean; linkAcrossDocuments?: boolean; schema?: object; }; tags?: string[]; usedInWorkflows?: { currentVersionNum: number; usedInWorkflowVersionNums: number[]; workflowID: string; workflowName: string; }[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst version = await client.functions.versions.retrieve(0, { functionName: 'functionName' });\n\nconsole.log(version);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.functions.versions.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst version = await client.functions.versions.retrieve(0, { functionName: 'functionName' });\n\nconsole.log(version['function']);",
+      },
+      python: {
+        method: 'functions.versions.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nversion = client.functions.versions.retrieve(\n    version_num=0,\n    function_name="functionName",\n)\nprint(version.function)',
+      },
+      go: {
+        method: 'client.Functions.Versions.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tversion, err := client.Functions.Versions.Get(\n\t\tcontext.TODO(),\n\t\t0,\n\t\tbem.FunctionVersionGetParams{\n\t\t\tFunctionName: "functionName",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", version.Function)\n}\n',
+      },
       cli: {
         method: 'versions retrieve',
         example:
@@ -408,24 +423,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'VersionRetrieveParams parameters = new()\n{\n    FunctionName = "functionName",\n    VersionNum = 0,\n};\n\nvar version = await client.Functions.Versions.Retrieve(parameters);\n\nConsole.WriteLine(version);',
       },
-      go: {
-        method: 'client.Functions.Versions.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tversion, err := client.Functions.Versions.Get(\n\t\tcontext.TODO(),\n\t\t0,\n\t\tbem.FunctionVersionGetParams{\n\t\t\tFunctionName: "functionName",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", version.Function)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/functions/$FUNCTION_NAME/versions/$VERSION_NUM \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'functions.versions.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nversion = client.functions.versions.retrieve(\n    version_num=0,\n    function_name="functionName",\n)\nprint(version.function)',
-      },
-      typescript: {
-        method: 'client.functions.versions.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst version = await client.functions.versions.retrieve(0, { functionName: 'functionName' });\n\nconsole.log(version['function']);",
       },
     },
   },
@@ -455,6 +455,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.calls.list(callIDs?: string[], endingBefore?: string, limit?: number, referenceIDs?: string[], referenceIDSubstring?: string, sortOrder?: 'asc' | 'desc', startingAfter?: string, statuses?: 'pending' | 'running' | 'completed' | 'failed'[], workflowIDs?: string[], workflowNames?: string[]): { callID: string; createdAt: string; errors: error_event[]; outputs: event[]; traceUrl: string; url: string; callReferenceID?: string; finishedAt?: string; input?: object; status?: 'pending' | 'running' | 'completed' | 'failed'; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n\n**get** `/v3/calls`\n\n**List workflow calls with filtering and pagination.**\n\nReturns calls created via `POST /v3/workflows/{workflowName}/call`.\n\n## Filtering\n\n- `callIDs`: Specific call identifiers\n- `referenceIDs`: Your custom reference IDs\n- `workflowIDs` / `workflowNames`: Filter by workflow\n\n## Pagination\n\nUse `startingAfter` and `endingBefore` cursors with a default limit of 50.\n\n### Parameters\n\n- `callIDs?: string[]`\n\n- `endingBefore?: string`\n\n- `limit?: number`\n\n- `referenceIDs?: string[]`\n\n- `referenceIDSubstring?: string`\n  Case-insensitive substring match against `callReferenceID`.\n\n- `sortOrder?: 'asc' | 'desc'`\n\n- `startingAfter?: string`\n\n- `statuses?: 'pending' | 'running' | 'completed' | 'failed'[]`\n  Filter by one or more statuses.\n\n- `workflowIDs?: string[]`\n\n- `workflowNames?: string[]`\n\n### Returns\n\n- `{ callID: string; createdAt: string; errors: { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]; outputs: { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: object; metrics?: object; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; metadata?: object; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: object; referenceID: string; semanticPageOutput: object; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; printPageOutput?: object; semanticPageOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | object | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: object[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: inbound_email_event; metadata?: object; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: object; inboundEmail?: inbound_email_event; metadata?: object; s3Output?: object; webhookOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]; traceUrl: string; url: string; callReferenceID?: string; finishedAt?: string; input?: { batchFiles?: { inputs?: object[]; }; singleFile?: { inputType?: string; s3URL?: string; }; }; status?: 'pending' | 'running' | 'completed' | 'failed'; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n  A workflow call returned by the V3 API.\n\nCompared to the V2 `Call` model:\n- Terminal outputs are split into `outputs` (non-error events) and `errors` (error events)\n- `callType` and function-scoped fields are removed — V3 calls are always workflow calls\n- The deprecated `functionCalls` field is removed (use `GET /v3/calls/{callID}/trace`)\n- `url` and `traceUrl` hint fields are included for resource discovery\n\n  - `callID: string`\n  - `createdAt: string`\n  - `errors: { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]`\n  - `outputs: { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: { output?: object | object[] | string | number | boolean[]; } | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; inputs?: { inputContent?: string; inputType?: string; jsonInputContent?: object; s3URL?: string; }[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: { durationFunctionToEventSeconds?: number; }; metrics?: { differences?: { category?: string; correctedVal?: object; extractedVal?: object; jsonPointer?: string; }[]; metrics?: { accuracy?: number; f1Score?: number; precision?: number; recall?: number; }; }; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: { output?: object | object[] | string | number | boolean[]; } | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; inputs?: { inputContent?: string; inputType?: string; jsonInputContent?: object; s3URL?: string; }[]; inputType?: string; invalidProperties?: string[]; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: { itemCount?: number; items?: { itemOffset?: number; itemReferenceID?: string; s3URL?: string; }[]; }; referenceID: string; semanticPageOutput: { itemCount?: number; items?: { itemClass?: string; itemClassCount?: number; itemClassOffset?: number; itemOffset?: number; itemReferenceID?: string; pageEnd?: number; pageStart?: number; s3URL?: string; }[]; pageCount?: number; }; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; printPageOutput?: { collectionReferenceID?: string; itemCount?: number; itemOffset?: number; s3URL?: string; }; semanticPageOutput?: { collectionReferenceID?: string; itemClass?: string; itemClassCount?: number; itemClassOffset?: number; itemCount?: number; itemOffset?: number; pageCount?: number; pageEnd?: number; pageStart?: number; s3URL?: string; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: object; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: { itemCount: number; itemOffset: number; itemReferenceID: string; s3URL?: string; }[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: { fileName: string; folderID: string; }; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3Output?: { bucketName: string; key: string; }; webhookOutput?: { httpResponseBody: string; httpStatusCode: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]`\n  - `traceUrl: string`\n  - `url: string`\n  - `callReferenceID?: string`\n  - `finishedAt?: string`\n  - `input?: { batchFiles?: { inputs?: { inputType?: string; itemReferenceID?: string; s3URL?: string; }[]; }; singleFile?: { inputType?: string; s3URL?: string; }; }`\n  - `status?: 'pending' | 'running' | 'completed' | 'failed'`\n  - `workflowID?: string`\n  - `workflowName?: string`\n  - `workflowVersionNum?: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\n// Automatically fetches more pages as needed.\nfor await (const call of client.calls.list()) {\n  console.log(call);\n}\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.calls.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const call of client.calls.list()) {\n  console.log(call.callID);\n}",
+      },
+      python: {
+        method: 'calls.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.calls.list()\npage = page.calls[0]\nprint(page.call_id)',
+      },
+      go: {
+        method: 'client.Calls.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Calls.List(context.TODO(), bem.CallListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
+      },
       cli: {
         method: 'calls list',
         example: "bem calls list \\\n  --api-key 'My API Key'",
@@ -464,23 +479,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CallListParams parameters = new();\n\nvar page = await client.Calls.List(parameters);\nawait foreach (var item in page.Paginate())\n{\n    Console.WriteLine(item);\n}',
       },
-      go: {
-        method: 'client.Calls.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Calls.List(context.TODO(), bem.CallListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/calls \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'calls.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.calls.list()\npage = page.calls[0]\nprint(page.call_id)',
-      },
-      typescript: {
-        method: 'client.calls.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const call of client.calls.list()) {\n  console.log(call.callID);\n}",
       },
     },
   },
@@ -499,6 +499,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.calls.retrieve(callID: string): { call?: call; error?: string; }`\n\n**get** `/v3/calls/{callID}`\n\n**Retrieve a workflow call by ID.**\n\nReturns the full call object including status, workflow details, terminal outputs,\nand terminal errors. `outputs` and `errors` are both populated once the call finishes —\nthey are not mutually exclusive (a partially-completed workflow may have both).\n\n## Status\n\n| Status | Description |\n|--------|-------------|\n| `pending` | Queued, not yet started |\n| `running` | Currently executing |\n| `completed` | All enclosed function calls finished without errors |\n| `failed` | One or more enclosed function calls produced an error event |\n\nPoll this endpoint or configure a webhook subscription to detect completion.\n\n### Parameters\n\n- `callID: string`\n\n### Returns\n\n- `{ call?: { callID: string; createdAt: string; errors: error_event[]; outputs: event[]; traceUrl: string; url: string; callReferenceID?: string; finishedAt?: string; input?: object; status?: 'pending' | 'running' | 'completed' | 'failed'; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }; error?: string; }`\n\n  - `call?: { callID: string; createdAt: string; errors: { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]; outputs: { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: object; metrics?: object; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; metadata?: object; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: object; referenceID: string; semanticPageOutput: object; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; printPageOutput?: object; semanticPageOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | object | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: object[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: inbound_email_event; metadata?: object; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: object; inboundEmail?: inbound_email_event; metadata?: object; s3Output?: object; webhookOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]; traceUrl: string; url: string; callReferenceID?: string; finishedAt?: string; input?: { batchFiles?: { inputs?: object[]; }; singleFile?: { inputType?: string; s3URL?: string; }; }; status?: 'pending' | 'running' | 'completed' | 'failed'; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n  - `error?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst callGetResponse = await client.calls.retrieve('callID');\n\nconsole.log(callGetResponse);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.calls.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst callGetResponse = await client.calls.retrieve('callID');\n\nconsole.log(callGetResponse.call);",
+      },
+      python: {
+        method: 'calls.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncall_get_response = client.calls.retrieve(\n    "callID",\n)\nprint(call_get_response.call)',
+      },
+      go: {
+        method: 'client.Calls.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcallGetResponse, err := client.Calls.Get(context.TODO(), "callID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", callGetResponse.Call)\n}\n',
+      },
       cli: {
         method: 'calls retrieve',
         example: "bem calls retrieve \\\n  --api-key 'My API Key' \\\n  --call-id callID",
@@ -508,23 +523,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CallRetrieveParams parameters = new() { CallID = "callID" };\n\nvar callGetResponse = await client.Calls.Retrieve(parameters);\n\nConsole.WriteLine(callGetResponse);',
       },
-      go: {
-        method: 'client.Calls.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcallGetResponse, err := client.Calls.Get(context.TODO(), "callID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", callGetResponse.Call)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/calls/$CALL_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'calls.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncall_get_response = client.calls.retrieve(\n    "callID",\n)\nprint(call_get_response.call)',
-      },
-      typescript: {
-        method: 'client.calls.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst callGetResponse = await client.calls.retrieve('callID');\n\nconsole.log(callGetResponse.call);",
       },
     },
   },
@@ -543,6 +543,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve_trace\n\n`client.calls.retrieveTrace(callID: string): { error?: string; trace?: object; }`\n\n**get** `/v3/calls/{callID}/trace`\n\n**Retrieve the full execution trace of a workflow call.**\n\nReturns all function calls and events emitted during the call as flat arrays.\nThe DAG can be reconstructed using `FunctionCallResponseBase.sourceEventID`\n(the event that spawned each function call) and each event's `functionCallID`\n(the function call that emitted it).\n\n## Graph structure\n\n- A function call with no `sourceEventID` is the root.\n- An event's `functionCallID` points to the function call that emitted it.\n- A function call's `sourceEventID` points to the event that triggered it.\n- `workflowNodeName` identifies the DAG node; `incomingDestinationName` identifies\nthe labelled outlet used to reach this call (absent for unlabelled edges and root calls).\n\nThe trace is available as soon as the call exists and grows as execution proceeds.\n\n### Parameters\n\n- `callID: string`\n\n### Returns\n\n- `{ error?: string; trace?: { events: object[]; functionCalls: { functionCallID: string; functionID: string; functionName: string; referenceID: string; startedAt: string; status: 'pending' | 'running' | 'completed' | 'failed'; type: function_type; activity?: object[]; finishedAt?: string; functionVersionNum?: number; incomingDestinationName?: string; inputs?: object[]; inputType?: string; s3URL?: string; sourceEventID?: string; sourceFunctionCallID?: string; workflowCallID?: string; workflowNodeName?: string; }[]; }; }`\n  Response from `GET /v3/calls/{callID}/trace`.\n\nContains the full execution DAG as flat arrays of function calls and events. Reconstruct the\ngraph using `FunctionCallResponseBase.sourceEventID` (the event that spawned each function call)\nand each event's `functionCallID` (the function call that emitted it).\n\n  - `error?: string`\n  - `trace?: { events: object[]; functionCalls: { functionCallID: string; functionID: string; functionName: string; referenceID: string; startedAt: string; status: 'pending' | 'running' | 'completed' | 'failed'; type: string; activity?: { displayName?: string; status?: 'pending' | 'running' | 'completed' | 'failed'; }[]; finishedAt?: string; functionVersionNum?: number; incomingDestinationName?: string; inputs?: { inputType?: string; itemReferenceID?: string; s3URL?: string; }[]; inputType?: string; s3URL?: string; sourceEventID?: string; sourceFunctionCallID?: string; workflowCallID?: string; workflowNodeName?: string; }[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.calls.retrieveTrace('callID');\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.calls.retrieveTrace',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.calls.retrieveTrace('callID');\n\nconsole.log(response.error);",
+      },
+      python: {
+        method: 'calls.retrieve_trace',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.calls.retrieve_trace(\n    "callID",\n)\nprint(response.error)',
+      },
+      go: {
+        method: 'client.Calls.GetTrace',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Calls.GetTrace(context.TODO(), "callID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Error)\n}\n',
+      },
       cli: {
         method: 'calls retrieve_trace',
         example: "bem calls retrieve-trace \\\n  --api-key 'My API Key' \\\n  --call-id callID",
@@ -552,23 +567,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CallRetrieveTraceParams parameters = new() { CallID = "callID" };\n\nvar response = await client.Calls.RetrieveTrace(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Calls.GetTrace',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Calls.GetTrace(context.TODO(), "callID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Error)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/calls/$CALL_ID/trace \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'calls.retrieve_trace',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.calls.retrieve_trace(\n    "callID",\n)\nprint(response.error)',
-      },
-      typescript: {
-        method: 'client.calls.retrieveTrace',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.calls.retrieveTrace('callID');\n\nconsole.log(response.error);",
       },
     },
   },
@@ -599,6 +599,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.errors.list(callIDs?: string[], endingBefore?: string, functionIDs?: string[], functionNames?: string[], limit?: number, referenceIDs?: string[], referenceIDSubstring?: string, sortOrder?: 'asc' | 'desc', startingAfter?: string, workflowIDs?: string[], workflowNames?: string[]): { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n\n**get** `/v3/errors`\n\n**List terminal error events.**\n\nReturns error events produced by failed function calls within workflow executions.\nNon-error output events are excluded; use `GET /v3/outputs` to retrieve those.\n\n## Filtering\n\nFilter by call, workflow, function, or reference ID. Multiple filters are ANDed together.\n\n### Parameters\n\n- `callIDs?: string[]`\n  Filter to errors from specific calls.\n\n- `endingBefore?: string`\n\n- `functionIDs?: string[]`\n\n- `functionNames?: string[]`\n\n- `limit?: number`\n\n- `referenceIDs?: string[]`\n\n- `referenceIDSubstring?: string`\n  Case-insensitive substring match against `referenceID`.\n\n- `sortOrder?: 'asc' | 'desc'`\n\n- `startingAfter?: string`\n\n- `workflowIDs?: string[]`\n\n- `workflowNames?: string[]`\n\n### Returns\n\n- `{ eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n\n  - `eventID: string`\n  - `functionID: string`\n  - `functionName: string`\n  - `message: string`\n  - `referenceID: string`\n  - `callID?: string`\n  - `createdAt?: string`\n  - `eventType?: 'error'`\n  - `functionCallID?: string`\n  - `functionCallTryNumber?: number`\n  - `functionVersionNum?: number`\n  - `inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }`\n  - `metadata?: { durationFunctionToEventSeconds?: number; }`\n  - `workflowID?: string`\n  - `workflowName?: string`\n  - `workflowVersionNum?: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\n// Automatically fetches more pages as needed.\nfor await (const errorEvent of client.errors.list()) {\n  console.log(errorEvent);\n}\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.errors.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const errorEvent of client.errors.list()) {\n  console.log(errorEvent.eventID);\n}",
+      },
+      python: {
+        method: 'errors.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.errors.list()\npage = page.errors[0]\nprint(page.event_id)',
+      },
+      go: {
+        method: 'client.Errors.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Errors.List(context.TODO(), bem.ErrorListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
+      },
       cli: {
         method: 'errors list',
         example: "bem errors list \\\n  --api-key 'My API Key'",
@@ -608,23 +623,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ErrorListParams parameters = new();\n\nvar page = await client.Errors.List(parameters);\nawait foreach (var item in page.Paginate())\n{\n    Console.WriteLine(item);\n}',
       },
-      go: {
-        method: 'client.Errors.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Errors.List(context.TODO(), bem.ErrorListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/errors \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'errors.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.errors.list()\npage = page.errors[0]\nprint(page.event_id)',
-      },
-      typescript: {
-        method: 'client.errors.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const errorEvent of client.errors.list()) {\n  console.log(errorEvent.eventID);\n}",
       },
     },
   },
@@ -643,6 +643,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.errors.retrieve(eventID: string): { error: error_event; }`\n\n**get** `/v3/errors/{eventID}`\n\n**Retrieve a single error event by ID.**\n\nReturns `404` if the event does not exist or if it is not an error event\n(use `GET /v3/outputs/{eventID}` for non-error events).\n\n### Parameters\n\n- `eventID: string`\n\n### Returns\n\n- `{ error: { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }; }`\n\n  - `error: { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst error = await client.errors.retrieve('eventID');\n\nconsole.log(error);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.errors.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst error = await client.errors.retrieve('eventID');\n\nconsole.log(error.error);",
+      },
+      python: {
+        method: 'errors.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nerror = client.errors.retrieve(\n    "eventID",\n)\nprint(error.error)',
+      },
+      go: {
+        method: 'client.Errors.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terror, err := client.Errors.Get(context.TODO(), "eventID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", error.Error)\n}\n',
+      },
       cli: {
         method: 'errors retrieve',
         example: "bem errors retrieve \\\n  --api-key 'My API Key' \\\n  --event-id eventID",
@@ -652,23 +667,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ErrorRetrieveParams parameters = new() { EventID = "eventID" };\n\nvar error = await client.Errors.Retrieve(parameters);\n\nConsole.WriteLine(error);',
       },
-      go: {
-        method: 'client.Errors.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terror, err := client.Errors.Get(context.TODO(), "eventID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", error.Error)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/errors/$EVENT_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'errors.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nerror = client.errors.retrieve(\n    "eventID",\n)\nprint(error.error)',
-      },
-      typescript: {
-        method: 'client.errors.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst error = await client.errors.retrieve('eventID');\n\nconsole.log(error.error);",
       },
     },
   },
@@ -705,6 +705,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.outputs.list(callIDs?: string[], endingBefore?: string, eventIDs?: string[], functionIDs?: string[], functionNames?: string[], functionVersionNums?: number[], includeIntermediate?: boolean, isLabelled?: boolean, isRegression?: boolean, limit?: number, referenceIDs?: string[], referenceIDSubstring?: string, sortOrder?: 'asc' | 'desc', startingAfter?: string, transformationIDs?: string[], workflowIDs?: string[], workflowNames?: string[]): { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: object; metrics?: object; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; metadata?: object; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: object; referenceID: string; semanticPageOutput: object; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; printPageOutput?: object; semanticPageOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | object | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: object[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: inbound_email_event; metadata?: object; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: object; inboundEmail?: inbound_email_event; metadata?: object; s3Output?: object; webhookOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n\n**get** `/v3/outputs`\n\n**List terminal non-error output events.**\n\nReturns events that represent successful terminal outputs — primary events\n(non-split-collection) that did not trigger any downstream function calls.\nError events are excluded; use `GET /v3/errors` to retrieve those.\n\n## Intermediate Events\n\nBy default, intermediate events (those that spawned a downstream function call in a\nmulti-step workflow) are excluded. Pass `includeIntermediate=true` to include them.\n\n## Filtering\n\nFilter by call, workflow, function, or reference ID. Multiple filters are ANDed together.\n\n### Parameters\n\n- `callIDs?: string[]`\n  Filter to outputs from specific calls.\n\n- `endingBefore?: string`\n\n- `eventIDs?: string[]`\n  Filter to specific output events by their event IDs (KSUIDs).\n\n- `functionIDs?: string[]`\n\n- `functionNames?: string[]`\n\n- `functionVersionNums?: number[]`\n  Filter to specific function version numbers.\n\n- `includeIntermediate?: boolean`\n  When `true`, includes intermediate events (those that spawned a downstream function call).\nDefault: `false`.\n\n- `isLabelled?: boolean`\n  If `true`, only outputs with a corrected (labelled) payload.\nIf `false`, only outputs that are not labelled. If omitted, no filter is applied.\n\n- `isRegression?: boolean`\n  If `true`, only regression-marked outputs. If `false`, only non-regression outputs.\nIf omitted, no filter is applied.\n\nNote: clients migrating from `/v1-beta/transformations` should pass `isRegression=false`\nexplicitly to preserve the legacy default (regressions hidden unless explicitly requested).\n\n- `limit?: number`\n\n- `referenceIDs?: string[]`\n\n- `referenceIDSubstring?: string`\n  Case-insensitive substring match against `referenceID`.\n\n- `sortOrder?: 'asc' | 'desc'`\n\n- `startingAfter?: string`\n\n- `transformationIDs?: string[]`\n  Filter by legacy transformation IDs. Provided for backwards compatibility\nwith clients migrating from `/v1-beta/transformations`.\n\n- `workflowIDs?: string[]`\n\n- `workflowNames?: string[]`\n\n### Returns\n\n- `{ eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: { output?: object | object[] | string | number | boolean[]; } | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; inputs?: { inputContent?: string; inputType?: string; jsonInputContent?: object; s3URL?: string; }[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: { durationFunctionToEventSeconds?: number; }; metrics?: { differences?: { category?: string; correctedVal?: object; extractedVal?: object; jsonPointer?: string; }[]; metrics?: { accuracy?: number; f1Score?: number; precision?: number; recall?: number; }; }; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: { output?: object | object[] | string | number | boolean[]; } | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; inputs?: { inputContent?: string; inputType?: string; jsonInputContent?: object; s3URL?: string; }[]; inputType?: string; invalidProperties?: string[]; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: { itemCount?: number; items?: { itemOffset?: number; itemReferenceID?: string; s3URL?: string; }[]; }; referenceID: string; semanticPageOutput: { itemCount?: number; items?: { itemClass?: string; itemClassCount?: number; itemClassOffset?: number; itemOffset?: number; itemReferenceID?: string; pageEnd?: number; pageStart?: number; s3URL?: string; }[]; pageCount?: number; }; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; printPageOutput?: { collectionReferenceID?: string; itemCount?: number; itemOffset?: number; s3URL?: string; }; semanticPageOutput?: { collectionReferenceID?: string; itemClass?: string; itemClassCount?: number; itemClassOffset?: number; itemCount?: number; itemOffset?: number; pageCount?: number; pageEnd?: number; pageStart?: number; s3URL?: string; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: object; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: { itemCount: number; itemOffset: number; itemReferenceID: string; s3URL?: string; }[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: { fileName: string; folderID: string; }; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3Output?: { bucketName: string; key: string; }; webhookOutput?: { httpResponseBody: string; httpStatusCode: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n  V3 read-side event union. Superset of the shared `Event` union: it contains\nevery shared variant verbatim (backward compatible) and adds the V3-only\n`extract` and `classify` variants.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\n// Automatically fetches more pages as needed.\nfor await (const event of client.outputs.list()) {\n  console.log(event);\n}\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.outputs.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const event of client.outputs.list()) {\n  console.log(event);\n}",
+      },
+      python: {
+        method: 'outputs.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.outputs.list()\npage = page.outputs[0]\nprint(page)',
+      },
+      go: {
+        method: 'client.Outputs.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Outputs.List(context.TODO(), bem.OutputListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
+      },
       cli: {
         method: 'outputs list',
         example: "bem outputs list \\\n  --api-key 'My API Key'",
@@ -714,23 +729,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'OutputListParams parameters = new();\n\nvar page = await client.Outputs.List(parameters);\nawait foreach (var item in page.Paginate())\n{\n    Console.WriteLine(item);\n}',
       },
-      go: {
-        method: 'client.Outputs.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Outputs.List(context.TODO(), bem.OutputListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/outputs \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'outputs.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.outputs.list()\npage = page.outputs[0]\nprint(page)',
-      },
-      typescript: {
-        method: 'client.outputs.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const event of client.outputs.list()) {\n  console.log(event);\n}",
       },
     },
   },
@@ -749,6 +749,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.outputs.retrieve(eventID: string): { output: event; }`\n\n**get** `/v3/outputs/{eventID}`\n\n**Retrieve a single output event by ID.**\n\nFetches any non-error event by its `eventID`. Returns `404` if the event does not exist\nor if it is an error event (use `GET /v3/errors/{eventID}` for those).\n\n### Parameters\n\n- `eventID: string`\n\n### Returns\n\n- `{ output: { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: object; metrics?: object; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; metadata?: object; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: object; referenceID: string; semanticPageOutput: object; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; printPageOutput?: object; semanticPageOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | object | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: object[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: inbound_email_event; metadata?: object; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: object; inboundEmail?: inbound_email_event; metadata?: object; s3Output?: object; webhookOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }; }`\n\n  - `output: { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: { output?: object | object[] | string | number | boolean[]; } | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; inputs?: { inputContent?: string; inputType?: string; jsonInputContent?: object; s3URL?: string; }[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: { durationFunctionToEventSeconds?: number; }; metrics?: { differences?: { category?: string; correctedVal?: object; extractedVal?: object; jsonPointer?: string; }[]; metrics?: { accuracy?: number; f1Score?: number; precision?: number; recall?: number; }; }; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: { output?: object | object[] | string | number | boolean[]; } | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; inputs?: { inputContent?: string; inputType?: string; jsonInputContent?: object; s3URL?: string; }[]; inputType?: string; invalidProperties?: string[]; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: { itemCount?: number; items?: { itemOffset?: number; itemReferenceID?: string; s3URL?: string; }[]; }; referenceID: string; semanticPageOutput: { itemCount?: number; items?: { itemClass?: string; itemClassCount?: number; itemClassOffset?: number; itemOffset?: number; itemReferenceID?: string; pageEnd?: number; pageStart?: number; s3URL?: string; }[]; pageCount?: number; }; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; printPageOutput?: { collectionReferenceID?: string; itemCount?: number; itemOffset?: number; s3URL?: string; }; semanticPageOutput?: { collectionReferenceID?: string; itemClass?: string; itemClassCount?: number; itemClassOffset?: number; itemCount?: number; itemOffset?: number; pageCount?: number; pageEnd?: number; pageStart?: number; s3URL?: string; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: object; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: { itemCount: number; itemOffset: number; itemReferenceID: string; s3URL?: string; }[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: { fileName: string; folderID: string; }; inboundEmail?: { from: string; subject: string; to: string; deliveredTo?: string; }; metadata?: { durationFunctionToEventSeconds?: number; }; s3Output?: { bucketName: string; key: string; }; webhookOutput?: { httpResponseBody: string; httpStatusCode: number; }; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst output = await client.outputs.retrieve('eventID');\n\nconsole.log(output);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.outputs.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst output = await client.outputs.retrieve('eventID');\n\nconsole.log(output.output);",
+      },
+      python: {
+        method: 'outputs.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\noutput = client.outputs.retrieve(\n    "eventID",\n)\nprint(output.output)',
+      },
+      go: {
+        method: 'client.Outputs.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\toutput, err := client.Outputs.Get(context.TODO(), "eventID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", output.Output)\n}\n',
+      },
       cli: {
         method: 'outputs retrieve',
         example: "bem outputs retrieve \\\n  --api-key 'My API Key' \\\n  --event-id eventID",
@@ -758,23 +773,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'OutputRetrieveParams parameters = new() { EventID = "eventID" };\n\nvar output = await client.Outputs.Retrieve(parameters);\n\nConsole.WriteLine(output);',
       },
-      go: {
-        method: 'client.Outputs.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\toutput, err := client.Outputs.Get(context.TODO(), "eventID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", output.Output)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/outputs/$EVENT_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'outputs.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\noutput = client.outputs.retrieve(\n    "eventID",\n)\nprint(output.output)',
-      },
-      typescript: {
-        method: 'client.outputs.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst output = await client.outputs.retrieve('eventID');\n\nconsole.log(output.output);",
       },
     },
   },
@@ -804,6 +804,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.workflows.list(displayName?: string, endingBefore?: string, functionIDs?: string[], functionNames?: string[], limit?: number, sortOrder?: 'asc' | 'desc', startingAfter?: string, tags?: string[], workflowIDs?: string[], workflowNames?: string[]): { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n**get** `/v3/workflows`\n\n**List workflows in the current environment.**\n\nReturns each workflow's current version, including its node graph\nand main node. Combine filters freely — they AND together.\n\n## Filtering\n\n- `workflowIDs` / `workflowNames`: exact-match identity filters.\n- `displayName`: case-insensitive substring match.\n- `tags`: returns workflows tagged with any of the supplied tags.\n- `functionIDs` / `functionNames`: returns only workflows that\nreference the named functions in any node. Useful for \"which\nworkflows depend on this function?\" lookups before changing or\ndeleting a function.\n\n## Pagination\n\nCursor-based with `startingAfter` and `endingBefore` (workflowIDs).\nDefault limit 50, maximum 100.\n\n### Parameters\n\n- `displayName?: string`\n\n- `endingBefore?: string`\n\n- `functionIDs?: string[]`\n\n- `functionNames?: string[]`\n\n- `limit?: number`\n\n- `sortOrder?: 'asc' | 'desc'`\n\n- `startingAfter?: string`\n\n- `tags?: string[]`\n\n- `workflowIDs?: string[]`\n\n- `workflowNames?: string[]`\n\n### Returns\n\n- `{ id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n  V3 read representation of a workflow version.\n\n  - `id: string`\n  - `connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]`\n  - `createdAt: string`\n  - `edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]`\n  - `mainNodeName: string`\n  - `name: string`\n  - `nodes: { function: { id?: string; name?: string; versionNum?: number; }; name: string; metadata?: object; }[]`\n  - `updatedAt: string`\n  - `versionNum: number`\n  - `audit?: { versionCreatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; workflowCreatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; workflowLastUpdatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; }`\n  - `displayName?: string`\n  - `emailAddress?: string`\n  - `tags?: string[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\n// Automatically fetches more pages as needed.\nfor await (const workflow of client.workflows.list()) {\n  console.log(workflow);\n}\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const workflow of client.workflows.list()) {\n  console.log(workflow.id);\n}",
+      },
+      python: {
+        method: 'workflows.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.workflows.list()\npage = page.workflows[0]\nprint(page.id)',
+      },
+      go: {
+        method: 'client.Workflows.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Workflows.List(context.TODO(), bem.WorkflowListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
+      },
       cli: {
         method: 'workflows list',
         example: "bem workflows list \\\n  --api-key 'My API Key'",
@@ -813,23 +828,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowListParams parameters = new();\n\nvar page = await client.Workflows.List(parameters);\nawait foreach (var item in page.Paginate())\n{\n    Console.WriteLine(item);\n}',
       },
-      go: {
-        method: 'client.Workflows.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Workflows.List(context.TODO(), bem.WorkflowListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/workflows \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'workflows.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.workflows.list()\npage = page.workflows[0]\nprint(page.id)',
-      },
-      typescript: {
-        method: 'client.workflows.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const workflow of client.workflows.list()) {\n  console.log(workflow.id);\n}",
       },
     },
   },
@@ -856,6 +856,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## create\n\n`client.workflows.create(mainNodeName: string, name: string, nodes: { function: object; metadata?: object; name?: string; }[], connectors?: { name: string; type: 'paragon'; connectorID?: string; paragon?: { configuration?: object; integration?: string; }; }[], displayName?: string, edges?: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[], tags?: string[]): { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n**post** `/v3/workflows`\n\n**Create a workflow.**\n\nA workflow is a directed acyclic graph of nodes (each pointing at a\nfunction) with one entry point (`mainNodeName`). The graph runs\nend-to-end on every call.\n\n## Required structure\n\n- `name`: unique within the environment, alphanumeric plus hyphens\nand underscores.\n- `mainNodeName`: must match one of the `nodes[].name` values, and\nmust not be the destination of any edge.\n- `nodes`: at least one. Each node has a unique `name` and a\n`function` reference (by `functionName` or `functionID`, optionally\npinned to a `versionNum`).\n- `edges`: optional for single-node workflows. For branching\nsources (Classify, semantic Split), each edge carries a\n`destinationName` matching a `classifications[].name` or\n`itemClasses[].name` on the source function.\n\nThe created workflow is at `versionNum: 1`. Subsequent\n`PATCH /v3/workflows/{workflowName}` calls produce new versions.\n\n## Common patterns\n\n- **Single-node**: one extract/classify function, no edges.\n- **Sequential**: extract → enrich → payload_shaping (linear edges).\n- **Branching**: classify → multiple extracts (one edge per\nclassification name).\n- **Split-then-process**: split → multiple extracts (one edge per\nitem class).\n\nSee [Workflows explained](/guide/workflows-explained) for end-to-end\nexamples of each pattern.\n\n### Parameters\n\n- `mainNodeName: string`\n  Name of the entry-point node. Must not be a destination of any edge.\n\n- `name: string`\n  Unique name for the workflow. Must match `^[a-zA-Z0-9_-]{1,128}$`.\n\n- `nodes: { function: { id?: string; name?: string; versionNum?: number; }; metadata?: object; name?: string; }[]`\n  Call-site nodes in the DAG. At least one is required.\n\n- `connectors?: { name: string; type: 'paragon'; connectorID?: string; paragon?: { configuration?: object; integration?: string; }; }[]`\n  Connectors to attach to the workflow at creation. If any entry fails to\nprovision, the entire workflow creation is rolled back.\n\n- `displayName?: string`\n  Human-readable display name.\n\n- `edges?: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]`\n  Directed edges between nodes. Omit or leave empty for single-node workflows.\n\n- `tags?: string[]`\n  Tags to categorize and organize the workflow.\n\n### Returns\n\n- `{ id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n  V3 read representation of a workflow version.\n\n  - `id: string`\n  - `connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]`\n  - `createdAt: string`\n  - `edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]`\n  - `mainNodeName: string`\n  - `name: string`\n  - `nodes: { function: { id?: string; name?: string; versionNum?: number; }; name: string; metadata?: object; }[]`\n  - `updatedAt: string`\n  - `versionNum: number`\n  - `audit?: { versionCreatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; workflowCreatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; workflowLastUpdatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; }`\n  - `displayName?: string`\n  - `emailAddress?: string`\n  - `tags?: string[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst workflow = await client.workflows.create({\n  mainNodeName: 'mainNodeName',\n  name: 'name',\n  nodes: [{ function: {} }],\n});\n\nconsole.log(workflow);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst workflow = await client.workflows.create({\n  mainNodeName: 'mainNodeName',\n  name: 'name',\n  nodes: [{ function: {} }],\n});\n\nconsole.log(workflow.id);",
+      },
+      python: {
+        method: 'workflows.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nworkflow = client.workflows.create(\n    main_node_name="mainNodeName",\n    name="name",\n    nodes=[{\n        "function": {}\n    }],\n)\nprint(workflow.id)',
+      },
+      go: {
+        method: 'client.Workflows.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tworkflow, err := client.Workflows.New(context.TODO(), bem.WorkflowNewParams{\n\t\tMainNodeName: "mainNodeName",\n\t\tName:         "name",\n\t\tNodes: []bem.WorkflowNewParamsNode{{\n\t\t\tFunction: bem.FunctionVersionIdentifierParam{},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", workflow.ID)\n}\n',
+      },
       cli: {
         method: 'workflows create',
         example:
@@ -866,24 +881,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowCreateParams parameters = new()\n{\n    MainNodeName = "mainNodeName",\n    Name = "name",\n    Nodes =\n    [\n        new()\n        {\n            Function = new()\n            {\n                ID = "id",\n                Name = "name",\n                VersionNum = 0,\n            },\n            Metadata = JsonSerializer.Deserialize<JsonElement>("{}"),\n            Name = "name",\n        },\n    ],\n};\n\nvar workflow = await client.Workflows.Create(parameters);\n\nConsole.WriteLine(workflow);',
       },
-      go: {
-        method: 'client.Workflows.New',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tworkflow, err := client.Workflows.New(context.TODO(), bem.WorkflowNewParams{\n\t\tMainNodeName: "mainNodeName",\n\t\tName:         "name",\n\t\tNodes: []bem.WorkflowNewParamsNode{{\n\t\t\tFunction: bem.FunctionVersionIdentifierParam{},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", workflow.ID)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/workflows \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "mainNodeName": "mainNodeName",\n          "name": "name",\n          "nodes": [\n            {\n              "function": {}\n            }\n          ]\n        }\'',
-      },
-      python: {
-        method: 'workflows.create',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nworkflow = client.workflows.create(\n    main_node_name="mainNodeName",\n    name="name",\n    nodes=[{\n        "function": {}\n    }],\n)\nprint(workflow.id)',
-      },
-      typescript: {
-        method: 'client.workflows.create',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst workflow = await client.workflows.create({\n  mainNodeName: 'mainNodeName',\n  name: 'name',\n  nodes: [{ function: {} }],\n});\n\nconsole.log(workflow.id);",
       },
     },
   },
@@ -909,6 +909,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## copy\n\n`client.workflows.copy(sourceWorkflowName: string, targetWorkflowName: string, sourceWorkflowVersionNum?: number, tags?: string[], targetDisplayName?: string, targetEnvironment?: string): { copiedFunctions?: object[]; environment?: string; error?: string; workflow?: workflow; }`\n\n**post** `/v3/workflows/copy`\n\n**Copy a workflow to a new name.**\n\nForks the source workflow's current version into a brand-new\nworkflow at `versionNum: 1`. The full node graph and edges are\ncarried over, but the *functions* the copied nodes reference are\nshared, not duplicated — both workflows now point at the same\nfunctions.\n\nUseful for forking a production workflow to test a topology change\nwithout disturbing the live caller.\n\n### Parameters\n\n- `sourceWorkflowName: string`\n  Name of the source workflow to copy from.\n\n- `targetWorkflowName: string`\n  Name for the new copied workflow. Must be unique within the target environment.\n\n- `sourceWorkflowVersionNum?: number`\n  Optional version number of the source workflow to copy. If not provided, copies the current version.\n\n- `tags?: string[]`\n  Optional tags for the copied workflow. If not provided, uses the source workflow's tags.\n\n- `targetDisplayName?: string`\n  Optional display name for the copied workflow. If not provided, uses the source workflow's display name with \" (Copy)\" appended.\n\n- `targetEnvironment?: string`\n  Optional target environment name. If provided, copies the workflow to a different environment. When copying to a different environment, all functions used in the workflow will also be copied.\n\n### Returns\n\n- `{ copiedFunctions?: { sourceFunctionID: string; sourceFunctionName: string; sourceVersionNum: number; targetFunctionID: string; targetFunctionName: string; targetVersionNum: number; }[]; environment?: string; error?: string; workflow?: { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }; }`\n\n  - `copiedFunctions?: { sourceFunctionID: string; sourceFunctionName: string; sourceVersionNum: number; targetFunctionID: string; targetFunctionName: string; targetVersionNum: number; }[]`\n  - `environment?: string`\n  - `error?: string`\n  - `workflow?: { id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.workflows.copy({ sourceWorkflowName: 'sourceWorkflowName', targetWorkflowName: 'targetWorkflowName' });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.copy',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.workflows.copy({\n  sourceWorkflowName: 'sourceWorkflowName',\n  targetWorkflowName: 'targetWorkflowName',\n});\n\nconsole.log(response.copiedFunctions);",
+      },
+      python: {
+        method: 'workflows.copy',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.workflows.copy(\n    source_workflow_name="sourceWorkflowName",\n    target_workflow_name="targetWorkflowName",\n)\nprint(response.copied_functions)',
+      },
+      go: {
+        method: 'client.Workflows.Copy',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Workflows.Copy(context.TODO(), bem.WorkflowCopyParams{\n\t\tSourceWorkflowName: "sourceWorkflowName",\n\t\tTargetWorkflowName: "targetWorkflowName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.CopiedFunctions)\n}\n',
+      },
       cli: {
         method: 'workflows copy',
         example:
@@ -919,24 +934,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowCopyParams parameters = new()\n{\n    SourceWorkflowName = "sourceWorkflowName",\n    TargetWorkflowName = "targetWorkflowName",\n};\n\nvar response = await client.Workflows.Copy(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Workflows.Copy',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Workflows.Copy(context.TODO(), bem.WorkflowCopyParams{\n\t\tSourceWorkflowName: "sourceWorkflowName",\n\t\tTargetWorkflowName: "targetWorkflowName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.CopiedFunctions)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/workflows/copy \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "sourceWorkflowName": "sourceWorkflowName",\n          "targetWorkflowName": "targetWorkflowName"\n        }\'',
-      },
-      python: {
-        method: 'workflows.copy',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.workflows.copy(\n    source_workflow_name="sourceWorkflowName",\n    target_workflow_name="targetWorkflowName",\n)\nprint(response.copied_functions)',
-      },
-      typescript: {
-        method: 'client.workflows.copy',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.workflows.copy({\n  sourceWorkflowName: 'sourceWorkflowName',\n  targetWorkflowName: 'targetWorkflowName',\n});\n\nconsole.log(response.copiedFunctions);",
       },
     },
   },
@@ -953,6 +953,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## delete\n\n`client.workflows.delete(workflowName: string): void`\n\n**delete** `/v3/workflows/{workflowName}`\n\n**Delete a workflow and every one of its versions.**\n\nPermanent. Running and queued calls against this workflow continue\nto completion against the version they captured at call time;\nsubsequent attempts to call the workflow return `404 Not Found`.\n\nFunctions referenced by the deleted workflow are not removed — they\nremain available to other workflows or for direct reference.\n\n### Parameters\n\n- `workflowName: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.workflows.delete('workflowName')\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.workflows.delete('workflowName');",
+      },
+      python: {
+        method: 'workflows.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.workflows.delete(\n    "workflowName",\n)',
+      },
+      go: {
+        method: 'client.Workflows.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Workflows.Delete(context.TODO(), "workflowName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
       cli: {
         method: 'workflows delete',
         example: "bem workflows delete \\\n  --api-key 'My API Key' \\\n  --workflow-name workflowName",
@@ -962,24 +977,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowDeleteParams parameters = new() { WorkflowName = "workflowName" };\n\nawait client.Workflows.Delete(parameters);',
       },
-      go: {
-        method: 'client.Workflows.Delete',
-        example:
-          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Workflows.Delete(context.TODO(), "workflowName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/workflows/$WORKFLOW_NAME \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'workflows.delete',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.workflows.delete(\n    "workflowName",\n)',
-      },
-      typescript: {
-        method: 'client.workflows.delete',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.workflows.delete('workflowName');",
       },
     },
   },
@@ -998,6 +998,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.workflows.retrieve(workflowName: string): { error?: string; workflow?: workflow; }`\n\n**get** `/v3/workflows/{workflowName}`\n\n**Retrieve a workflow's current version by name.**\n\nReturns the full workflow record: `currentVersionNum`, `mainNodeName`,\nthe `nodes` array (with each node's function reference and pinned\n`versionNum` if any), and the `edges` array. To inspect a historical\nversion, use `GET /v3/workflows/{workflowName}/versions/{versionNum}`.\n\n### Parameters\n\n- `workflowName: string`\n\n### Returns\n\n- `{ error?: string; workflow?: { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }; }`\n\n  - `error?: string`\n  - `workflow?: { id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst workflow = await client.workflows.retrieve('workflowName');\n\nconsole.log(workflow);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst workflow = await client.workflows.retrieve('workflowName');\n\nconsole.log(workflow.error);",
+      },
+      python: {
+        method: 'workflows.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nworkflow = client.workflows.retrieve(\n    "workflowName",\n)\nprint(workflow.error)',
+      },
+      go: {
+        method: 'client.Workflows.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tworkflow, err := client.Workflows.Get(context.TODO(), "workflowName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", workflow.Error)\n}\n',
+      },
       cli: {
         method: 'workflows retrieve',
         example: "bem workflows retrieve \\\n  --api-key 'My API Key' \\\n  --workflow-name workflowName",
@@ -1007,23 +1022,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowRetrieveParams parameters = new() { WorkflowName = "workflowName" };\n\nvar workflow = await client.Workflows.Retrieve(parameters);\n\nConsole.WriteLine(workflow);',
       },
-      go: {
-        method: 'client.Workflows.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tworkflow, err := client.Workflows.Get(context.TODO(), "workflowName")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", workflow.Error)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/workflows/$WORKFLOW_NAME \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'workflows.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nworkflow = client.workflows.retrieve(\n    "workflowName",\n)\nprint(workflow.error)',
-      },
-      typescript: {
-        method: 'client.workflows.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst workflow = await client.workflows.retrieve('workflowName');\n\nconsole.log(workflow.error);",
       },
     },
   },
@@ -1051,6 +1051,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## update\n\n`client.workflows.update(workflowName: string, connectors?: { name: string; type: 'paragon'; connectorID?: string; paragon?: { configuration?: object; integration?: string; }; }[], displayName?: string, edges?: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[], mainNodeName?: string, name?: string, nodes?: { function: object; metadata?: object; name?: string; }[], tags?: string[]): { connectorErrors?: object[]; error?: string; workflow?: workflow; }`\n\n**patch** `/v3/workflows/{workflowName}`\n\n**Update a workflow. Updates create a new version.**\n\nThe previous version remains addressable and immutable. Pending and\nrunning calls captured at the old version continue against it; new\ncalls run against the new version.\n\n## Topology updates\n\nTo change the graph you must provide `mainNodeName`, `nodes`, AND\n`edges` together — partial topology updates are rejected. The full\ngraph is replaced atomically.\n\n## Metadata-only updates\n\nOmit all three fields to update only `displayName`, `tags`, or\n`name` while keeping the topology of the current version.\n\n## Reverting\n\nTo roll back, fetch the desired prior version and resubmit its\n`mainNodeName`/`nodes`/`edges` as a new update. Versions themselves\nare immutable — there is no \"pin to version N\" operation at the\nworkflow level (use `nodes[].function.versionNum` to pin individual\nfunctions).\n\n### Parameters\n\n- `workflowName: string`\n\n- `connectors?: { name: string; type: 'paragon'; connectorID?: string; paragon?: { configuration?: object; integration?: string; }; }[]`\n  Declarative, full-desired-state array of connectors. If omitted, existing\nconnectors are left unchanged. If provided, it replaces the current set:\nentries with `connectorID` are updates, entries without are creates, and\nexisting connectors whose `connectorID` is absent are deleted.\n\n- `displayName?: string`\n  Human-readable display name.\n\n- `edges?: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]`\n\n- `mainNodeName?: string`\n  `mainNodeName`, `nodes`, and `edges` must be provided together to update the DAG\ntopology. If none are provided the topology is copied unchanged from the current\nversion.\n\n- `name?: string`\n  New name for the workflow (renames it). Must match `^[a-zA-Z0-9_-]{1,128}$`.\n\n- `nodes?: { function: { id?: string; name?: string; versionNum?: number; }; metadata?: object; name?: string; }[]`\n\n- `tags?: string[]`\n  Tags to categorize and organize the workflow.\n\n### Returns\n\n- `{ connectorErrors?: { code: string; message: string; operation: 'create' | 'update' | 'delete'; connectorID?: string; name?: string; }[]; error?: string; workflow?: { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }; }`\n\n  - `connectorErrors?: { code: string; message: string; operation: 'create' | 'update' | 'delete'; connectorID?: string; name?: string; }[]`\n  - `error?: string`\n  - `workflow?: { id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst workflow = await client.workflows.update('workflowName');\n\nconsole.log(workflow);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst workflow = await client.workflows.update('workflowName');\n\nconsole.log(workflow.connectorErrors);",
+      },
+      python: {
+        method: 'workflows.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nworkflow = client.workflows.update(\n    workflow_name="workflowName",\n)\nprint(workflow.connector_errors)',
+      },
+      go: {
+        method: 'client.Workflows.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tworkflow, err := client.Workflows.Update(\n\t\tcontext.TODO(),\n\t\t"workflowName",\n\t\tbem.WorkflowUpdateParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", workflow.ConnectorErrors)\n}\n',
+      },
       cli: {
         method: 'workflows update',
         example: "bem workflows update \\\n  --api-key 'My API Key' \\\n  --workflow-name workflowName",
@@ -1060,24 +1075,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowUpdateParams parameters = new() { WorkflowName = "workflowName" };\n\nvar workflow = await client.Workflows.Update(parameters);\n\nConsole.WriteLine(workflow);',
       },
-      go: {
-        method: 'client.Workflows.Update',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tworkflow, err := client.Workflows.Update(\n\t\tcontext.TODO(),\n\t\t"workflowName",\n\t\tbem.WorkflowUpdateParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", workflow.ConnectorErrors)\n}\n',
-      },
       http: {
         example:
           "curl https://api.bem.ai/v3/workflows/$WORKFLOW_NAME \\\n    -X PATCH \\\n    -H 'Content-Type: application/json' \\\n    -H \"x-api-key: $BEM_API_KEY\" \\\n    -d '{}'",
-      },
-      python: {
-        method: 'workflows.update',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nworkflow = client.workflows.update(\n    workflow_name="workflowName",\n)\nprint(workflow.connector_errors)',
-      },
-      typescript: {
-        method: 'client.workflows.update',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst workflow = await client.workflows.update('workflowName');\n\nconsole.log(workflow.connectorErrors);",
       },
     },
   },
@@ -1102,6 +1102,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## call\n\n`client.workflows.call(workflowName: string, input: { batchFiles?: { inputs?: object[]; }; singleFile?: { inputContent: string; inputType: string; }; }, wait?: boolean, callReferenceID?: string, metadata?: object): { call?: call; error?: string; }`\n\n**post** `/v3/workflows/{workflowName}/call`\n\n**Invoke a workflow.**\n\nSubmit the input file as either a multipart form request or a JSON request with\nbase64-encoded file content. The workflow name is derived from the URL path.\n\n## Input Formats\n\n- **Multipart form** (`multipart/form-data`): attach the file directly via the `file`\nor `files` fields. Set `wait` in the form body to control synchronous behaviour.\n- **JSON** (`application/json`): base64-encode the file content and set it in\n`input.singleFile.inputContent` or `input.batchFiles.inputs[*].inputContent`.\nPass `wait=true` as a query parameter to control synchronous behaviour.\n\n## Synchronous vs Asynchronous\n\nBy default the call is created asynchronously and this endpoint returns `202 Accepted`\nimmediately with a `pending` call object. Set `wait` to `true` to block until\nthe call completes (up to 30 seconds):\n\n- On success: returns `200 OK` with the completed call, `outputs` populated\n- On failure: returns `500 Internal Server Error` with the call and an `error` message\n- On timeout: returns `202 Accepted` with the still-running call\n\n## Tracking\n\nPoll `GET /v3/calls/{callID}` to check status, or configure a webhook subscription\nto receive events when the call finishes.\n\n## CLI Usage\n\nUse `@path/to/file` inside JSON string values to embed file contents automatically.\nBinary files (PDF, images, audio) are base64-encoded; text files are embedded as strings.\n\nSingle file (synchronous):\n```bash\nbem workflows call \\\n  --workflow-name my-workflow \\\n  --input.single-file '{\"inputContent\": \"@invoice.pdf\", \"inputType\": \"pdf\"}' \\\n  --wait\n```\n\nSingle file (asynchronous, returns callID immediately):\n```bash\nbem workflows call \\\n  --workflow-name my-workflow \\\n  --input.single-file '{\"inputContent\": \"@invoice.pdf\", \"inputType\": \"pdf\"}'\n```\n\nBatch files:\n```bash\nbem workflows call \\\n  --workflow-name my-workflow \\\n  --input.batch-files '{\"inputs\": [{\"inputContent\": \"@a.pdf\", \"inputType\": \"pdf\"}, {\"inputContent\": \"@b.png\", \"inputType\": \"png\"}]}'\n```\n\nAlternative: pass the full `--input` flag as JSON:\n```bash\nbem workflows call \\\n  --workflow-name my-workflow \\\n  --input '{\"singleFile\": {\"inputContent\": \"@invoice.pdf\", \"inputType\": \"pdf\"}}' \\\n  --wait\n```\n\n**Important:** `--wait` is a boolean flag. Use `--wait` or `--wait=true`.\nDo **not** use `--wait true` (with a space) — the `true` will be parsed as an\nunexpected positional argument.\n\nSupported `inputType` values: csv, docx, email, heic, heif, html, jpeg, json,\nm4a, mp3, pdf, png, text, wav, webp, xls, xlsx, xml.\n\n### Parameters\n\n- `workflowName: string`\n\n- `input: { batchFiles?: { inputs?: { inputContent: string; inputType: string; itemReferenceID?: string; }[]; }; singleFile?: { inputContent: string; inputType: string; }; }`\n  Input file(s) for a call. Provide exactly one of `singleFile` or `batchFiles`.\n\nIn the CLI, use the nested flags `--input.single-file` or `--input.batch-files`\nwith `@path/to/file` for automatic file embedding:\n`--input.single-file '{\"inputContent\": \"@invoice.pdf\", \"inputType\": \"pdf\"}' --wait`\n  - `batchFiles?: { inputs?: { inputContent: string; inputType: string; itemReferenceID?: string; }[]; }`\n    Multiple files to process in one call. Each item in the `inputs` array has its own `inputContent` and `inputType`.\n  - `singleFile?: { inputContent: string; inputType: string; }`\n    A single file input with base64-encoded content.\n\nWhen using the Bem CLI, use `@path/to/file` in the `inputContent` field to\nautomatically read and base64-encode the file:\n`--input.single-file '{\"inputContent\": \"@file.pdf\", \"inputType\": \"pdf\"}' --wait`\n\n- `wait?: boolean`\n  Block until the call completes (up to 30 seconds) and return the finished\ncall object. Default: `false`. This is a boolean flag — use `--wait` or\n`--wait=true`, not `--wait true`.\n\n- `callReferenceID?: string`\n  Your reference ID for tracking this call.\n\n- `metadata?: object`\n  Arbitrary JSON object attached to this call. Stored on the call record and injected\ninto `transformedContent` under the reserved `_metadata` key (alongside `referenceID`).\nMust be a JSON object. Maximum size: 4 KB.\n\n### Returns\n\n- `{ call?: { callID: string; createdAt: string; errors: error_event[]; outputs: event[]; traceUrl: string; url: string; callReferenceID?: string; finishedAt?: string; input?: object; status?: 'pending' | 'running' | 'completed' | 'failed'; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }; error?: string; }`\n\n  - `call?: { callID: string; createdAt: string; errors: { eventID: string; functionID: string; functionName: string; message: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'error'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]; outputs: { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'transform'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; isRegression?: boolean; lastPublishErrorAt?: string; metadata?: object; metrics?: object; orderMatching?: boolean; pipelineID?: string; publishedAt?: string; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; itemCount: number; itemOffset: number; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; correctedContent?: object | object | object[] | string | number | boolean; createdAt?: string; eventType?: 'extract'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; inputs?: object[]; inputType?: string; invalidProperties?: string[]; metadata?: object; s3URL?: string; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'route'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { choice: string; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'classify'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; s3URL?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; printPageOutput: object; referenceID: string; semanticPageOutput: object; callID?: string; createdAt?: string; eventType?: 'split_collection'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { eventID: string; functionID: string; functionName: string; outputType: 'print_page' | 'semantic_page'; referenceID: string; callID?: string; createdAt?: string; eventType?: 'split_item'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; printPageOutput?: object; semanticPageOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | object | { eventID: string; functionID: string; functionName: string; invalidProperties: string[]; items: object[]; joinType: 'standard'; referenceID: string; transformedContent: object; avgConfidence?: number; callID?: string; createdAt?: string; eventType?: 'join'; fieldConfidences?: object; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; transformationID?: string; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { enrichedContent: object; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; eventType?: 'enrich'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; inboundEmail?: inbound_email_event; metadata?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; } | { collectionID: string; collectionName: string; eventID: string; operation: 'add' | 'update'; processedCount: number; referenceID: string; status: 'success' | 'failed'; collectionItemIDs?: string[]; createdAt?: string; errorMessage?: string; eventType?: 'collection_processing'; functionCallTryNumber?: number; inboundEmail?: inbound_email_event; metadata?: object; } | { deliveryStatus: 'success' | 'skip'; destinationType: 'webhook' | 's3' | 'google_drive'; eventID: string; functionID: string; functionName: string; referenceID: string; callID?: string; createdAt?: string; deliveredContent?: object; eventType?: 'send'; functionCallID?: string; functionCallTryNumber?: number; functionVersionNum?: number; googleDriveOutput?: object; inboundEmail?: inbound_email_event; metadata?: object; s3Output?: object; webhookOutput?: object; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }[]; traceUrl: string; url: string; callReferenceID?: string; finishedAt?: string; input?: { batchFiles?: { inputs?: object[]; }; singleFile?: { inputType?: string; s3URL?: string; }; }; status?: 'pending' | 'running' | 'completed' | 'failed'; workflowID?: string; workflowName?: string; workflowVersionNum?: number; }`\n  - `error?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst callGetResponse = await client.workflows.call('workflowName', { input: {} });\n\nconsole.log(callGetResponse);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.call',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst callGetResponse = await client.workflows.call('workflowName', { input: {} });\n\nconsole.log(callGetResponse.call);",
+      },
+      python: {
+        method: 'workflows.call',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncall_get_response = client.workflows.call(\n    workflow_name="workflowName",\n    input={},\n)\nprint(call_get_response.call)',
+      },
+      go: {
+        method: 'client.Workflows.Call',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcallGetResponse, err := client.Workflows.Call(\n\t\tcontext.TODO(),\n\t\t"workflowName",\n\t\tbem.WorkflowCallParams{\n\t\t\tInput: bem.WorkflowCallParamsInput{},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", callGetResponse.Call)\n}\n',
+      },
       cli: {
         method: 'workflows call',
         example:
@@ -1112,24 +1127,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WorkflowCallParams parameters = new()\n{\n    WorkflowName = "workflowName",\n    Input = new()\n    {\n        BatchFiles = new()\n        {\n            Inputs =\n            [\n                new()\n                {\n                    InputContent = "inputContent",\n                    InputType = InputType.Csv,\n                    ItemReferenceID = "itemReferenceID",\n                },\n            ],\n        },\n        SingleFile = new()\n        {\n            InputContent = "inputContent",\n            InputType = InputType.Csv,\n        },\n    },\n};\n\nvar callGetResponse = await client.Workflows.Call(parameters);\n\nConsole.WriteLine(callGetResponse);',
       },
-      go: {
-        method: 'client.Workflows.Call',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcallGetResponse, err := client.Workflows.Call(\n\t\tcontext.TODO(),\n\t\t"workflowName",\n\t\tbem.WorkflowCallParams{\n\t\t\tInput: bem.WorkflowCallParamsInput{},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", callGetResponse.Call)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/workflows/$WORKFLOW_NAME/call \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "input": {}\n        }\'',
-      },
-      python: {
-        method: 'workflows.call',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncall_get_response = client.workflows.call(\n    workflow_name="workflowName",\n    input={},\n)\nprint(call_get_response.call)',
-      },
-      typescript: {
-        method: 'client.workflows.call',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst callGetResponse = await client.workflows.call('workflowName', { input: {} });\n\nconsole.log(callGetResponse.call);",
       },
     },
   },
@@ -1154,6 +1154,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## list\n\n`client.workflows.versions.list(workflowName: string, endingBefore?: number, limit?: number, sortOrder?: 'asc' | 'desc', startingAfter?: number): { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n**get** `/v3/workflows/{workflowName}/versions`\n\n**List every version of a workflow.**\n\nVersions are immutable. Each row captures what the workflow looked\nlike between updates: graph topology, metadata, and timestamps.\nReturns newest-first by default. Cursor pagination via\n`startingAfter` / `endingBefore` over `versionNum`.\n\n### Parameters\n\n- `workflowName: string`\n\n- `endingBefore?: number`\n\n- `limit?: number`\n\n- `sortOrder?: 'asc' | 'desc'`\n\n- `startingAfter?: number`\n\n### Returns\n\n- `{ id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n  V3 read representation of a workflow version.\n\n  - `id: string`\n  - `connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]`\n  - `createdAt: string`\n  - `edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]`\n  - `mainNodeName: string`\n  - `name: string`\n  - `nodes: { function: { id?: string; name?: string; versionNum?: number; }; name: string; metadata?: object; }[]`\n  - `updatedAt: string`\n  - `versionNum: number`\n  - `audit?: { versionCreatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; workflowCreatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; workflowLastUpdatedBy?: { createdAt: string; userActionID: string; apiKeyName?: string; emailAddress?: string; userEmail?: string; userID?: string; }; }`\n  - `displayName?: string`\n  - `emailAddress?: string`\n  - `tags?: string[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\n// Automatically fetches more pages as needed.\nfor await (const workflow of client.workflows.versions.list('workflowName')) {\n  console.log(workflow);\n}\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.versions.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const workflow of client.workflows.versions.list('workflowName')) {\n  console.log(workflow.id);\n}",
+      },
+      python: {
+        method: 'workflows.versions.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.workflows.versions.list(\n    workflow_name="workflowName",\n)\npage = page.versions[0]\nprint(page.id)',
+      },
+      go: {
+        method: 'client.Workflows.Versions.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Workflows.Versions.List(\n\t\tcontext.TODO(),\n\t\t"workflowName",\n\t\tbem.WorkflowVersionListParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
+      },
       cli: {
         method: 'versions list',
         example:
@@ -1164,24 +1179,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'VersionListParams parameters = new() { WorkflowName = "workflowName" };\n\nvar page = await client.Workflows.Versions.List(parameters);\nawait foreach (var item in page.Paginate())\n{\n    Console.WriteLine(item);\n}',
       },
-      go: {
-        method: 'client.Workflows.Versions.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tpage, err := client.Workflows.Versions.List(\n\t\tcontext.TODO(),\n\t\t"workflowName",\n\t\tbem.WorkflowVersionListParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", page)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/workflows/$WORKFLOW_NAME/versions \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'workflows.versions.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\npage = client.workflows.versions.list(\n    workflow_name="workflowName",\n)\npage = page.versions[0]\nprint(page.id)',
-      },
-      typescript: {
-        method: 'client.workflows.versions.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\n// Automatically fetches more pages as needed.\nfor await (const workflow of client.workflows.versions.list('workflowName')) {\n  console.log(workflow.id);\n}",
       },
     },
   },
@@ -1200,6 +1200,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.workflows.versions.retrieve(workflowName: string, versionNum: number): { error?: string; workflow?: workflow; }`\n\n**get** `/v3/workflows/{workflowName}/versions/{versionNum}`\n\n**Retrieve a specific historical version of a workflow.**\n\nVersions are immutable. Use this endpoint to see what a workflow\nlooked like at the moment a particular call was made — every call\nrecord carries the workflow `versionNum` it ran against.\n\n### Parameters\n\n- `workflowName: string`\n\n- `versionNum: number`\n\n### Returns\n\n- `{ error?: string; workflow?: { id: string; connectors: object[]; createdAt: string; edges: workflow_edge_response[]; mainNodeName: string; name: string; nodes: workflow_node_response[]; updatedAt: string; versionNum: number; audit?: workflow_audit; displayName?: string; emailAddress?: string; tags?: string[]; }; }`\n\n  - `error?: string`\n  - `workflow?: { id: string; connectors: { connectorID: string; name: string; type: 'paragon'; paragon?: { configuration: object; integration: string; syncID: string; }; }[]; createdAt: string; edges: { destinationNodeName: string; sourceNodeName: string; destinationName?: string; metadata?: object; }[]; mainNodeName: string; name: string; nodes: { function: function_version_identifier; name: string; metadata?: object; }[]; updatedAt: string; versionNum: number; audit?: { versionCreatedBy?: user_action_summary; workflowCreatedBy?: user_action_summary; workflowLastUpdatedBy?: user_action_summary; }; displayName?: string; emailAddress?: string; tags?: string[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst version = await client.workflows.versions.retrieve(0, { workflowName: 'workflowName' });\n\nconsole.log(version);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.workflows.versions.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst version = await client.workflows.versions.retrieve(0, { workflowName: 'workflowName' });\n\nconsole.log(version.error);",
+      },
+      python: {
+        method: 'workflows.versions.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nversion = client.workflows.versions.retrieve(\n    version_num=0,\n    workflow_name="workflowName",\n)\nprint(version.error)',
+      },
+      go: {
+        method: 'client.Workflows.Versions.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tversion, err := client.Workflows.Versions.Get(\n\t\tcontext.TODO(),\n\t\t0,\n\t\tbem.WorkflowVersionGetParams{\n\t\t\tWorkflowName: "workflowName",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", version.Error)\n}\n',
+      },
       cli: {
         method: 'versions retrieve',
         example:
@@ -1210,24 +1225,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'VersionRetrieveParams parameters = new()\n{\n    WorkflowName = "workflowName",\n    VersionNum = 0,\n};\n\nvar version = await client.Workflows.Versions.Retrieve(parameters);\n\nConsole.WriteLine(version);',
       },
-      go: {
-        method: 'client.Workflows.Versions.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tversion, err := client.Workflows.Versions.Get(\n\t\tcontext.TODO(),\n\t\t0,\n\t\tbem.WorkflowVersionGetParams{\n\t\t\tWorkflowName: "workflowName",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", version.Error)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/workflows/$WORKFLOW_NAME/versions/$VERSION_NUM \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'workflows.versions.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nversion = client.workflows.versions.retrieve(\n    version_num=0,\n    workflow_name="workflowName",\n)\nprint(version.error)',
-      },
-      typescript: {
-        method: 'client.workflows.versions.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst version = await client.workflows.versions.retrieve(0, { workflowName: 'workflowName' });\n\nconsole.log(version.error);",
       },
     },
   },
@@ -1246,6 +1246,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       '## create\n\n`client.inferSchema.create(file: object): { analysis: object; filename: string; }`\n\n**post** `/v3/infer-schema`\n\n**Analyze a file and infer a JSON Schema from its contents.**\n\nAccepts a file via multipart form upload and uses Gemini to analyze the document,\nreturning a description of its contents, an inferred JSON Schema capturing all\nextractable fields, and document classification metadata.\n\nThe returned schema is designed to be reusable across many similar documents of the\nsame type, not just the specific file uploaded. It can be used directly as the\n`outputSchema` when creating a Transform function.\n\nThe endpoint also detects whether the file contains multiple bundled documents\nand classifies the content nature (textual, visual, audio, video, or mixed).\n\n## Supported file types\n\nPDF, PNG, JPEG, HEIC, HEIF, WebP, CSV, XLS, XLSX, DOCX, JSON, HTML, XML, EML,\nplain text, WAV, MP3, M4A, MP4.\n\n## File size limit\n\nMaximum file size is **20 MB**.\n\n## Examples\n\nUsing curl:\n```bash\ncurl -X POST https://api.bem.ai/v3/infer-schema \\\n  -H "x-api-key: YOUR_API_KEY" \\\n  -F "file=@invoice.pdf"\n```\n\nUsing the Bem CLI:\n```bash\nbem infer-schema create --file @invoice.pdf\n```\n\n### Parameters\n\n- `file: object`\n  The file to analyze and infer a JSON schema from.\n\n### Returns\n\n- `{ analysis: { contentNature: string; contentType: string; description: string; documentTypes: { count: number; description: string; name: string; }[]; fileName: string; fileType: string; isMultiDocument: boolean; sizeBytes: number; schema?: object; }; filename: string; }`\n  Response from the infer-schema endpoint.\n\n  - `analysis: { contentNature: string; contentType: string; description: string; documentTypes: { count: number; description: string; name: string; }[]; fileName: string; fileType: string; isMultiDocument: boolean; sizeBytes: number; schema?: object; }`\n  - `filename: string`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst inferSchema = await client.inferSchema.create({ file: {} });\n\nconsole.log(inferSchema);\n```',
     perLanguage: {
+      typescript: {
+        method: 'client.inferSchema.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst inferSchema = await client.inferSchema.create({ file: {} });\n\nconsole.log(inferSchema.analysis);",
+      },
+      python: {
+        method: 'infer_schema.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ninfer_schema = client.infer_schema.create(\n    file={},\n)\nprint(infer_schema.analysis)',
+      },
+      go: {
+        method: 'client.InferSchema.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tinferSchema, err := client.InferSchema.New(context.TODO(), bem.InferSchemaNewParams{\n\t\tFile: map[string]any{},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", inferSchema.Analysis)\n}\n',
+      },
       cli: {
         method: 'infer_schema create',
         example: "bem infer-schema create \\\n  --api-key 'My API Key' \\\n  --file '{}'",
@@ -1255,24 +1270,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'InferSchemaCreateParams parameters = new()\n{\n    File = JsonSerializer.Deserialize<JsonElement>("{}")\n};\n\nvar inferSchema = await client.InferSchema.Create(parameters);\n\nConsole.WriteLine(inferSchema);',
       },
-      go: {
-        method: 'client.InferSchema.New',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tinferSchema, err := client.InferSchema.New(context.TODO(), bem.InferSchemaNewParams{\n\t\tFile: map[string]any{},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", inferSchema.Analysis)\n}\n',
-      },
       http: {
         example:
           "curl https://api.bem.ai/v3/infer-schema \\\n    -H 'Content-Type: multipart/form-data' \\\n    -H \"x-api-key: $BEM_API_KEY\" \\\n    -F file='{}'",
-      },
-      python: {
-        method: 'infer_schema.create',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ninfer_schema = client.infer_schema.create(\n    file={},\n)\nprint(infer_schema.analysis)',
-      },
-      typescript: {
-        method: 'client.inferSchema.create',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst inferSchema = await client.inferSchema.create({ file: {} });\n\nconsole.log(inferSchema.analysis);",
       },
     },
   },
@@ -1288,6 +1288,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## delete\n\n`client.collections.delete(collectionName: string): void`\n\n**delete** `/v3/collections`\n\nDelete a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection to delete. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.collections.delete({ collectionName: 'collectionName' })\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.collections.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.collections.delete({ collectionName: 'collectionName' });",
+      },
+      python: {
+        method: 'collections.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.collections.delete(\n    collection_name="collectionName",\n)',
+      },
+      go: {
+        method: 'client.Collections.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Collections.Delete(context.TODO(), bem.CollectionDeleteParams{\n\t\tCollectionName: "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
       cli: {
         method: 'collections delete',
         example: "bem collections delete \\\n  --api-key 'My API Key' \\\n  --collection-name collectionName",
@@ -1297,24 +1312,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CollectionDeleteParams parameters = new() { CollectionName = "collectionName" };\n\nawait client.Collections.Delete(parameters);',
       },
-      go: {
-        method: 'client.Collections.Delete',
-        example:
-          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Collections.Delete(context.TODO(), bem.CollectionDeleteParams{\n\t\tCollectionName: "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/collections \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'collections.delete',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.collections.delete(\n    collection_name="collectionName",\n)',
-      },
-      typescript: {
-        method: 'client.collections.delete',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.collections.delete({ collectionName: 'collectionName' });",
       },
     },
   },
@@ -1337,6 +1337,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       '## list\n\n`client.collections.list(collectionNameSearch?: string, limit?: number, page?: number, parentCollectionName?: string): { collections: object[]; limit: number; page: number; totalCount: number; totalPages: number; }`\n\n**get** `/v3/collections`\n\nList Collections\n\n### Parameters\n\n- `collectionNameSearch?: string`\n  Optional substring search filter for collection names (case-insensitive).\nFor example, "premium" will match "customers.premium", "products.premium", etc.\n\n- `limit?: number`\n  Number of collections per page\n\n- `page?: number`\n  Page number for pagination\n\n- `parentCollectionName?: string`\n  Optional filter to list only collections under a specific parent collection path.\nFor example, "customers" will return "customers", "customers.premium", "customers.premium.vip", etc.\n\n### Returns\n\n- `{ collections: { collectionID: string; collectionName: string; createdAt: string; itemCount: number; updatedAt?: string; }[]; limit: number; page: number; totalCount: number; totalPages: number; }`\n  Response for listing collections\n\n  - `collections: { collectionID: string; collectionName: string; createdAt: string; itemCount: number; updatedAt?: string; }[]`\n  - `limit: number`\n  - `page: number`\n  - `totalCount: number`\n  - `totalPages: number`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst collections = await client.collections.list();\n\nconsole.log(collections);\n```',
     perLanguage: {
+      typescript: {
+        method: 'client.collections.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst collections = await client.collections.list();\n\nconsole.log(collections.collections);",
+      },
+      python: {
+        method: 'collections.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncollections = client.collections.list()\nprint(collections.collections)',
+      },
+      go: {
+        method: 'client.Collections.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcollections, err := client.Collections.List(context.TODO(), bem.CollectionListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", collections.Collections)\n}\n',
+      },
       cli: {
         method: 'collections list',
         example: "bem collections list \\\n  --api-key 'My API Key'",
@@ -1346,23 +1361,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CollectionListParams parameters = new();\n\nvar collections = await client.Collections.List(parameters);\n\nConsole.WriteLine(collections);',
       },
-      go: {
-        method: 'client.Collections.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcollections, err := client.Collections.List(context.TODO(), bem.CollectionListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", collections.Collections)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/collections \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'collections.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncollections = client.collections.list()\nprint(collections.collections)',
-      },
-      typescript: {
-        method: 'client.collections.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst collections = await client.collections.list();\n\nconsole.log(collections.collections);",
       },
     },
   },
@@ -1380,6 +1380,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## create\n\n`client.collections.create(collectionName: string): { collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: object[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n\n**post** `/v3/collections`\n\nCreate a Collection\n\n### Parameters\n\n- `collectionName: string`\n  Unique name/path for the collection. Supports dot notation for hierarchical paths.\n\n- Only letters (a-z, A-Z), digits (0-9), underscores (_), and dots (.) are allowed\n- Each segment (between dots) must start with a letter or underscore (not a digit)\n- Segments cannot consist only of digits\n- Each segment must be 1-256 characters\n- No leading, trailing, or consecutive dots\n- Invalid names are rejected with a 400 Bad Request error\n\n**Valid Examples:**\n- 'product_catalog'\n- 'orders.line_items.sku'\n- 'customer_data'\n- 'price_v2'\n\n**Invalid Examples:**\n- 'product-catalog' (contains hyphen)\n- '123items' (starts with digit)\n- 'items..data' (consecutive dots)\n- 'order#123' (contains invalid character #)\n\n### Returns\n\n- `{ collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n  Collection details\n\n  - `collectionID: string`\n  - `collectionName: string`\n  - `createdAt: string`\n  - `itemCount: number`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n  - `limit?: number`\n  - `page?: number`\n  - `totalPages?: number`\n  - `updatedAt?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst collection = await client.collections.create({ collectionName: 'product_catalog' });\n\nconsole.log(collection);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.collections.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst collection = await client.collections.create({ collectionName: 'product_catalog' });\n\nconsole.log(collection.collectionID);",
+      },
+      python: {
+        method: 'collections.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncollection = client.collections.create(\n    collection_name="product_catalog",\n)\nprint(collection.collection_id)',
+      },
+      go: {
+        method: 'client.Collections.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcollection, err := client.Collections.New(context.TODO(), bem.CollectionNewParams{\n\t\tCollectionName: "product_catalog",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", collection.CollectionID)\n}\n',
+      },
       cli: {
         method: 'collections create',
         example:
@@ -1390,24 +1405,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CollectionCreateParams parameters = new()\n{\n    CollectionName = "product_catalog"\n};\n\nvar collection = await client.Collections.Create(parameters);\n\nConsole.WriteLine(collection);',
       },
-      go: {
-        method: 'client.Collections.New',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tcollection, err := client.Collections.New(context.TODO(), bem.CollectionNewParams{\n\t\tCollectionName: "product_catalog",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", collection.CollectionID)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/collections \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "collectionName": "product_catalog"\n        }\'',
-      },
-      python: {
-        method: 'collections.create',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\ncollection = client.collections.create(\n    collection_name="product_catalog",\n)\nprint(collection.collection_id)',
-      },
-      typescript: {
-        method: 'client.collections.create',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst collection = await client.collections.create({ collectionName: 'product_catalog' });\n\nconsole.log(collection.collectionID);",
       },
     },
   },
@@ -1426,6 +1426,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## count_tokens\n\n`client.collections.countTokens(texts: string[]): { max_token_limit?: number; texts_exceeding_limit?: number; token_counts?: object[]; total_tokens?: number; }`\n\n**post** `/v3/collections/token-count`\n\nCount the number of tokens in the provided texts using the BGE M3 tokenizer.\nThis is useful for checking if texts will fit within the embedding model's token limit\n(8,192 tokens per text) before sending them for embedding.\n\n### Parameters\n\n- `texts: string[]`\n  One or more texts to tokenize.\n\n### Returns\n\n- `{ max_token_limit?: number; texts_exceeding_limit?: number; token_counts?: { char_count?: number; exceeds_limit?: boolean; index?: number; token_count?: number; }[]; total_tokens?: number; }`\n  Response for the token count endpoint.\n\n  - `max_token_limit?: number`\n  - `texts_exceeding_limit?: number`\n  - `token_counts?: { char_count?: number; exceeds_limit?: boolean; index?: number; token_count?: number; }[]`\n  - `total_tokens?: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.collections.countTokens({ texts: ['string'] });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.collections.countTokens',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.collections.countTokens({ texts: ['string'] });\n\nconsole.log(response.max_token_limit);",
+      },
+      python: {
+        method: 'collections.count_tokens',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.collections.count_tokens(\n    texts=["string"],\n)\nprint(response.max_token_limit)',
+      },
+      go: {
+        method: 'client.Collections.CountTokens',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Collections.CountTokens(context.TODO(), bem.CollectionCountTokensParams{\n\t\tTexts: []string{"string"},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.MaxTokenLimit)\n}\n',
+      },
       cli: {
         method: 'collections count_tokens',
         example: "bem collections count-tokens \\\n  --api-key 'My API Key' \\\n  --text string",
@@ -1435,24 +1450,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'CollectionCountTokensParams parameters = new()\n{\n    Texts =\n    [\n        "string"\n    ],\n};\n\nvar response = await client.Collections.CountTokens(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Collections.CountTokens',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Collections.CountTokens(context.TODO(), bem.CollectionCountTokensParams{\n\t\tTexts: []string{"string"},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.MaxTokenLimit)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/collections/token-count \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "texts": [\n            "string"\n          ]\n        }\'',
-      },
-      python: {
-        method: 'collections.count_tokens',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.collections.count_tokens(\n    texts=["string"],\n)\nprint(response.max_token_limit)',
-      },
-      typescript: {
-        method: 'client.collections.countTokens',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.collections.countTokens({ texts: ['string'] });\n\nconsole.log(response.max_token_limit);",
       },
     },
   },
@@ -1468,6 +1468,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## delete\n\n`client.collections.items.delete(collectionItemID: string, collectionName: string): void`\n\n**delete** `/v3/collections/items`\n\nDelete an item from a Collection\n\n### Parameters\n\n- `collectionItemID: string`\n  The unique identifier of the item to delete\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.collections.items.delete({ collectionItemID: 'collectionItemID', collectionName: 'collectionName' })\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.collections.items.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.collections.items.delete({\n  collectionItemID: 'collectionItemID',\n  collectionName: 'collectionName',\n});",
+      },
+      python: {
+        method: 'collections.items.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.collections.items.delete(\n    collection_item_id="collectionItemID",\n    collection_name="collectionName",\n)',
+      },
+      go: {
+        method: 'client.Collections.Items.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Collections.Items.Delete(context.TODO(), bem.CollectionItemDeleteParams{\n\t\tCollectionItemID: "collectionItemID",\n\t\tCollectionName:   "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
       cli: {
         method: 'items delete',
         example:
@@ -1478,24 +1493,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ItemDeleteParams parameters = new()\n{\n    CollectionItemID = "collectionItemID",\n    CollectionName = "collectionName",\n};\n\nawait client.Collections.Items.Delete(parameters);',
       },
-      go: {
-        method: 'client.Collections.Items.Delete',
-        example:
-          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Collections.Items.Delete(context.TODO(), bem.CollectionItemDeleteParams{\n\t\tCollectionItemID: "collectionItemID",\n\t\tCollectionName:   "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/collections/items \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'collections.items.delete',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.collections.items.delete(\n    collection_item_id="collectionItemID",\n    collection_name="collectionName",\n)',
-      },
-      typescript: {
-        method: 'client.collections.items.delete',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.collections.items.delete({\n  collectionItemID: 'collectionItemID',\n  collectionName: 'collectionName',\n});",
       },
     },
   },
@@ -1518,6 +1518,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       '## retrieve\n\n`client.collections.items.retrieve(collectionName: string, includeSubcollections?: boolean, limit?: number, page?: number): { collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: object[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n\n**get** `/v3/collections/items`\n\nGet a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n- `includeSubcollections?: boolean`\n  When true, includes items from all subcollections under the specified collection path.\nFor example, querying "customers" with this flag will return items from "customers",\n"customers.premium", "customers.premium.vip", etc.\n\n- `limit?: number`\n  Number of items per page\n\n- `page?: number`\n  Page number for pagination\n\n### Returns\n\n- `{ collectionID: string; collectionName: string; createdAt: string; itemCount: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; limit?: number; page?: number; totalPages?: number; updatedAt?: string; }`\n  Collection details\n\n  - `collectionID: string`\n  - `collectionName: string`\n  - `createdAt: string`\n  - `itemCount: number`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n  - `limit?: number`\n  - `page?: number`\n  - `totalPages?: number`\n  - `updatedAt?: string`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst item = await client.collections.items.retrieve({ collectionName: \'collectionName\' });\n\nconsole.log(item);\n```',
     perLanguage: {
+      typescript: {
+        method: 'client.collections.items.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst item = await client.collections.items.retrieve({ collectionName: 'collectionName' });\n\nconsole.log(item.collectionID);",
+      },
+      python: {
+        method: 'collections.items.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nitem = client.collections.items.retrieve(\n    collection_name="collectionName",\n)\nprint(item.collection_id)',
+      },
+      go: {
+        method: 'client.Collections.Items.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\titem, err := client.Collections.Items.Get(context.TODO(), bem.CollectionItemGetParams{\n\t\tCollectionName: "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", item.CollectionID)\n}\n',
+      },
       cli: {
         method: 'items retrieve',
         example:
@@ -1528,23 +1543,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ItemRetrieveParams parameters = new() { CollectionName = "collectionName" };\n\nvar item = await client.Collections.Items.Retrieve(parameters);\n\nConsole.WriteLine(item);',
       },
-      go: {
-        method: 'client.Collections.Items.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\titem, err := client.Collections.Items.Get(context.TODO(), bem.CollectionItemGetParams{\n\t\tCollectionName: "collectionName",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", item.CollectionID)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/collections/items \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'collections.items.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nitem = client.collections.items.retrieve(\n    collection_name="collectionName",\n)\nprint(item.collection_id)',
-      },
-      typescript: {
-        method: 'client.collections.items.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst item = await client.collections.items.retrieve({ collectionName: 'collectionName' });\n\nconsole.log(item.collectionID);",
       },
     },
   },
@@ -1562,6 +1562,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## add\n\n`client.collections.items.add(collectionName: string, items: { data: string | object; }[]): { eventID: string; message: string; status: 'pending'; addedCount?: number; items?: object[]; }`\n\n**post** `/v3/collections/items`\n\nAdd new items to a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n- `items: { data: string | object; }[]`\n  Array of items to add (maximum 100 items per request)\n\n### Returns\n\n- `{ eventID: string; message: string; status: 'pending'; addedCount?: number; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; }`\n  Response after queuing items for async processing\n\n  - `eventID: string`\n  - `message: string`\n  - `status: 'pending'`\n  - `addedCount?: number`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.collections.items.add({ collectionName: 'product_catalog', items: [{ data: {\n  sku: 'SKU-11111',\n  name: 'Deluxe Component',\n  category: 'Hardware',\n  price: 299.99,\n} }, { data: {\n  sku: 'SKU-22222',\n  name: 'Standard Part',\n  category: 'Tools',\n  price: 49.99,\n} }] });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.collections.items.add',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.collections.items.add({\n  collectionName: 'product_catalog',\n  items: [\n    {\n      data: {\n        sku: 'SKU-11111',\n        name: 'Deluxe Component',\n        category: 'Hardware',\n        price: 299.99,\n      },\n    },\n    {\n      data: {\n        sku: 'SKU-22222',\n        name: 'Standard Part',\n        category: 'Tools',\n        price: 49.99,\n      },\n    },\n  ],\n});\n\nconsole.log(response.eventID);",
+      },
+      python: {
+        method: 'collections.items.add',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.collections.items.add(\n    collection_name="product_catalog",\n    items=[{\n        "data": {\n            "sku": "SKU-11111",\n            "name": "Deluxe Component",\n            "category": "Hardware",\n            "price": 299.99,\n        }\n    }, {\n        "data": {\n            "sku": "SKU-22222",\n            "name": "Standard Part",\n            "category": "Tools",\n            "price": 49.99,\n        }\n    }],\n)\nprint(response.event_id)',
+      },
+      go: {
+        method: 'client.Collections.Items.Add',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Collections.Items.Add(context.TODO(), bem.CollectionItemAddParams{\n\t\tCollectionName: "product_catalog",\n\t\tItems: []bem.CollectionItemAddParamsItem{{\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-11111",\n\t\t\t\t"name":     "Deluxe Component",\n\t\t\t\t"category": "Hardware",\n\t\t\t\t"price":    299.99,\n\t\t\t},\n\t\t}, {\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-22222",\n\t\t\t\t"name":     "Standard Part",\n\t\t\t\t"category": "Tools",\n\t\t\t\t"price":    49.99,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.EventID)\n}\n',
+      },
       cli: {
         method: 'items add',
         example:
@@ -1572,24 +1587,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ItemAddParams parameters = new()\n{\n    CollectionName = "product_catalog",\n    Items =\n    [\n        new(\n            new Data(\n                JsonSerializer.Deserialize<JsonElement>(\n                    """\n                    {\n                      "sku": "SKU-11111",\n                      "name": "Deluxe Component",\n                      "category": "Hardware",\n                      "price": 299.99\n                    }\n                    """\n                )\n            )\n        ),\n        new(\n            new Data(\n                JsonSerializer.Deserialize<JsonElement>(\n                    """\n                    {\n                      "sku": "SKU-22222",\n                      "name": "Standard Part",\n                      "category": "Tools",\n                      "price": 49.99\n                    }\n                    """\n                )\n            )\n        ),\n    ],\n};\n\nvar response = await client.Collections.Items.Add(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Collections.Items.Add',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Collections.Items.Add(context.TODO(), bem.CollectionItemAddParams{\n\t\tCollectionName: "product_catalog",\n\t\tItems: []bem.CollectionItemAddParamsItem{{\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-11111",\n\t\t\t\t"name":     "Deluxe Component",\n\t\t\t\t"category": "Hardware",\n\t\t\t\t"price":    299.99,\n\t\t\t},\n\t\t}, {\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-22222",\n\t\t\t\t"name":     "Standard Part",\n\t\t\t\t"category": "Tools",\n\t\t\t\t"price":    49.99,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.EventID)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/collections/items \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "collectionName": "product_catalog",\n          "items": [\n            {\n              "data": {\n                "sku": "SKU-11111",\n                "name": "Deluxe Component",\n                "category": "Hardware",\n                "price": 299.99\n              }\n            },\n            {\n              "data": {\n                "sku": "SKU-22222",\n                "name": "Standard Part",\n                "category": "Tools",\n                "price": 49.99\n              }\n            }\n          ]\n        }\'',
-      },
-      python: {
-        method: 'collections.items.add',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.collections.items.add(\n    collection_name="product_catalog",\n    items=[{\n        "data": {\n            "sku": "SKU-11111",\n            "name": "Deluxe Component",\n            "category": "Hardware",\n            "price": 299.99,\n        }\n    }, {\n        "data": {\n            "sku": "SKU-22222",\n            "name": "Standard Part",\n            "category": "Tools",\n            "price": 49.99,\n        }\n    }],\n)\nprint(response.event_id)',
-      },
-      typescript: {
-        method: 'client.collections.items.add',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.collections.items.add({\n  collectionName: 'product_catalog',\n  items: [\n    {\n      data: {\n        sku: 'SKU-11111',\n        name: 'Deluxe Component',\n        category: 'Hardware',\n        price: 299.99,\n      },\n    },\n    {\n      data: {\n        sku: 'SKU-22222',\n        name: 'Standard Part',\n        category: 'Tools',\n        price: 49.99,\n      },\n    },\n  ],\n});\n\nconsole.log(response.eventID);",
       },
     },
   },
@@ -1607,6 +1607,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## update\n\n`client.collections.items.update(collectionName: string, items: { collectionItemID: string; data: string | object; }[]): { eventID: string; message: string; status: 'pending'; items?: object[]; updatedCount?: number; }`\n\n**put** `/v3/collections/items`\n\nUpdate existing items in a Collection\n\n### Parameters\n\n- `collectionName: string`\n  The name/path of the collection. Must use only letters, digits, underscores, and dots.\nEach segment must start with a letter or underscore.\n\n- `items: { collectionItemID: string; data: string | object; }[]`\n  Array of items to update (maximum 100 items per request)\n\n### Returns\n\n- `{ eventID: string; message: string; status: 'pending'; items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]; updatedCount?: number; }`\n  Response after queuing items for async update\n\n  - `eventID: string`\n  - `message: string`\n  - `status: 'pending'`\n  - `items?: { collectionItemID: string; createdAt: string; data: string | object; updatedAt: string; }[]`\n  - `updatedCount?: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst item = await client.collections.items.update({ collectionName: 'product_catalog', items: [{ collectionItemID: 'clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP', data: 'SKU-12345: Updated Industrial Widget - Premium Edition' }, {\n  collectionItemID: 'clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ',\n  data: {\n  sku: 'SKU-67890',\n  name: 'Updated Premium Gear',\n  category: 'Hardware',\n  price: 399.99,\n},\n}] });\n\nconsole.log(item);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.collections.items.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst item = await client.collections.items.update({\n  collectionName: 'product_catalog',\n  items: [\n    {\n      collectionItemID: 'clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP',\n      data: 'SKU-12345: Updated Industrial Widget - Premium Edition',\n    },\n    {\n      collectionItemID: 'clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ',\n      data: {\n        sku: 'SKU-67890',\n        name: 'Updated Premium Gear',\n        category: 'Hardware',\n        price: 399.99,\n      },\n    },\n  ],\n});\n\nconsole.log(item.eventID);",
+      },
+      python: {
+        method: 'collections.items.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nitem = client.collections.items.update(\n    collection_name="product_catalog",\n    items=[{\n        "collection_item_id": "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n        "data": "SKU-12345: Updated Industrial Widget - Premium Edition",\n    }, {\n        "collection_item_id": "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n        "data": {\n            "sku": "SKU-67890",\n            "name": "Updated Premium Gear",\n            "category": "Hardware",\n            "price": 399.99,\n        },\n    }],\n)\nprint(item.event_id)',
+      },
+      go: {
+        method: 'client.Collections.Items.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\titem, err := client.Collections.Items.Update(context.TODO(), bem.CollectionItemUpdateParams{\n\t\tCollectionName: "product_catalog",\n\t\tItems: []bem.CollectionItemUpdateParamsItem{{\n\t\t\tCollectionItemID: "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n\t\t\tData:             "SKU-12345: Updated Industrial Widget - Premium Edition",\n\t\t}, {\n\t\t\tCollectionItemID: "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-67890",\n\t\t\t\t"name":     "Updated Premium Gear",\n\t\t\t\t"category": "Hardware",\n\t\t\t\t"price":    399.99,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", item.EventID)\n}\n',
+      },
       cli: {
         method: 'items update',
         example:
@@ -1617,24 +1632,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ItemUpdateParams parameters = new()\n{\n    CollectionName = "product_catalog",\n    Items =\n    [\n        new()\n        {\n            CollectionItemID = "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n            Data = "SKU-12345: Updated Industrial Widget - Premium Edition",\n        },\n        new()\n        {\n            CollectionItemID = "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n            Data = JsonSerializer.Deserialize<JsonElement>(\n                """\n                {\n                  "sku": "SKU-67890",\n                  "name": "Updated Premium Gear",\n                  "category": "Hardware",\n                  "price": 399.99\n                }\n                """\n            ),\n        },\n    ],\n};\n\nvar item = await client.Collections.Items.Update(parameters);\n\nConsole.WriteLine(item);',
       },
-      go: {
-        method: 'client.Collections.Items.Update',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\titem, err := client.Collections.Items.Update(context.TODO(), bem.CollectionItemUpdateParams{\n\t\tCollectionName: "product_catalog",\n\t\tItems: []bem.CollectionItemUpdateParamsItem{{\n\t\t\tCollectionItemID: "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n\t\t\tData:             "SKU-12345: Updated Industrial Widget - Premium Edition",\n\t\t}, {\n\t\t\tCollectionItemID: "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n\t\t\tData: map[string]any{\n\t\t\t\t"sku":      "SKU-67890",\n\t\t\t\t"name":     "Updated Premium Gear",\n\t\t\t\t"category": "Hardware",\n\t\t\t\t"price":    399.99,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", item.EventID)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/collections/items \\\n    -X PUT \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "collectionName": "product_catalog",\n          "items": [\n            {\n              "collectionItemID": "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n              "data": "SKU-12345: Updated Industrial Widget - Premium Edition"\n            },\n            {\n              "collectionItemID": "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n              "data": {\n                "sku": "SKU-67890",\n                "name": "Updated Premium Gear",\n                "category": "Hardware",\n                "price": 399.99\n              }\n            }\n          ]\n        }\'',
-      },
-      python: {
-        method: 'collections.items.update',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nitem = client.collections.items.update(\n    collection_name="product_catalog",\n    items=[{\n        "collection_item_id": "clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP",\n        "data": "SKU-12345: Updated Industrial Widget - Premium Edition",\n    }, {\n        "collection_item_id": "clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ",\n        "data": {\n            "sku": "SKU-67890",\n            "name": "Updated Premium Gear",\n            "category": "Hardware",\n            "price": 399.99,\n        },\n    }],\n)\nprint(item.event_id)',
-      },
-      typescript: {
-        method: 'client.collections.items.update',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst item = await client.collections.items.update({\n  collectionName: 'product_catalog',\n  items: [\n    {\n      collectionItemID: 'clitm_2N6gH8ZKCmvb6BnFcGqhKJ98VzP',\n      data: 'SKU-12345: Updated Industrial Widget - Premium Edition',\n    },\n    {\n      collectionItemID: 'clitm_3M7hI9ALDnwc7CoGdHriLK09WaQ',\n      data: {\n        sku: 'SKU-67890',\n        name: 'Updated Premium Gear',\n        category: 'Hardware',\n        price: 399.99,\n      },\n    },\n  ],\n});\n\nconsole.log(item.eventID);",
       },
     },
   },
@@ -1653,6 +1653,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## submit_feedback\n\n`client.events.submitFeedback(eventID: string, correction: object, orderMatching?: boolean): { correction: object; createdAt: string; eventID: string; functionType: 'extract' | 'classify' | 'join'; }`\n\n**post** `/v3/events/{eventID}/feedback`\n\n**Submit a correction for an event.**\n\nAccepts training corrections for `extract`, `classify`, and `join` events.\nFor extract/join events, `correction` is a JSON object matching the function's\noutput schema. For classify events, `correction` is a JSON string matching\none of the function version's declared classifications.\n\nSubmitting feedback again for the same event overwrites the previous correction.\n\nUnsupported function types (split, enrich) return `400`.\n\n### Parameters\n\n- `eventID: string`\n\n- `correction: object`\n\n- `orderMatching?: boolean`\n\n### Returns\n\n- `{ correction: object; createdAt: string; eventID: string; functionType: 'extract' | 'classify' | 'join'; }`\n  Echoed response after a correction is recorded.\n\n  - `correction: object`\n  - `createdAt: string`\n  - `eventID: string`\n  - `functionType: 'extract' | 'classify' | 'join'`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.events.submitFeedback('eventID', { correction: {} });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.events.submitFeedback',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.events.submitFeedback('eventID', { correction: {} });\n\nconsole.log(response.correction);",
+      },
+      python: {
+        method: 'events.submit_feedback',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.events.submit_feedback(\n    event_id="eventID",\n    correction={},\n)\nprint(response.correction)',
+      },
+      go: {
+        method: 'client.Events.SubmitFeedback',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Events.SubmitFeedback(\n\t\tcontext.TODO(),\n\t\t"eventID",\n\t\tbem.EventSubmitFeedbackParams{\n\t\t\tCorrection: map[string]any{},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Correction)\n}\n',
+      },
       cli: {
         method: 'events submit_feedback',
         example:
@@ -1663,24 +1678,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'EventSubmitFeedbackParams parameters = new()\n{\n    EventID = "eventID",\n    Correction = JsonSerializer.Deserialize<JsonElement>("{}"),\n};\n\nvar response = await client.Events.SubmitFeedback(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Events.SubmitFeedback',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Events.SubmitFeedback(\n\t\tcontext.TODO(),\n\t\t"eventID",\n\t\tbem.EventSubmitFeedbackParams{\n\t\t\tCorrection: map[string]any{},\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Correction)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/events/$EVENT_ID/feedback \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "correction": {}\n        }\'',
-      },
-      python: {
-        method: 'events.submit_feedback',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.events.submit_feedback(\n    event_id="eventID",\n    correction={},\n)\nprint(response.correction)',
-      },
-      typescript: {
-        method: 'client.events.submitFeedback',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.events.submitFeedback('eventID', { correction: {} });\n\nconsole.log(response.correction);",
       },
     },
   },
@@ -1697,6 +1697,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve\n\n`client.webhookSecret.retrieve(): { secret: string; }`\n\n**get** `/v3/webhook-secret`\n\n**Get the current webhook signing secret.**\n\nReturns the active secret used to sign outbound webhook deliveries via the `bem-signature`\nheader. Returns 404 if no secret has been generated for this environment yet.\n\nUse the secret to verify incoming webhook payloads:\n1. Parse `bem-signature: t={timestamp},v1={signature}`.\n2. Construct the signed string: `{timestamp}.{raw request body}`.\n3. Compute HMAC-SHA256 of that string using the secret.\n4. Compare the hex digest against `v1`.\n5. Reject requests where the timestamp is more than a few minutes old.\n\n### Returns\n\n- `{ secret: string; }`\n  Webhook signing secret used to verify `bem-signature` headers on delivered webhooks.\n\n  - `secret: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst webhookSecret = await client.webhookSecret.retrieve();\n\nconsole.log(webhookSecret);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.webhookSecret.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst webhookSecret = await client.webhookSecret.retrieve();\n\nconsole.log(webhookSecret.secret);",
+      },
+      python: {
+        method: 'webhook_secret.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nwebhook_secret = client.webhook_secret.retrieve()\nprint(webhook_secret.secret)',
+      },
+      go: {
+        method: 'client.WebhookSecret.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\twebhookSecret, err := client.WebhookSecret.Get(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", webhookSecret.Secret)\n}\n',
+      },
       cli: {
         method: 'webhook_secret retrieve',
         example: "bem webhook-secret retrieve \\\n  --api-key 'My API Key'",
@@ -1706,23 +1721,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WebhookSecretRetrieveParams parameters = new();\n\nvar webhookSecret = await client.WebhookSecret.Retrieve(parameters);\n\nConsole.WriteLine(webhookSecret);',
       },
-      go: {
-        method: 'client.WebhookSecret.Get',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\twebhookSecret, err := client.WebhookSecret.Get(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", webhookSecret.Secret)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/webhook-secret \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'webhook_secret.retrieve',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nwebhook_secret = client.webhook_secret.retrieve()\nprint(webhook_secret.secret)',
-      },
-      typescript: {
-        method: 'client.webhookSecret.retrieve',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst webhookSecret = await client.webhookSecret.retrieve();\n\nconsole.log(webhookSecret.secret);",
       },
     },
   },
@@ -1739,6 +1739,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## create\n\n`client.webhookSecret.create(): { secret: string; }`\n\n**post** `/v3/webhook-secret`\n\n**Generate a new webhook signing secret.**\n\nCreates a new signing secret for this environment (or replaces the existing one).\nThe new secret is returned in full exactly once — store it securely.\n\nAfter rotation all newly delivered webhooks will be signed with the new secret.\nUpdate your verification logic before calling this endpoint if you need zero-downtime rotation.\n\n### Returns\n\n- `{ secret: string; }`\n  Webhook signing secret used to verify `bem-signature` headers on delivered webhooks.\n\n  - `secret: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst webhookSecret = await client.webhookSecret.create();\n\nconsole.log(webhookSecret);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.webhookSecret.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst webhookSecret = await client.webhookSecret.create();\n\nconsole.log(webhookSecret.secret);",
+      },
+      python: {
+        method: 'webhook_secret.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nwebhook_secret = client.webhook_secret.create()\nprint(webhook_secret.secret)',
+      },
+      go: {
+        method: 'client.WebhookSecret.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\twebhookSecret, err := client.WebhookSecret.New(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", webhookSecret.Secret)\n}\n',
+      },
       cli: {
         method: 'webhook_secret create',
         example: "bem webhook-secret create \\\n  --api-key 'My API Key'",
@@ -1748,24 +1763,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WebhookSecretCreateParams parameters = new();\n\nvar webhookSecret = await client.WebhookSecret.Create(parameters);\n\nConsole.WriteLine(webhookSecret);',
       },
-      go: {
-        method: 'client.WebhookSecret.New',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\twebhookSecret, err := client.WebhookSecret.New(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", webhookSecret.Secret)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/webhook-secret \\\n    -X POST \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'webhook_secret.create',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nwebhook_secret = client.webhook_secret.create()\nprint(webhook_secret.secret)',
-      },
-      typescript: {
-        method: 'client.webhookSecret.create',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst webhookSecret = await client.webhookSecret.create();\n\nconsole.log(webhookSecret.secret);",
       },
     },
   },
@@ -1781,6 +1781,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## revoke\n\n`client.webhookSecret.revoke(): void`\n\n**delete** `/v3/webhook-secret`\n\n**Revoke the current webhook signing secret.**\n\nDeletes the active signing secret. Webhook deliveries will continue but will no longer\ninclude a `bem-signature` header until a new secret is generated.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.webhookSecret.revoke()\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.webhookSecret.revoke',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.webhookSecret.revoke();",
+      },
+      python: {
+        method: 'webhook_secret.revoke',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.webhook_secret.revoke()',
+      },
+      go: {
+        method: 'client.WebhookSecret.Revoke',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.WebhookSecret.Revoke(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
       cli: {
         method: 'webhook_secret revoke',
         example: "bem webhook-secret revoke \\\n  --api-key 'My API Key'",
@@ -1790,24 +1805,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'WebhookSecretRevokeParams parameters = new();\n\nawait client.WebhookSecret.Revoke(parameters);',
       },
-      go: {
-        method: 'client.WebhookSecret.Revoke',
-        example:
-          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.WebhookSecret.Revoke(context.TODO())\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/webhook-secret \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'webhook_secret.revoke',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.webhook_secret.revoke()',
-      },
-      typescript: {
-        method: 'client.webhookSecret.revoke',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.webhookSecret.revoke();",
       },
     },
   },
@@ -1825,6 +1825,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## trigger_evaluation\n\n`client.eval.triggerEvaluation(transformationIDs: string[], evaluationVersion?: string): { queued: number; skipped: number; errors?: object; }`\n\n**post** `/v3/eval`\n\n**Queue evaluation jobs for a batch of transformations.**\n\nEvaluations run asynchronously and score each transformation's output\nagainst the function's schema for confidence, hallucination detection,\nand relevance. Transformations must belong to events of a supported\ntype: `extract`, `transform`, `analyze`, or `join`.\n\nReturns immediately with a summary of queued vs. skipped transformations\nand per-transformation errors. Poll `POST /v3/eval/results` or\n`GET /v3/eval/results` to retrieve results once evaluations complete.\n\n### Parameters\n\n- `transformationIDs: string[]`\n  Transformation IDs to evaluate. Up to 100 per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version (e.g. `0.1.0-gemini`). When omitted the\nserver's default evaluation version is used.\n\n### Returns\n\n- `{ queued: number; skipped: number; errors?: object; }`\n  Summary of the trigger call. Evaluations run asynchronously; use\n`POST /v3/eval/results` or `GET /v3/eval/results` to poll for results.\n\n  - `queued: number`\n  - `skipped: number`\n  - `errors?: object`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.eval.triggerEvaluation({ transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'] });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.eval.triggerEvaluation',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.triggerEvaluation({\n  transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],\n  evaluationVersion: '0.1.0-gemini',\n});\n\nconsole.log(response.queued);",
+      },
+      python: {
+        method: 'eval.trigger_evaluation',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.trigger_evaluation(\n    transformation_ids=["tr_01HXAB...", "tr_01HXCD..."],\n    evaluation_version="0.1.0-gemini",\n)\nprint(response.queued)',
+      },
+      go: {
+        method: 'client.Eval.TriggerEvaluation',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.TriggerEvaluation(context.TODO(), bem.EvalTriggerEvaluationParams{\n\t\tTransformationIDs: []string{"tr_01HXAB...", "tr_01HXCD..."},\n\t\tEvaluationVersion: bem.String("0.1.0-gemini"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Queued)\n}\n',
+      },
       cli: {
         method: 'eval trigger_evaluation',
         example:
@@ -1835,24 +1850,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'EvalTriggerEvaluationParams parameters = new()\n{\n    TransformationIds =\n    [\n        "tr_01HXAB...", "tr_01HXCD..."\n    ],\n};\n\nvar response = await client.Eval.TriggerEvaluation(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Eval.TriggerEvaluation',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.TriggerEvaluation(context.TODO(), bem.EvalTriggerEvaluationParams{\n\t\tTransformationIDs: []string{"tr_01HXAB...", "tr_01HXCD..."},\n\t\tEvaluationVersion: bem.String("0.1.0-gemini"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Queued)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/eval \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ]\n        }\'',
-      },
-      python: {
-        method: 'eval.trigger_evaluation',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.trigger_evaluation(\n    transformation_ids=["tr_01HXAB...", "tr_01HXCD..."],\n    evaluation_version="0.1.0-gemini",\n)\nprint(response.queued)',
-      },
-      typescript: {
-        method: 'client.eval.triggerEvaluation',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.triggerEvaluation({\n  transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],\n  evaluationVersion: '0.1.0-gemini',\n});\n\nconsole.log(response.queued);",
       },
     },
   },
@@ -1871,6 +1871,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## fetch_results\n\n`client.eval.results.fetchResults(transformationIDs: string[], evaluationVersion?: string): { results: object; errors?: object; failed?: object[]; pending?: object[]; }`\n\n**post** `/v3/eval/results`\n\n**Fetch evaluation results for a batch of transformations (POST).**\n\nFor each requested transformation ID the response reports one of three\nstates: a completed `result`, still-`pending`, or `failed`. The POST\nvariant accepts the ID list in the request body; use the `GET` variant\nwith query parameters for simpler clients.\n\n### Parameters\n\n- `transformationIDs: string[]`\n  Transformation IDs to fetch results for. Up to 100 per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version filter.\n\n### Returns\n\n- `{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]; pending?: { createdAt: string; transformationId: string; }[]; }`\n  Batched response containing the evaluation state for every requested\ntransformation ID, partitioned into completed `results`, still-running\n`pending`, and terminal `failed` groups.\n\n  - `results: object`\n  - `errors?: object`\n  - `failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]`\n  - `pending?: { createdAt: string; transformationId: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.eval.results.fetchResults({ transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'] });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.eval.results.fetchResults',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.results.fetchResults({\n  transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],\n  evaluationVersion: '0.1.0-gemini',\n});\n\nconsole.log(response.results);",
+      },
+      python: {
+        method: 'eval.results.fetch_results',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.results.fetch_results(\n    transformation_ids=["tr_01HXAB...", "tr_01HXCD..."],\n    evaluation_version="0.1.0-gemini",\n)\nprint(response.results)',
+      },
+      go: {
+        method: 'client.Eval.Results.FetchResults',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.Results.FetchResults(context.TODO(), bem.EvalResultFetchResultsParams{\n\t\tTransformationIDs: []string{"tr_01HXAB...", "tr_01HXCD..."},\n\t\tEvaluationVersion: bem.String("0.1.0-gemini"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Results)\n}\n',
+      },
       cli: {
         method: 'results fetch_results',
         example:
@@ -1881,24 +1896,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ResultFetchResultsParams parameters = new()\n{\n    TransformationIds =\n    [\n        "tr_01HXAB...", "tr_01HXCD..."\n    ],\n};\n\nvar response = await client.Eval.Results.FetchResults(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Eval.Results.FetchResults',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.Results.FetchResults(context.TODO(), bem.EvalResultFetchResultsParams{\n\t\tTransformationIDs: []string{"tr_01HXAB...", "tr_01HXCD..."},\n\t\tEvaluationVersion: bem.String("0.1.0-gemini"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Results)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/eval/results \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ]\n        }\'',
-      },
-      python: {
-        method: 'eval.results.fetch_results',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.results.fetch_results(\n    transformation_ids=["tr_01HXAB...", "tr_01HXCD..."],\n    evaluation_version="0.1.0-gemini",\n)\nprint(response.results)',
-      },
-      typescript: {
-        method: 'client.eval.results.fetchResults',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.results.fetchResults({\n  transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],\n  evaluationVersion: '0.1.0-gemini',\n});\n\nconsole.log(response.results);",
       },
     },
   },
@@ -1917,6 +1917,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## retrieve_results\n\n`client.eval.results.retrieveResults(transformationIDs: string, evaluationVersion?: string): { results: object; errors?: object; failed?: object[]; pending?: object[]; }`\n\n**get** `/v3/eval/results`\n\n**Fetch evaluation results for a batch of transformations.**\n\nIdentical behavior to the POST variant; accepts transformation IDs as a\ncomma-separated `transformationIDs` query parameter. Limited to 100 IDs\nper request.\n\n### Parameters\n\n- `transformationIDs: string`\n  Comma-separated list of transformation IDs to fetch results for.\nBetween 1 and 100 IDs per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version filter.\n\n### Returns\n\n- `{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]; pending?: { createdAt: string; transformationId: string; }[]; }`\n  Batched response containing the evaluation state for every requested\ntransformation ID, partitioned into completed `results`, still-running\n`pending`, and terminal `failed` groups.\n\n  - `results: object`\n  - `errors?: object`\n  - `failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]`\n  - `pending?: { createdAt: string; transformationId: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.eval.results.retrieveResults({ transformationIDs: 'transformationIDs' });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.eval.results.retrieveResults',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.results.retrieveResults({\n  transformationIDs: 'transformationIDs',\n});\n\nconsole.log(response.results);",
+      },
+      python: {
+        method: 'eval.results.retrieve_results',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.results.retrieve_results(\n    transformation_ids="transformationIDs",\n)\nprint(response.results)',
+      },
+      go: {
+        method: 'client.Eval.Results.GetResults',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.Results.GetResults(context.TODO(), bem.EvalResultGetResultsParams{\n\t\tTransformationIDs: "transformationIDs",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Results)\n}\n',
+      },
       cli: {
         method: 'results retrieve_results',
         example:
@@ -1927,23 +1942,8 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'ResultRetrieveResultsParams parameters = new()\n{\n    TransformationIds = "transformationIDs"\n};\n\nvar response = await client.Eval.Results.RetrieveResults(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Eval.Results.GetResults',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.Results.GetResults(context.TODO(), bem.EvalResultGetResultsParams{\n\t\tTransformationIDs: "transformationIDs",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Results)\n}\n',
-      },
       http: {
         example: 'curl https://api.bem.ai/v3/eval/results \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-      python: {
-        method: 'eval.results.retrieve_results',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.results.retrieve_results(\n    transformation_ids="transformationIDs",\n)\nprint(response.results)',
-      },
-      typescript: {
-        method: 'client.eval.results.retrieveResults',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.results.retrieveResults({\n  transformationIDs: 'transformationIDs',\n});\n\nconsole.log(response.results);",
       },
     },
   },
@@ -1976,6 +1976,21 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     markdown:
       "## navigate\n\n`client.fs.navigate(op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head', countOnly?: boolean, cursor?: string, filter?: { functionName?: string; search?: string; since?: string; type?: string; }, ignoreCase?: boolean, limit?: number, n?: number, path?: string, pattern?: string, range?: { page?: number; pageRange?: number[]; sectionTypes?: string[]; }, regex?: boolean, scope?: string, select?: string[]): { data: object; op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head'; count?: number; hasMore?: boolean; hint?: string; nextCursor?: string; }`\n\n**post** `/v3/fs`\n\n**Navigate parsed documents and the cross-doc memory store via Unix-shell verbs.**\n\n`POST /v3/fs` is a single op-driven endpoint that lets an LLM agent\n(or any programmatic client) walk a corpus the way it would walk a\nfilesystem — `ls` to list, `cat` to read, `grep` to search, `head`\nfor a quick peek, `stat` for metadata, and `find` / `open` / `xref`\nfor the cross-doc entity memory layer.\n\nThe body always carries an `op` field; other fields apply per op.\nThe response envelope is uniform: `{op, data, hasMore?, nextCursor?, count?, hint?}`.\n\n## Doc-level ops (work on every parsed document)\n\n- `ls`: list parsed documents with `pageCount`, `sectionCount`,\n`entityCount`, and a short `previewEntities` array.\n- `cat`: read one doc's full parse JSON, optionally sliced by\n`range` (page / pageRange / sectionTypes) or projected by\n`select` (dotted paths like `[\"sections.label\", \"sections.page\"]`).\n- `head`: first N sections of one doc.\n- `grep`: substring or regex search across recent parse outputs.\n`scope` restricts to `sections` / `entities` / `relationships`.\n`path` scopes to one doc. `countOnly: true` returns only the hit\ncount.\n- `stat`: metadata only — page/section/entity counts, timestamps.\n\n## Memory-level ops (require `linkAcrossDocuments: true` on the parse function)\n\n- `find`: list canonical entities, filterable by `type`, `search`,\n`since`. Returns an empty list with a `hint` when no docs have\nbeen memory-linked.\n- `open`: fetch one entity plus its mentions across docs.\n- `xref`: for one entity, return the actual sections (with content)\nacross docs that mention it. The \"where exactly is X discussed\"\nloop in one round trip.\n\n## Pagination\n\nList ops (`ls`, `find`) paginate by cursor: pass the last item's\n`nextCursor` from a previous response to fetch the next page;\n`hasMore: false` signals the last page. Same idiom as `/v3/calls`\nand `/v3/outputs`.\n\n### Parameters\n\n- `op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head'`\n  Operations exposed by `POST /v3/fs`.\n\nThe verbs and their flag names mirror Unix tools so an LLM agent's\nexisting vocabulary maps directly:\n\n- `ls` — list parsed documents\n- `cat` — read one parsed doc (optionally sliced by range / projected by select)\n- `grep` — substring or regex search across parse outputs\n- `head` — first N sections of one doc\n- `stat` — metadata only (page count, section count, parsed at, ...)\n- `find` — list canonical entities (cross-doc memory)\n- `open` — entity + mentions\n- `xref` — entity → sections across docs that mention it\n\nDoc-level ops (ls, cat, grep, head, stat) work on every parsed\ndocument, regardless of how the parse function was configured.\n\nMemory-level ops (find, open, xref) operate on the global entities\ntable which is only populated when the parse function had\n`linkAcrossDocuments: true`. On environments with no memory-linked\ndocs they return empty data with a hint pointing at the toggle.\n\n- `countOnly?: boolean`\n  When true, return only the hit count without snippet payload.\nCheaper than fetching matches when the agent only wants a yes/no.\n\n- `cursor?: string`\n  Pagination cursor. Pass the last item's ID from a previous response\n(`nextCursor`) to fetch the next page.\n\n- `filter?: { functionName?: string; search?: string; since?: string; type?: string; }`\n  Filter options for `op=ls` and `op=find`.\n  - `functionName?: string`\n    Match a parsed doc's source function name exactly.\n  - `search?: string`\n    Substring match on canonical name (entities) or `referenceID`\n(parsed docs). Case-insensitive.\n  - `since?: string`\n    Restrict to resources created at or after this timestamp.\n  - `type?: string`\n    Match an entity's `type` field exactly (e.g. `\"drug\"`, `\"study\"`).\n\n- `ignoreCase?: boolean`\n  When true (default), substring/regex matching is case-insensitive.\n\n- `limit?: number`\n  Maximum results to return. Defaults vary per op (25–50).\n\n- `n?: number`\n  First-N count for `op=head`. Defaults to 10.\n\n- `path?: string`\n  Identifier for ops that operate on a single resource:\n- cat / head / stat: a parsed document, by `referenceID` or\n`transformationID`.\n- open / xref / stat: an entity, by `entityID`.\n\n- `pattern?: string`\n  Substring or regex pattern for `op=grep`.\n\n- `range?: { page?: number; pageRange?: number[]; sectionTypes?: string[]; }`\n  Slice the parse output along page or section dimensions. Used with `op=cat`.\n  - `page?: number`\n    Restrict sections to one page (1-indexed).\n  - `pageRange?: number[]`\n    Restrict sections to an inclusive page range. Two-element array of\n`[from, to]` (both 1-indexed).\n  - `sectionTypes?: string[]`\n    Keep only sections whose `type` matches one of these (e.g.\n`[\"table\", \"list\"]`).\n\n- `regex?: boolean`\n  When true, `pattern` is interpreted as a Go regex. Default false.\n\n- `scope?: string`\n  Restricts grep to one part of the parse output. One of\n`\"sections\"`, `\"entities\"`, `\"relationships\"`, `\"all\"` (default).\n\n- `select?: string[]`\n  Project the parse output to specific dotted paths\n(e.g. `[\"sections.label\", \"sections.page\"]`), letting an agent map\na doc's structure cheaply before reading content. Used with\n`op=cat`.\n\n### Returns\n\n- `{ data: object; op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head'; count?: number; hasMore?: boolean; hint?: string; nextCursor?: string; }`\n  Uniform response shape returned for every `op`. `data` is op-specific\nJSON (a list, an object, or a string), but the wrapper is constant\nso a client only learns one parse path.\n\n  - `data: object`\n  - `op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head'`\n  - `count?: number`\n  - `hasMore?: boolean`\n  - `hint?: string`\n  - `nextCursor?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.fs.navigate({ op: 'ls' });\n\nconsole.log(response);\n```",
     perLanguage: {
+      typescript: {
+        method: 'client.fs.navigate',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.fs.navigate({ op: 'ls' });\n\nconsole.log(response.data);",
+      },
+      python: {
+        method: 'fs.navigate',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.fs.navigate(\n    op="ls",\n)\nprint(response.data)',
+      },
+      go: {
+        method: 'client.Fs.Navigate',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Fs.Navigate(context.TODO(), bem.FNavigateParams{\n\t\tOp: bem.FNavigateParamsOpLs,\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Data)\n}\n',
+      },
       cli: {
         method: 'fs navigate',
         example: "bem fs navigate \\\n  --api-key 'My API Key' \\\n  --op ls",
@@ -1985,24 +2000,9 @@ const EMBEDDED_METHODS: MethodEntry[] = [
         example:
           'FNavigateParams parameters = new() { Op = Op.Ls };\n\nvar response = await client.Fs.Navigate(parameters);\n\nConsole.WriteLine(response);',
       },
-      go: {
-        method: 'client.Fs.Navigate',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Fs.Navigate(context.TODO(), bem.FNavigateParams{\n\t\tOp: bem.FNavigateParamsOpLs,\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Data)\n}\n',
-      },
       http: {
         example:
           'curl https://api.bem.ai/v3/fs \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "op": "ls"\n        }\'',
-      },
-      python: {
-        method: 'fs.navigate',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.fs.navigate(\n    op="ls",\n)\nprint(response.data)',
-      },
-      typescript: {
-        method: 'client.fs.navigate',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.fs.navigate({ op: 'ls' });\n\nconsole.log(response.data);",
       },
     },
   },
