@@ -50,12 +50,13 @@ import {
   InboundEmailEvent,
 } from './resources/errors';
 import { EventSubmitFeedbackParams, EventSubmitFeedbackResponse, Events } from './resources/events';
+import { FNavigateParams, FNavigateResponse, Fs } from './resources/fs';
 import { InferSchema, InferSchemaCreateParams, InferSchemaCreateResponse } from './resources/infer-schema';
 import {
   AnyType,
+  Event,
+  EventsOutputsPage,
   OutputListParams,
-  OutputListResponse,
-  OutputListResponsesOutputsPage,
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
@@ -74,6 +75,7 @@ import {
   CollectionListResponse,
   Collections,
 } from './resources/collections/collections';
+import { Eval, EvalTriggerEvaluationParams, EvalTriggerEvaluationResponse } from './resources/eval/eval';
 import {
   ClassificationListItem,
   CreateFunction,
@@ -964,6 +966,57 @@ export class Bem {
    * before revoking the old one.
    */
   webhookSecret: API.WebhookSecret = new API.WebhookSecret(this);
+  /**
+   * Trigger and retrieve evaluations for completed transformations.
+   *
+   * Evaluations run asynchronously and score each transformation's output against
+   * the function's schema for confidence, per-field hallucination detection, and
+   * relevance. Evaluations are supported for `extract`, `transform`, `analyze`,
+   * and `join` events.
+   *
+   * ## Lifecycle
+   *
+   * 1. **Trigger** — `POST /v3/eval` queues jobs for a batch of transformation IDs
+   *    and returns immediately with `queued` / `skipped` counts plus per-ID errors.
+   * 2. **Poll** — `POST /v3/eval/results` (body) or `GET /v3/eval/results` (query)
+   *    returns the current state of each requested transformation, partitioned
+   *    into `results` (completed), `pending` (still running), and `failed`
+   *    (terminal failures or unknown transformation IDs).
+   *
+   * Up to 100 transformation IDs may be submitted per request.
+   */
+  eval: API.Eval = new API.Eval(this);
+  /**
+   * Unix-shell-style nav over parsed documents and the cross-doc memory store.
+   *
+   * `POST /v3/fs` is a single op-driven endpoint designed for LLM agents
+   * and programmatic consumers that want to walk a corpus the way they'd
+   * walk a filesystem.
+   *
+   * ## Doc-level ops (every parsed document)
+   *
+   * - `ls` — list parsed documents with rich per-doc metadata.
+   * - `cat` — read one doc's parse JSON, sliced (`range`) or projected (`select`).
+   * - `head` — first N sections of one doc.
+   * - `grep` — substring or regex search; `scope`, `path`, `countOnly` available.
+   * - `stat` — metadata only (page/section/entity counts, timestamps).
+   *
+   * ## Memory-level ops (require `linkAcrossDocuments: true` on the parse function)
+   *
+   * - `find` — list canonical entities across the corpus.
+   * - `open` — entity + mentions.
+   * - `xref` — for one entity, sections across docs that mention it (with content).
+   *
+   * Memory ops return an empty list with a `hint` when no docs in this
+   * environment have been memory-linked.
+   *
+   * ## Pagination
+   *
+   * List ops paginate by cursor — pass the previous response's `nextCursor`
+   * back as `cursor`; `hasMore: false` signals the last page. Same idiom as
+   * `/v3/calls` and `/v3/outputs`.
+   */
+  fs: API.Fs = new API.Fs(this);
 }
 
 Bem.Functions = Functions;
@@ -975,6 +1028,8 @@ Bem.InferSchema = InferSchema;
 Bem.Collections = Collections;
 Bem.Events = Events;
 Bem.WebhookSecret = WebhookSecret;
+Bem.Eval = Eval;
+Bem.Fs = Fs;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -1048,9 +1103,9 @@ export declare namespace Bem {
   export {
     Outputs as Outputs,
     type AnyType as AnyType,
+    type Event as Event,
     type OutputRetrieveResponse as OutputRetrieveResponse,
-    type OutputListResponse as OutputListResponse,
-    type OutputListResponsesOutputsPage as OutputListResponsesOutputsPage,
+    type EventsOutputsPage as EventsOutputsPage,
     type OutputListParams as OutputListParams,
   };
 
@@ -1100,4 +1155,12 @@ export declare namespace Bem {
     type WebhookSecretCreateResponse as WebhookSecretCreateResponse,
     type WebhookSecretRetrieveResponse as WebhookSecretRetrieveResponse,
   };
+
+  export {
+    Eval as Eval,
+    type EvalTriggerEvaluationResponse as EvalTriggerEvaluationResponse,
+    type EvalTriggerEvaluationParams as EvalTriggerEvaluationParams,
+  };
+
+  export { Fs as Fs, type FNavigateResponse as FNavigateResponse, type FNavigateParams as FNavigateParams };
 }

@@ -232,6 +232,30 @@ export const sdkMethods: SdkMethod[] = [
     httpMethod: 'delete',
     httpPath: '/v3/webhook-secret',
   },
+  {
+    clientCallName: 'client.eval.triggerEvaluation',
+    fullyQualifiedName: 'eval.triggerEvaluation',
+    httpMethod: 'post',
+    httpPath: '/v3/eval',
+  },
+  {
+    clientCallName: 'client.eval.results.fetchResults',
+    fullyQualifiedName: 'eval.results.fetchResults',
+    httpMethod: 'post',
+    httpPath: '/v3/eval/results',
+  },
+  {
+    clientCallName: 'client.eval.results.retrieveResults',
+    fullyQualifiedName: 'eval.results.retrieveResults',
+    httpMethod: 'get',
+    httpPath: '/v3/eval/results',
+  },
+  {
+    clientCallName: 'client.fs.navigate',
+    fullyQualifiedName: 'fs.navigate',
+    httpMethod: 'post',
+    httpPath: '/v3/fs',
+  },
 ];
 
 function allowedMethodsForCodeTool(options: McpOptions | undefined): SdkMethod[] | undefined {

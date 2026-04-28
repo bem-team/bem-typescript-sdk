@@ -145,6 +145,10 @@ const fuse = new Fuse(
     'client.webhookSecret.create',
     'client.webhookSecret.retrieve',
     'client.webhookSecret.revoke',
+    'client.eval.triggerEvaluation',
+    'client.eval.results.fetchResults',
+    'client.eval.results.retrieveResults',
+    'client.fs.navigate',
   ],
   { threshold: 1, shouldSort: true },
 );
