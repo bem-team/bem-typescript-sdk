@@ -26,7 +26,9 @@ export {
   type ErrorListParams,
   type ErrorEventsErrorsPage,
 } from './errors';
+export { Eval, type EvalTriggerEvaluationResponse, type EvalTriggerEvaluationParams } from './eval/eval';
 export { Events, type EventSubmitFeedbackResponse, type EventSubmitFeedbackParams } from './events';
+export { Fs, type FNavigateResponse, type FNavigateParams } from './fs';
 export {
   Functions,
   type ClassificationListItem,
@@ -51,10 +53,10 @@ export { InferSchema, type InferSchemaCreateResponse, type InferSchemaCreatePara
 export {
   Outputs,
   type AnyType,
+  type Event,
   type OutputRetrieveResponse,
-  type OutputListResponse,
   type OutputListParams,
-  type OutputListResponsesOutputsPage,
+  type EventsOutputsPage,
 } from './outputs';
 export {
   WebhookSecret,
