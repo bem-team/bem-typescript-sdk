@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.17.0 (2026-04-28)
+
+Full Changelog: [v0.16.0...v0.17.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.16.0...v0.17.0)
+
+### Features
+
+* support setting headers via env ([94d0603](https://github.com/bem-team/bem-typescript-sdk/commit/94d0603d548327884890404b0d7787ac822d1e46))
+
+
+### Chores
+
+* **internal:** codegen related update ([7aea86a](https://github.com/bem-team/bem-typescript-sdk/commit/7aea86a7c719e82a0a1b226263f9d25833b5a079))
+* restructure docs search code ([0930194](https://github.com/bem-team/bem-typescript-sdk/commit/0930194d1754a4482e09be9a3a253e4338c0754c))
+
 ## 0.16.0 (2026-04-28)
 
 Full Changelog: [v0.15.0...v0.16.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.15.0...v0.16.0)
