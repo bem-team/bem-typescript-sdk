@@ -26,7 +26,9 @@ export {
   type ErrorListParams,
   type ErrorEventsErrorsPage,
 } from './errors';
+export { Eval, type EvalTriggerEvaluationResponse, type EvalTriggerEvaluationParams } from './eval/eval';
 export { Events, type EventSubmitFeedbackResponse, type EventSubmitFeedbackParams } from './events';
+export { Fs, type FNavigateResponse, type FNavigateParams } from './fs';
 export {
   Functions,
   type ClassificationListItem,

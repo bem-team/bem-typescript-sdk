@@ -20,7 +20,17 @@ import { RequestOptions } from '../../internal/request-options';
  */
 export class Copy extends APIResource {
   /**
-   * Copy a Function
+   * **Copy a function to a new name within the same environment.**
+   *
+   * Forks the source function's current configuration into a brand-new function. The
+   * copy starts at `versionNum: 1` regardless of how many versions the source has —
+   * version history is not carried over.
+   *
+   * Useful for experimenting with schema or prompt changes against a stable
+   * production function without disturbing existing callers.
+   *
+   * The destination name must be unique in the environment. A copy does not migrate
+   * workflows: existing workflow nodes continue to reference the original function.
    */
   create(body: CopyCreateParams, options?: RequestOptions): APIPromise<FunctionsAPI.FunctionResponse> {
     return this._client.post('/v3/functions/copy', { body, ...options });

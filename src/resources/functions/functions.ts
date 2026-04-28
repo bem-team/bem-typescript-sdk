@@ -36,21 +36,64 @@ export class Functions extends APIResource {
   versions: VersionsAPI.Versions = new VersionsAPI.Versions(this._client);
 
   /**
-   * Create a Function
+   * **Create a function.**
+   *
+   * The function type (`extract`, `classify`, `split`, `join`, `enrich`, or
+   * `payload_shaping`) determines which configuration fields are required — see
+   * [Function types overview](/guide/function-types/overview) for the per-type
+   * contract.
+   *
+   * The response contains both `functionID` and `functionName`. Either is a stable
+   * handle you can use elsewhere; most workflows reference functions by
+   * `functionName` because it's human-readable.
+   *
+   * ## Naming rules
+   *
+   * - `functionName` must be unique per environment.
+   * - Allowed characters: letters, digits, hyphens, and underscores.
+   * - Names cannot be reused after deletion within the same environment for at least
+   *   the retention window of the previous record.
+   *
+   * The new function is created at `versionNum: 1`. Subsequent
+   * `PATCH /v3/functions/{functionName}` calls produce new versions — the version-1
+   * configuration remains immutable and addressable.
    */
   create(body: FunctionCreateParams, options?: RequestOptions): APIPromise<FunctionResponse> {
     return this._client.post('/v3/functions', { body, ...options });
   }
 
   /**
-   * Get a Function
+   * **Retrieve a function's current version by name.**
+   *
+   * Returns the function record with its `currentVersionNum` and the configuration
+   * of that version. To inspect a historical version, use
+   * `GET /v3/functions/{functionName}/versions/{versionNum}`.
    */
   retrieve(functionName: string, options?: RequestOptions): APIPromise<FunctionResponse> {
     return this._client.get(path`/v3/functions/${functionName}`, options);
   }
 
   /**
-   * Update a Function
+   * **Update a function. Updates create a new version.**
+   *
+   * The previous version remains addressable and immutable. Workflow nodes that
+   * pinned the function with a `versionNum` continue to use the pinned version;
+   * nodes that reference the function by name with no version automatically pick up
+   * the new version on their next call.
+   *
+   * ## What you can change
+   *
+   * Any field allowed by the function's type. Most commonly: `outputSchema` (for
+   * `extract`/`join`), `classifications` (for `classify`), `displayName`, and
+   * `tags`.
+   *
+   * ## Versioning behaviour
+   *
+   * - Each successful update increments `currentVersionNum` by 1.
+   * - `displayName`, `tags`, and `functionName` updates also create a new version,
+   *   so the version history is a complete record of every change.
+   * - To revert, fetch the previous version and re-submit its configuration as a new
+   *   update — versions themselves are immutable.
    */
   update(
     pathFunctionName: string,
@@ -61,7 +104,27 @@ export class Functions extends APIResource {
   }
 
   /**
-   * List Functions
+   * **List functions in the current environment.**
+   *
+   * Returns each function's current version. Combine filters freely — they AND
+   * together.
+   *
+   * ## Filtering
+   *
+   * - `functionIDs` / `functionNames`: exact-match identity filters.
+   * - `displayName`: case-insensitive substring match.
+   * - `types`: one or more of `extract`, `classify`, `split`, `join`, `enrich`,
+   *   `payload_shaping`. Legacy `transform`, `analyze`, `route`, and `send` types
+   *   remain readable via this filter.
+   * - `tags`: returns functions tagged with any of the supplied tags.
+   * - `workflowIDs` / `workflowNames`: returns only functions referenced by the
+   *   named workflows. Useful for "what functions does this workflow depend on?"
+   *   lookups.
+   *
+   * ## Pagination
+   *
+   * Cursor-based with `startingAfter` and `endingBefore` (functionIDs). Default
+   * limit 50, maximum 100.
    */
   list(
     query: FunctionListParams | null | undefined = {},
@@ -71,7 +134,23 @@ export class Functions extends APIResource {
   }
 
   /**
-   * Delete a Function
+   * **Delete a function and every one of its versions.**
+   *
+   * Permanent. Running and queued calls that reference this function continue to
+   * completion against the version they captured at call time, but no new calls can
+   * target it.
+   *
+   * ## Before deleting
+   *
+   * Workflow nodes that reference this function will fail at call time after
+   * deletion. List workflows that reference it first:
+   *
+   * ```
+   * GET /v3/workflows?functionNames=my-function
+   * ```
+   *
+   * Update or remove those workflows, or create a replacement function and re-point
+   * the workflow nodes, before deleting.
    */
   delete(functionName: string, options?: RequestOptions): APIPromise<void> {
     return this._client.delete(path`/v3/functions/${functionName}`, {
@@ -116,7 +195,7 @@ export namespace ClassificationListItem {
 }
 
 /**
- * V3 wire form of the Route (classify) function create payload. Mirrors {
+ * V3 wire form of the classify function create payload.
  */
 export type CreateFunction =
   | CreateFunction.ExtractFunction
@@ -125,7 +204,8 @@ export type CreateFunction =
   | CreateFunction.SplitFunction
   | CreateFunction.JoinFunction
   | CreateFunction.PayloadShapingFunction
-  | CreateFunction.EnrichFunction;
+  | CreateFunction.EnrichFunction
+  | CreateFunction.ParseFunction;
 
 export namespace CreateFunction {
   export interface ExtractFunction {
@@ -142,6 +222,15 @@ export namespace CreateFunction {
     displayName?: string;
 
     /**
+     * Whether bounding box extraction is enabled. Applies to vision input types (pdf,
+     * png, jpeg, heic, heif, webp) that dispatch through the analyze path. When true,
+     * the function returns the document regions (page, coordinates) from which each
+     * field was extracted. Enabling this automatically configures the function to use
+     * the bounding box model. Disabling resets to the default.
+     */
+    enableBoundingBoxes?: boolean;
+
+    /**
      * Desired output structure defined in standard JSON Schema convention.
      */
     outputSchema?: unknown;
@@ -150,6 +239,12 @@ export namespace CreateFunction {
      * Name of output schema object.
      */
     outputSchemaName?: string;
+
+    /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
 
     /**
      * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
@@ -164,7 +259,7 @@ export namespace CreateFunction {
   }
 
   /**
-   * V3 wire form of the Route (classify) function create payload. Mirrors {
+   * V3 wire form of the classify function create payload.
    */
   export interface ClassifyFunction {
     /**
@@ -175,19 +270,8 @@ export namespace CreateFunction {
     type: 'classify';
 
     /**
-     * V3 create/update variants of the shared function payloads.
-     *
-     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
-     * function types when creating new functions or updating existing ones — both have
-     * been unified under `extract`. Existing functions of those types remain readable
-     * and callable via V3, so the V3 read-side unions still include `transform` and
-     * `analyze` variants.
-     *
-     * The V3 API also renames the internal `route` function type to `classify` on the
-     * wire, and the associated `routes` field to `classifications` (type
-     * `ClassificationList`). Platform-internal storage and processing still use
-     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
-     * name for the list of classifications a classify function can produce.
+     * List of classifications a classify function can produce. Shares the underlying
+     * route list shape.
      */
     classifications?: Array<FunctionsAPI.ClassificationListItem>;
 
@@ -411,6 +495,70 @@ export namespace CreateFunction {
      */
     tags?: Array<string>;
   }
+
+  export interface ParseFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'parse';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    parseConfig?: ParseFunction.ParseConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace ParseFunction {
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    export interface ParseConfig {
+      /**
+       * When true, extract named entities (people, organizations, products, studies,
+       * identifiers, etc.) and the relationships between them, and dedupe by canonical
+       * name within the document. When false, only `sections[]` is extracted;
+       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
+       * to true.
+       */
+      extractEntities?: boolean;
+
+      /**
+       * When true, link this document's entities to entities seen in earlier documents
+       * in this environment, building one canonical record per real-world thing across
+       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
+       * open / xref). Doesn't change this call's parse output. Requires
+       * `extractEntities=true`. Defaults to true.
+       */
+      linkAcrossDocuments?: boolean;
+
+      /**
+       * Optional JSONSchema. When provided, each chunk performs schema-guided
+       * extraction. When absent, chunks perform open-ended discovery and return
+       * sections, entities, and relationships per the discovery schema.
+       */
+      schema?: unknown;
+    }
+  }
 }
 
 /**
@@ -577,7 +725,8 @@ export type Function =
   | Function.SplitFunction
   | Function.JoinFunction
   | Function.PayloadShapingFunction
-  | Function.EnrichFunction;
+  | Function.EnrichFunction
+  | Function.ParseFunction;
 
 export namespace Function {
   export interface TransformFunction {
@@ -648,6 +797,14 @@ export namespace Function {
    */
   export interface ExtractFunction {
     /**
+     * Whether bounding box extraction is enabled. Applies to vision input types (pdf,
+     * png, jpeg, heic, heif, webp) that dispatch through the analyze path. When true,
+     * the function returns the document regions (page, coordinates) from which each
+     * field was extracted.
+     */
+    enableBoundingBoxes: boolean;
+
+    /**
      * Unique identifier of function.
      */
     functionID: string;
@@ -668,10 +825,10 @@ export namespace Function {
     outputSchemaName: string;
 
     /**
-     * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
-     * processed in row batches rather than all at once.
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency.
      */
-    tabularChunkingEnabled: boolean;
+    preCount: boolean;
 
     type: 'extract';
 
@@ -763,24 +920,10 @@ export namespace Function {
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
   }
 
-  /**
-   * V3 read-side shape of a Classify (internally Route) function. Mirrors {
-   */
   export interface ClassifyFunction {
     /**
-     * V3 create/update variants of the shared function payloads.
-     *
-     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
-     * function types when creating new functions or updating existing ones — both have
-     * been unified under `extract`. Existing functions of those types remain readable
-     * and callable via V3, so the V3 read-side unions still include `transform` and
-     * `analyze` variants.
-     *
-     * The V3 API also renames the internal `route` function type to `classify` on the
-     * wire, and the associated `routes` field to `classifications` (type
-     * `ClassificationList`). Platform-internal storage and processing still use
-     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
-     * name for the list of classifications a classify function can produce.
+     * List of classifications a classify function can produce. Shares the underlying
+     * route list shape.
      */
     classifications: Array<FunctionsAPI.ClassificationListItem>;
 
@@ -1159,6 +1302,90 @@ export namespace Function {
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
   }
+
+  export interface ParseFunction {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'parse';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    parseConfig?: ParseFunction.ParseConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace ParseFunction {
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    export interface ParseConfig {
+      /**
+       * When true, extract named entities (people, organizations, products, studies,
+       * identifiers, etc.) and the relationships between them, and dedupe by canonical
+       * name within the document. When false, only `sections[]` is extracted;
+       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
+       * to true.
+       */
+      extractEntities?: boolean;
+
+      /**
+       * When true, link this document's entities to entities seen in earlier documents
+       * in this environment, building one canonical record per real-world thing across
+       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
+       * open / xref). Doesn't change this call's parse output. Requires
+       * `extractEntities=true`. Defaults to true.
+       */
+      linkAcrossDocuments?: boolean;
+
+      /**
+       * Optional JSONSchema. When provided, each chunk performs schema-guided
+       * extraction. When absent, chunks perform open-ended discovery and return
+       * sections, entities, and relationships per the discovery schema.
+       */
+      schema?: unknown;
+    }
+  }
 }
 
 export interface FunctionAudit {
@@ -1199,12 +1426,14 @@ export type FunctionType =
   | 'transform'
   | 'extract'
   | 'route'
+  | 'classify'
   | 'send'
   | 'split'
   | 'join'
   | 'analyze'
   | 'payload_shaping'
-  | 'enrich';
+  | 'enrich'
+  | 'parse';
 
 export interface ListFunctionsResponse {
   functions?: Array<Function>;
@@ -1232,7 +1461,20 @@ export interface SplitFunctionSemanticPageItemClass {
 }
 
 /**
- * V3 wire form of the Route (classify) function upsert payload. Mirrors {
+ * V3 create/update variants of the shared function payloads.
+ *
+ * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+ * function types when creating new functions or updating existing ones — both have
+ * been unified under `extract`. Existing functions of those types remain readable
+ * and callable via V3, so the V3 read-side unions still include `transform` and
+ * `analyze` variants.
+ *
+ * The V3 API also exposes `classify` in place of the legacy `route` type on
+ * create/update, with `classifications` in place of `routes`. Read-side
+ * `ClassifyFunction` / `ClassifyFunctionVersion` / `ClassificationList` are
+ * defined in the shared functions models and used by both the V2 and V3 response
+ * unions (existing classify functions are returned from V2 GET endpoints
+ * verbatim).V3 wire form of the classify function upsert payload.
  */
 export type UpdateFunction =
   | UpdateFunction.ExtractFunction
@@ -1241,7 +1483,8 @@ export type UpdateFunction =
   | UpdateFunction.SplitFunction
   | UpdateFunction.JoinFunction
   | UpdateFunction.PayloadShapingFunction
-  | UpdateFunction.UpsertEnrichFunction;
+  | UpdateFunction.UpsertEnrichFunction
+  | UpdateFunction.ParseFunction;
 
 export namespace UpdateFunction {
   export interface ExtractFunction {
@@ -1251,6 +1494,15 @@ export namespace UpdateFunction {
      * Display name of function. Human-readable name to help you identify the function.
      */
     displayName?: string;
+
+    /**
+     * Whether bounding box extraction is enabled. Applies to vision input types (pdf,
+     * png, jpeg, heic, heif, webp) that dispatch through the analyze path. When true,
+     * the function returns the document regions (page, coordinates) from which each
+     * field was extracted. Enabling this automatically configures the function to use
+     * the bounding box model. Disabling resets to the default.
+     */
+    enableBoundingBoxes?: boolean;
 
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.
@@ -1268,6 +1520,12 @@ export namespace UpdateFunction {
     outputSchemaName?: string;
 
     /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
+
+    /**
      * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
      * processed in row batches rather than all at once.
      */
@@ -1280,25 +1538,27 @@ export namespace UpdateFunction {
   }
 
   /**
-   * V3 wire form of the Route (classify) function upsert payload. Mirrors {
+   * V3 create/update variants of the shared function payloads.
+   *
+   * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
+   * function types when creating new functions or updating existing ones — both have
+   * been unified under `extract`. Existing functions of those types remain readable
+   * and callable via V3, so the V3 read-side unions still include `transform` and
+   * `analyze` variants.
+   *
+   * The V3 API also exposes `classify` in place of the legacy `route` type on
+   * create/update, with `classifications` in place of `routes`. Read-side
+   * `ClassifyFunction` / `ClassifyFunctionVersion` / `ClassificationList` are
+   * defined in the shared functions models and used by both the V2 and V3 response
+   * unions (existing classify functions are returned from V2 GET endpoints
+   * verbatim).V3 wire form of the classify function upsert payload.
    */
   export interface ClassifyFunction {
     type: 'classify';
 
     /**
-     * V3 create/update variants of the shared function payloads.
-     *
-     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
-     * function types when creating new functions or updating existing ones — both have
-     * been unified under `extract`. Existing functions of those types remain readable
-     * and callable via V3, so the V3 read-side unions still include `transform` and
-     * `analyze` variants.
-     *
-     * The V3 API also renames the internal `route` function type to `classify` on the
-     * wire, and the associated `routes` field to `classifications` (type
-     * `ClassificationList`). Platform-internal storage and processing still use
-     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
-     * name for the list of classifications a classify function can produce.
+     * List of classifications a classify function can produce. Shares the underlying
+     * route list shape.
      */
     classifications?: Array<FunctionsAPI.ClassificationListItem>;
 
@@ -1518,6 +1778,70 @@ export namespace UpdateFunction {
      */
     config?: FunctionsAPI.EnrichConfig;
   }
+
+  export interface ParseFunction {
+    type: 'parse';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    parseConfig?: ParseFunction.ParseConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace ParseFunction {
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    export interface ParseConfig {
+      /**
+       * When true, extract named entities (people, organizations, products, studies,
+       * identifiers, etc.) and the relationships between them, and dedupe by canonical
+       * name within the document. When false, only `sections[]` is extracted;
+       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
+       * to true.
+       */
+      extractEntities?: boolean;
+
+      /**
+       * When true, link this document's entities to entities seen in earlier documents
+       * in this environment, building one canonical record per real-world thing across
+       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
+       * open / xref). Doesn't change this call's parse output. Requires
+       * `extractEntities=true`. Defaults to true.
+       */
+      linkAcrossDocuments?: boolean;
+
+      /**
+       * Optional JSONSchema. When provided, each chunk performs schema-guided
+       * extraction. When absent, chunks perform open-ended discovery and return
+       * sections, entities, and relationships per the discovery schema.
+       */
+      schema?: unknown;
+    }
+  }
 }
 
 export interface UserActionSummary {
@@ -1583,7 +1907,8 @@ export type FunctionCreateParams =
   | FunctionCreateParams.CreateSplitFunction
   | FunctionCreateParams.CreateJoinFunction
   | FunctionCreateParams.CreatePayloadShapingFunction
-  | FunctionCreateParams.CreateEnrichFunction;
+  | FunctionCreateParams.CreateEnrichFunction
+  | FunctionCreateParams.CreateParseFunction;
 
 export declare namespace FunctionCreateParams {
   export interface CreateExtractFunction {
@@ -1600,6 +1925,15 @@ export declare namespace FunctionCreateParams {
     displayName?: string;
 
     /**
+     * Whether bounding box extraction is enabled. Applies to vision input types (pdf,
+     * png, jpeg, heic, heif, webp) that dispatch through the analyze path. When true,
+     * the function returns the document regions (page, coordinates) from which each
+     * field was extracted. Enabling this automatically configures the function to use
+     * the bounding box model. Disabling resets to the default.
+     */
+    enableBoundingBoxes?: boolean;
+
+    /**
      * Desired output structure defined in standard JSON Schema convention.
      */
     outputSchema?: unknown;
@@ -1608,6 +1942,12 @@ export declare namespace FunctionCreateParams {
      * Name of output schema object.
      */
     outputSchemaName?: string;
+
+    /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
 
     /**
      * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
@@ -1630,19 +1970,8 @@ export declare namespace FunctionCreateParams {
     type: 'classify';
 
     /**
-     * V3 create/update variants of the shared function payloads.
-     *
-     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
-     * function types when creating new functions or updating existing ones — both have
-     * been unified under `extract`. Existing functions of those types remain readable
-     * and callable via V3, so the V3 read-side unions still include `transform` and
-     * `analyze` variants.
-     *
-     * The V3 API also renames the internal `route` function type to `classify` on the
-     * wire, and the associated `routes` field to `classifications` (type
-     * `ClassificationList`). Platform-internal storage and processing still use
-     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
-     * name for the list of classifications a classify function can produce.
+     * List of classifications a classify function can produce. Shares the underlying
+     * route list shape.
      */
     classifications?: Array<ClassificationListItem>;
 
@@ -1866,6 +2195,70 @@ export declare namespace FunctionCreateParams {
      */
     tags?: Array<string>;
   }
+
+  export interface CreateParseFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'parse';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    parseConfig?: CreateParseFunction.ParseConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace CreateParseFunction {
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    export interface ParseConfig {
+      /**
+       * When true, extract named entities (people, organizations, products, studies,
+       * identifiers, etc.) and the relationships between them, and dedupe by canonical
+       * name within the document. When false, only `sections[]` is extracted;
+       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
+       * to true.
+       */
+      extractEntities?: boolean;
+
+      /**
+       * When true, link this document's entities to entities seen in earlier documents
+       * in this environment, building one canonical record per real-world thing across
+       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
+       * open / xref). Doesn't change this call's parse output. Requires
+       * `extractEntities=true`. Defaults to true.
+       */
+      linkAcrossDocuments?: boolean;
+
+      /**
+       * Optional JSONSchema. When provided, each chunk performs schema-guided
+       * extraction. When absent, chunks perform open-ended discovery and return
+       * sections, entities, and relationships per the discovery schema.
+       */
+      schema?: unknown;
+    }
+  }
 }
 
 export type FunctionUpdateParams =
@@ -1875,7 +2268,8 @@ export type FunctionUpdateParams =
   | FunctionUpdateParams.UpsertSplitFunction
   | FunctionUpdateParams.UpsertJoinFunction
   | FunctionUpdateParams.UpsertPayloadShapingFunction
-  | FunctionUpdateParams.UpsertEnrichFunction;
+  | FunctionUpdateParams.UpsertEnrichFunction
+  | FunctionUpdateParams.UpsertParseFunction;
 
 export declare namespace FunctionUpdateParams {
   export interface UpsertExtractFunction {
@@ -1885,6 +2279,15 @@ export declare namespace FunctionUpdateParams {
      * Display name of function. Human-readable name to help you identify the function.
      */
     displayName?: string;
+
+    /**
+     * Whether bounding box extraction is enabled. Applies to vision input types (pdf,
+     * png, jpeg, heic, heif, webp) that dispatch through the analyze path. When true,
+     * the function returns the document regions (page, coordinates) from which each
+     * field was extracted. Enabling this automatically configures the function to use
+     * the bounding box model. Disabling resets to the default.
+     */
+    enableBoundingBoxes?: boolean;
 
     /**
      * Name of function. Must be UNIQUE on a per-environment basis.
@@ -1902,6 +2305,12 @@ export declare namespace FunctionUpdateParams {
     outputSchemaName?: string;
 
     /**
+     * Reducing the risk of the model stopping early on long documents. Trade-off:
+     * Increases total latency. Compatible with `enableBoundingBoxes`.
+     */
+    preCount?: boolean;
+
+    /**
      * Whether tabular chunking is enabled. When true, tables in CSV/Excel files are
      * processed in row batches rather than all at once.
      */
@@ -1917,19 +2326,8 @@ export declare namespace FunctionUpdateParams {
     type: 'classify';
 
     /**
-     * V3 create/update variants of the shared function payloads.
-     *
-     * The V3 Functions API no longer accepts the legacy `transform` or `analyze`
-     * function types when creating new functions or updating existing ones — both have
-     * been unified under `extract`. Existing functions of those types remain readable
-     * and callable via V3, so the V3 read-side unions still include `transform` and
-     * `analyze` variants.
-     *
-     * The V3 API also renames the internal `route` function type to `classify` on the
-     * wire, and the associated `routes` field to `classifications` (type
-     * `ClassificationList`). Platform-internal storage and processing still use
-     * `route` / `routes`; the rename is applied only at the V3 API boundary.V3-facing
-     * name for the list of classifications a classify function can produce.
+     * List of classifications a classify function can produce. Shares the underlying
+     * route list shape.
      */
     classifications?: Array<ClassificationListItem>;
 
@@ -2142,6 +2540,70 @@ export declare namespace FunctionUpdateParams {
      * - Steps are executed sequentially
      */
     config?: EnrichConfig;
+  }
+
+  export interface UpsertParseFunction {
+    type: 'parse';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    parseConfig?: UpsertParseFunction.ParseConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace UpsertParseFunction {
+    /**
+     * Per-version configuration for a Parse function.
+     *
+     * Parse renders document pages (PDF, image) via vision LLM and emits structured
+     * JSON. The two toggles below independently control entity extraction (a per-call
+     * output concern) and cross-document memory linking (an environment-wide concern).
+     */
+    export interface ParseConfig {
+      /**
+       * When true, extract named entities (people, organizations, products, studies,
+       * identifiers, etc.) and the relationships between them, and dedupe by canonical
+       * name within the document. When false, only `sections[]` is extracted;
+       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
+       * to true.
+       */
+      extractEntities?: boolean;
+
+      /**
+       * When true, link this document's entities to entities seen in earlier documents
+       * in this environment, building one canonical record per real-world thing across
+       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
+       * open / xref). Doesn't change this call's parse output. Requires
+       * `extractEntities=true`. Defaults to true.
+       */
+      linkAcrossDocuments?: boolean;
+
+      /**
+       * Optional JSONSchema. When provided, each chunk performs schema-guided
+       * extraction. When absent, chunks perform open-ended discovery and return
+       * sections, entities, and relationships per the discovery schema.
+       */
+      schema?: unknown;
+    }
   }
 }
 

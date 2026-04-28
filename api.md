@@ -183,3 +183,35 @@ Methods:
 - <code title="post /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">create</a>() -> WebhookSecretCreateResponse</code>
 - <code title="get /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">retrieve</a>() -> WebhookSecretRetrieveResponse</code>
 - <code title="delete /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">revoke</a>() -> void</code>
+
+# Eval
+
+Types:
+
+- <code><a href="./src/resources/eval/eval.ts">EvalTriggerEvaluationResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/eval">client.eval.<a href="./src/resources/eval/eval.ts">triggerEvaluation</a>({ ...params }) -> EvalTriggerEvaluationResponse</code>
+
+## Results
+
+Types:
+
+- <code><a href="./src/resources/eval/results.ts">ResultFetchResultsResponse</a></code>
+- <code><a href="./src/resources/eval/results.ts">ResultRetrieveResultsResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">fetchResults</a>({ ...params }) -> ResultFetchResultsResponse</code>
+- <code title="get /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">retrieveResults</a>({ ...params }) -> ResultRetrieveResultsResponse</code>
+
+# Fs
+
+Types:
+
+- <code><a href="./src/resources/fs.ts">FNavigateResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/fs">client.fs.<a href="./src/resources/fs.ts">navigate</a>({ ...params }) -> FNavigateResponse</code>

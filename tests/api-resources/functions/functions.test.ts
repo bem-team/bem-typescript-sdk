@@ -26,8 +26,10 @@ describe('resource functions', () => {
       functionName: 'functionName',
       type: 'extract',
       displayName: 'displayName',
+      enableBoundingBoxes: true,
       outputSchema: {},
       outputSchemaName: 'outputSchemaName',
+      preCount: true,
       tabularChunkingEnabled: true,
       tags: ['string'],
     });
@@ -62,9 +64,11 @@ describe('resource functions', () => {
     const response = await client.functions.update('functionName', {
       type: 'extract',
       displayName: 'displayName',
+      enableBoundingBoxes: true,
       functionName: 'functionName',
       outputSchema: {},
       outputSchemaName: 'outputSchemaName',
+      preCount: true,
       tabularChunkingEnabled: true,
       tags: ['string'],
     });
