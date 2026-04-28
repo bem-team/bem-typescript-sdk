@@ -79,13 +79,13 @@ Methods:
 Types:
 
 - <code><a href="./src/resources/outputs.ts">AnyType</a></code>
-- <code><a href="./src/resources/outputs.ts">Event</a></code>
 - <code><a href="./src/resources/outputs.ts">OutputRetrieveResponse</a></code>
+- <code><a href="./src/resources/outputs.ts">OutputListResponse</a></code>
 
 Methods:
 
 - <code title="get /v3/outputs/{eventID}">client.outputs.<a href="./src/resources/outputs.ts">retrieve</a>(eventID) -> OutputRetrieveResponse</code>
-- <code title="get /v3/outputs">client.outputs.<a href="./src/resources/outputs.ts">list</a>({ ...params }) -> EventsOutputsPage</code>
+- <code title="get /v3/outputs">client.outputs.<a href="./src/resources/outputs.ts">list</a>({ ...params }) -> OutputListResponsesOutputsPage</code>
 
 # Workflows
 

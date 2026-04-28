@@ -53,9 +53,9 @@ import { EventSubmitFeedbackParams, EventSubmitFeedbackResponse, Events } from '
 import { InferSchema, InferSchemaCreateParams, InferSchemaCreateResponse } from './resources/infer-schema';
 import {
   AnyType,
-  Event,
-  EventsOutputsPage,
   OutputListParams,
+  OutputListResponse,
+  OutputListResponsesOutputsPage,
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
@@ -1048,9 +1048,9 @@ export declare namespace Bem {
   export {
     Outputs as Outputs,
     type AnyType as AnyType,
-    type Event as Event,
     type OutputRetrieveResponse as OutputRetrieveResponse,
-    type EventsOutputsPage as EventsOutputsPage,
+    type OutputListResponse as OutputListResponse,
+    type OutputListResponsesOutputsPage as OutputListResponsesOutputsPage,
     type OutputListParams as OutputListParams,
   };
 
