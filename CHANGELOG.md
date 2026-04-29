@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.18.0 (2026-04-29)
+
+Full Changelog: [v0.17.0...v0.18.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.17.0...v0.18.0)
+
+### Features
+
+* **api:** api update ([1f01c1d](https://github.com/bem-team/bem-typescript-sdk/commit/1f01c1d37b645e939496671518abe04390d4cc37))
+
+
+### Chores
+
+* **format:** run eslint and prettier separately ([92c0e16](https://github.com/bem-team/bem-typescript-sdk/commit/92c0e1614fd35b8cdf60b769165dfb4a81beb570))
+
 ## 0.17.0 (2026-04-28)
 
 Full Changelog: [v0.16.0...v0.17.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.16.0...v0.17.0)

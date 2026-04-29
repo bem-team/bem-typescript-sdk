@@ -25,6 +25,7 @@ import { path } from '../../internal/utils/path';
  * - **Route**: Direct data to different processing paths based on conditions
  * - **Split**: Break multi-page documents into individual pages for parallel processing
  * - **Join**: Combine outputs from multiple function calls into a single result
+ * - **Parse**: Render documents into a navigable structure of page-aware sections, named entities, and relationships — designed to be walked by an LLM agent via the [File System API](/api/v3/file-system) (`POST /v3/fs`). Two toggles, both `true` by default: `extractEntities` controls per-document entity and relationship extraction; `linkAcrossDocuments` merges entities into one canonical record per real-world thing across the environment, populating cross-document memory.
  * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
  * - **Enrich**: Enhance data with semantic search against collections
  * - **Send**: Deliver workflow outputs to downstream destinations
@@ -648,9 +649,10 @@ export interface EnrichStep {
    * from 0.0 (perfect match) to 2.0 (completely dissimilar). Lower scores indicate
    * better semantic similarity.
    *
-   * When enabled, each result includes a `cosineDistance` field.
+   * When enabled, each result includes a `cosine_distance` field (semantic mode) or
+   * a `hybrid_score` field (hybrid mode).
    */
-  includeCosineDistance?: boolean;
+  includeScore?: boolean;
 
   /**
    * When true, searches all collections under the hierarchical path. For example,
