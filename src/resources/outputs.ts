@@ -390,6 +390,13 @@ export namespace Event {
     eventType?: 'extract';
 
     /**
+     * Per-field bounding boxes. A JSON object mapping RFC 6901 JSON Pointer paths
+     * (e.g. `"/invoiceNumber"`, `"/items/0/price"`) to the document regions from which
+     * each extracted value was sourced.
+     */
+    fieldBoundingBoxes?: unknown;
+
+    /**
      * Per-field confidence scores. A JSON object mapping RFC 6901 JSON Pointer paths
      * (e.g. `"/invoiceNumber"`) to float values in the range [0, 1] indicating the
      * model's confidence in each extracted field value.
