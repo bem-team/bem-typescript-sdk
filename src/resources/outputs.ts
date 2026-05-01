@@ -1399,6 +1399,11 @@ export interface OutputListParams extends OutputsPageParams {
    */
   eventIDs?: Array<string>;
 
+  /**
+   * Filter to specific non-error output event types, e.g. `classify` or `extract`.
+   */
+  eventTypes?: Array<string>;
+
   functionIDs?: Array<string>;
 
   functionNames?: Array<string>;
