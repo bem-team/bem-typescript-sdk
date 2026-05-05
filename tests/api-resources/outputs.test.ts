@@ -41,6 +41,7 @@ describe('resource outputs', () => {
           callIDs: ['string'],
           endingBefore: 'endingBefore',
           eventIDs: ['string'],
+          eventTypes: ['string'],
           functionIDs: ['string'],
           functionNames: ['string'],
           functionVersionNums: [0],
