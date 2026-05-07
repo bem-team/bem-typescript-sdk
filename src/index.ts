@@ -21,3 +21,16 @@ export {
   PermissionDeniedError,
   UnprocessableEntityError,
 } from './core/error';
+
+export {
+  verifyWebhookSignature,
+  WebhookSignatureError,
+  type VerifyWebhookOptions,
+  type VerifiedWebhook,
+} from './lib/webhooks';
+
+export { waitForCall, CallTimeoutError, CallFailedError, type WaitForCallOptions } from './lib/wait';
+
+export { upsertFunction, upsertWorkflow, type UpsertResult } from './lib/upsert';
+
+export { fromPath } from './lib/uploads';
