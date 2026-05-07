@@ -35,3 +35,5 @@ export {
   CallFailedError,
   type WaitForCallOptions,
 } from './lib/wait';
+
+export { upsertFunction, upsertWorkflow, type UpsertResult } from './lib/upsert';
