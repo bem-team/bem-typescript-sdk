@@ -214,6 +214,7 @@ export const sdkMethods: SdkMethod[] = [
     httpMethod: 'post',
     httpPath: '/v3/events/{eventID}/feedback',
   },
+  { clientCallName: 'client.webhooks.unwrap', fullyQualifiedName: 'webhooks.unwrap' },
   {
     clientCallName: 'client.webhookSecret.create',
     fullyQualifiedName: 'webhookSecret.create',
@@ -255,6 +256,54 @@ export const sdkMethods: SdkMethod[] = [
     fullyQualifiedName: 'fs.navigate',
     httpMethod: 'post',
     httpPath: '/v3/fs',
+  },
+  {
+    clientCallName: 'client.connectors.create',
+    fullyQualifiedName: 'connectors.create',
+    httpMethod: 'post',
+    httpPath: '/v3/connectors',
+  },
+  {
+    clientCallName: 'client.connectors.list',
+    fullyQualifiedName: 'connectors.list',
+    httpMethod: 'get',
+    httpPath: '/v3/connectors',
+  },
+  {
+    clientCallName: 'client.connectors.delete',
+    fullyQualifiedName: 'connectors.delete',
+    httpMethod: 'delete',
+    httpPath: '/v3/connectors/{connectorID}',
+  },
+  {
+    clientCallName: 'client.subscriptions.create',
+    fullyQualifiedName: 'subscriptions.create',
+    httpMethod: 'post',
+    httpPath: '/v3/subscriptions',
+  },
+  {
+    clientCallName: 'client.subscriptions.retrieve',
+    fullyQualifiedName: 'subscriptions.retrieve',
+    httpMethod: 'get',
+    httpPath: '/v3/subscriptions/{subscriptionID}',
+  },
+  {
+    clientCallName: 'client.subscriptions.update',
+    fullyQualifiedName: 'subscriptions.update',
+    httpMethod: 'patch',
+    httpPath: '/v3/subscriptions/{subscriptionID}',
+  },
+  {
+    clientCallName: 'client.subscriptions.list',
+    fullyQualifiedName: 'subscriptions.list',
+    httpMethod: 'get',
+    httpPath: '/v3/subscriptions',
+  },
+  {
+    clientCallName: 'client.subscriptions.delete',
+    fullyQualifiedName: 'subscriptions.delete',
+    httpMethod: 'delete',
+    httpPath: '/v3/subscriptions/{subscriptionID}',
   },
 ];
 

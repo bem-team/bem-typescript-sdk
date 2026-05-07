@@ -50,7 +50,7 @@ import { RequestOptions } from '../internal/request-options';
  *
  * bem treats any non-2XX response (or a transport failure) as a delivery error and retries with exponential backoff. Return a 2XX as soon as you have durably queued the payload — do not block on downstream work.
  */
-export class WebhookSecret extends APIResource {
+export class WebhookSecretResource extends APIResource {
   /**
    * **Generate a new webhook signing secret.**
    *
@@ -61,7 +61,7 @@ export class WebhookSecret extends APIResource {
    * Update your verification logic before calling this endpoint if you need
    * zero-downtime rotation.
    */
-  create(options?: RequestOptions): APIPromise<WebhookSecretCreateResponse> {
+  create(options?: RequestOptions): APIPromise<WebhookSecret> {
     return this._client.post('/v3/webhook-secret', options);
   }
 
@@ -80,7 +80,7 @@ export class WebhookSecret extends APIResource {
    * 4. Compare the hex digest against `v1`.
    * 5. Reject requests where the timestamp is more than a few minutes old.
    */
-  retrieve(options?: RequestOptions): APIPromise<WebhookSecretRetrieveResponse> {
+  retrieve(options?: RequestOptions): APIPromise<WebhookSecret> {
     return this._client.get('/v3/webhook-secret', options);
   }
 
@@ -102,7 +102,7 @@ export class WebhookSecret extends APIResource {
  * Webhook signing secret used to verify `bem-signature` headers on delivered
  * webhooks.
  */
-export interface WebhookSecretCreateResponse {
+export interface WebhookSecret {
   /**
    * The signing secret value. Store this securely — it is shown in full only on
    * generation.
@@ -110,21 +110,6 @@ export interface WebhookSecretCreateResponse {
   secret: string;
 }
 
-/**
- * Webhook signing secret used to verify `bem-signature` headers on delivered
- * webhooks.
- */
-export interface WebhookSecretRetrieveResponse {
-  /**
-   * The signing secret value. Store this securely — it is shown in full only on
-   * generation.
-   */
-  secret: string;
-}
-
-export declare namespace WebhookSecret {
-  export {
-    type WebhookSecretCreateResponse as WebhookSecretCreateResponse,
-    type WebhookSecretRetrieveResponse as WebhookSecretRetrieveResponse,
-  };
+export declare namespace WebhookSecretResource {
+  export { type WebhookSecret as WebhookSecret };
 }

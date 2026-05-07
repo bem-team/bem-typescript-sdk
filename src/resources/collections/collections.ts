@@ -7,7 +7,6 @@ import {
   ItemAddResponse,
   ItemDeleteParams,
   ItemRetrieveParams,
-  ItemRetrieveResponse,
   ItemUpdateParams,
   ItemUpdateResponse,
   Items,
@@ -55,7 +54,7 @@ export class Collections extends APIResource {
    * });
    * ```
    */
-  create(body: CollectionCreateParams, options?: RequestOptions): APIPromise<CollectionCreateResponse> {
+  create(body: CollectionCreateParams, options?: RequestOptions): APIPromise<Collection> {
     return this._client.post('/v3/collections', { body, ...options });
   }
 
@@ -116,7 +115,7 @@ export class Collections extends APIResource {
 /**
  * Collection details
  */
-export interface CollectionCreateResponse {
+export interface Collection {
   /**
    * Unique identifier for the collection
    */
@@ -141,7 +140,7 @@ export interface CollectionCreateResponse {
   /**
    * List of items in the collection (when fetching collection details)
    */
-  items?: Array<CollectionCreateResponse.Item>;
+  items?: Array<CollectionItem>;
 
   /**
    * Number of items per page
@@ -164,31 +163,29 @@ export interface CollectionCreateResponse {
   updatedAt?: string;
 }
 
-export namespace CollectionCreateResponse {
+/**
+ * A single item in a collection
+ */
+export interface CollectionItem {
   /**
-   * A single item in a collection
+   * Unique identifier for the item
    */
-  export interface Item {
-    /**
-     * Unique identifier for the item
-     */
-    collectionItemID: string;
+  collectionItemID: string;
 
-    /**
-     * When the item was created
-     */
-    createdAt: string;
+  /**
+   * When the item was created
+   */
+  createdAt: string;
 
-    /**
-     * The data stored in this item
-     */
-    data: string | unknown;
+  /**
+   * The data stored in this item
+   */
+  data: string | unknown;
 
-    /**
-     * When the item was last updated
-     */
-    updatedAt: string;
-  }
+  /**
+   * When the item was last updated
+   */
+  updatedAt: string;
 }
 
 /**
@@ -381,7 +378,8 @@ Collections.Items = Items;
 
 export declare namespace Collections {
   export {
-    type CollectionCreateResponse as CollectionCreateResponse,
+    type Collection as Collection,
+    type CollectionItem as CollectionItem,
     type CollectionListResponse as CollectionListResponse,
     type CollectionCountTokensResponse as CollectionCountTokensResponse,
     type CollectionCreateParams as CollectionCreateParams,
@@ -392,7 +390,6 @@ export declare namespace Collections {
 
   export {
     Items as Items,
-    type ItemRetrieveResponse as ItemRetrieveResponse,
     type ItemUpdateResponse as ItemUpdateResponse,
     type ItemAddResponse as ItemAddResponse,
     type ItemRetrieveParams as ItemRetrieveParams,

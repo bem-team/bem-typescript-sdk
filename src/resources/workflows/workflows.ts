@@ -3,6 +3,7 @@
 import { APIResource } from '../../core/resource';
 import * as WorkflowsAPI from './workflows';
 import * as CallsAPI from '../calls';
+import * as OutputsAPI from '../outputs';
 import * as FunctionsAPI from '../functions/functions';
 import * as VersionsAPI from './versions';
 import { VersionListParams, VersionRetrieveParams, VersionRetrieveResponse, Versions } from './versions';
@@ -383,7 +384,7 @@ export namespace Workflow {
     /**
      * Discriminator for a workflow connector. V3 supports `paragon` only.
      */
-    type: 'paragon';
+    type: WorkflowsAPI.WorkflowConnectorType;
 
     /**
      * Paragon-integration configuration on a workflow connector.
@@ -432,6 +433,112 @@ export interface WorkflowAudit {
 }
 
 /**
+ * Create/update entry for a connector inline with the workflow.
+ */
+export interface WorkflowConnector {
+  /**
+   * Human-friendly connector name.
+   */
+  name: string;
+
+  /**
+   * Discriminator for a workflow connector. V3 supports `paragon` only.
+   */
+  type: WorkflowConnectorType;
+
+  /**
+   * Present → update. Absent → create.
+   */
+  connectorID?: string;
+
+  /**
+   * Request-side config block for a Paragon connector. Fields absent on update are
+   * unchanged.
+   */
+  paragon?: WorkflowConnector.Paragon;
+}
+
+export namespace WorkflowConnector {
+  /**
+   * Request-side config block for a Paragon connector. Fields absent on update are
+   * unchanged.
+   */
+  export interface Paragon {
+    /**
+     * Opaque per-integration configuration. Required on create.
+     */
+    configuration?: unknown;
+
+    /**
+     * Paragon integration key. Required on create.
+     */
+    integration?: string;
+  }
+}
+
+/**
+ * Per-connector failure surfaced alongside a successful workflow DAG save.
+ */
+export interface WorkflowConnectorError {
+  /**
+   * Machine-readable error code.
+   */
+  code: string;
+
+  /**
+   * Human-readable error message.
+   */
+  message: string;
+
+  /**
+   * Which diff operation was attempted.
+   */
+  operation: 'create' | 'update' | 'delete';
+
+  /**
+   * Populated for update/delete failures.
+   */
+  connectorID?: string;
+
+  /**
+   * Populated for create failures.
+   */
+  name?: string;
+}
+
+/**
+ * Discriminator for a workflow connector. V3 supports `paragon` only.
+ */
+export type WorkflowConnectorType = 'paragon';
+
+/**
+ * A directed edge between two named call-site nodes.
+ */
+export interface WorkflowEdge {
+  /**
+   * Name of the destination node.
+   */
+  destinationNodeName: string;
+
+  /**
+   * Name of the source node.
+   */
+  sourceNodeName: string;
+
+  /**
+   * Labelled outlet on the source node that activates this edge. Omit for the
+   * default (unlabelled) outlet.
+   */
+  destinationName?: string;
+
+  /**
+   * Opaque free-form JSON object attached to this edge. Stored and returned
+   * verbatim; the server does not interpret it.
+   */
+  metadata?: unknown;
+}
+
+/**
  * Read representation of a directed edge between call-site nodes.
  */
 export interface WorkflowEdgeResponse {
@@ -455,6 +562,29 @@ export interface WorkflowEdgeResponse {
    * verbatim; never interpreted by the server.
    */
   metadata?: unknown;
+}
+
+/**
+ * A single function call-site node in a workflow DAG.
+ */
+export interface WorkflowNode {
+  /**
+   * The function (and version) to execute at this call site.
+   */
+  function: FunctionVersionIdentifier;
+
+  /**
+   * Opaque free-form JSON object attached to this node. Stored and returned
+   * verbatim; the server does not interpret it. Intended for client-side concerns
+   * such as canvas display properties (position, color, collapsed state, etc.).
+   */
+  metadata?: unknown;
+
+  /**
+   * Name for this call site. Must be unique within the workflow version. Defaults to
+   * the function's own name when omitted.
+   */
+  name?: string;
 }
 
 /**
@@ -495,7 +625,7 @@ export interface WorkflowUpdateResponse {
    * Per-connector failures from the diff/apply phase. Empty or omitted when all
    * operations succeeded.
    */
-  connectorErrors?: Array<WorkflowUpdateResponse.ConnectorError>;
+  connectorErrors?: Array<WorkflowConnectorError>;
 
   /**
    * Error message if the workflow update failed.
@@ -506,38 +636,6 @@ export interface WorkflowUpdateResponse {
    * V3 read representation of a workflow version.
    */
   workflow?: Workflow;
-}
-
-export namespace WorkflowUpdateResponse {
-  /**
-   * Per-connector failure surfaced alongside a successful workflow DAG save.
-   */
-  export interface ConnectorError {
-    /**
-     * Machine-readable error code.
-     */
-    code: string;
-
-    /**
-     * Human-readable error message.
-     */
-    message: string;
-
-    /**
-     * Which diff operation was attempted.
-     */
-    operation: 'create' | 'update' | 'delete';
-
-    /**
-     * Populated for update/delete failures.
-     */
-    connectorID?: string;
-
-    /**
-     * Populated for create failures.
-     */
-    name?: string;
-  }
 }
 
 export interface WorkflowCopyResponse {
@@ -611,13 +709,13 @@ export interface WorkflowCreateParams {
   /**
    * Call-site nodes in the DAG. At least one is required.
    */
-  nodes: Array<WorkflowCreateParams.Node>;
+  nodes: Array<WorkflowNode>;
 
   /**
    * Connectors to attach to the workflow at creation. If any entry fails to
    * provision, the entire workflow creation is rolled back.
    */
-  connectors?: Array<WorkflowCreateParams.Connector>;
+  connectors?: Array<WorkflowConnector>;
 
   /**
    * Human-readable display name.
@@ -627,108 +725,12 @@ export interface WorkflowCreateParams {
   /**
    * Directed edges between nodes. Omit or leave empty for single-node workflows.
    */
-  edges?: Array<WorkflowCreateParams.Edge>;
+  edges?: Array<WorkflowEdge>;
 
   /**
    * Tags to categorize and organize the workflow.
    */
   tags?: Array<string>;
-}
-
-export namespace WorkflowCreateParams {
-  /**
-   * A single function call-site node in a workflow DAG.
-   */
-  export interface Node {
-    /**
-     * The function (and version) to execute at this call site.
-     */
-    function: WorkflowsAPI.FunctionVersionIdentifier;
-
-    /**
-     * Opaque free-form JSON object attached to this node. Stored and returned
-     * verbatim; the server does not interpret it. Intended for client-side concerns
-     * such as canvas display properties (position, color, collapsed state, etc.).
-     */
-    metadata?: unknown;
-
-    /**
-     * Name for this call site. Must be unique within the workflow version. Defaults to
-     * the function's own name when omitted.
-     */
-    name?: string;
-  }
-
-  /**
-   * Create/update entry for a connector inline with the workflow.
-   */
-  export interface Connector {
-    /**
-     * Human-friendly connector name.
-     */
-    name: string;
-
-    /**
-     * Discriminator for a workflow connector. V3 supports `paragon` only.
-     */
-    type: 'paragon';
-
-    /**
-     * Present → update. Absent → create.
-     */
-    connectorID?: string;
-
-    /**
-     * Request-side config block for a Paragon connector. Fields absent on update are
-     * unchanged.
-     */
-    paragon?: Connector.Paragon;
-  }
-
-  export namespace Connector {
-    /**
-     * Request-side config block for a Paragon connector. Fields absent on update are
-     * unchanged.
-     */
-    export interface Paragon {
-      /**
-       * Opaque per-integration configuration. Required on create.
-       */
-      configuration?: unknown;
-
-      /**
-       * Paragon integration key. Required on create.
-       */
-      integration?: string;
-    }
-  }
-
-  /**
-   * A directed edge between two named call-site nodes.
-   */
-  export interface Edge {
-    /**
-     * Name of the destination node.
-     */
-    destinationNodeName: string;
-
-    /**
-     * Name of the source node.
-     */
-    sourceNodeName: string;
-
-    /**
-     * Labelled outlet on the source node that activates this edge. Omit for the
-     * default (unlabelled) outlet.
-     */
-    destinationName?: string;
-
-    /**
-     * Opaque free-form JSON object attached to this edge. Stored and returned
-     * verbatim; the server does not interpret it.
-     */
-    metadata?: unknown;
-  }
 }
 
 export interface WorkflowUpdateParams {
@@ -738,14 +740,14 @@ export interface WorkflowUpdateParams {
    * with `connectorID` are updates, entries without are creates, and existing
    * connectors whose `connectorID` is absent are deleted.
    */
-  connectors?: Array<WorkflowUpdateParams.Connector>;
+  connectors?: Array<WorkflowConnector>;
 
   /**
    * Human-readable display name.
    */
   displayName?: string;
 
-  edges?: Array<WorkflowUpdateParams.Edge>;
+  edges?: Array<WorkflowEdge>;
 
   /**
    * `mainNodeName`, `nodes`, and `edges` must be provided together to update the DAG
@@ -759,108 +761,12 @@ export interface WorkflowUpdateParams {
    */
   name?: string;
 
-  nodes?: Array<WorkflowUpdateParams.Node>;
+  nodes?: Array<WorkflowNode>;
 
   /**
    * Tags to categorize and organize the workflow.
    */
   tags?: Array<string>;
-}
-
-export namespace WorkflowUpdateParams {
-  /**
-   * Create/update entry for a connector inline with the workflow.
-   */
-  export interface Connector {
-    /**
-     * Human-friendly connector name.
-     */
-    name: string;
-
-    /**
-     * Discriminator for a workflow connector. V3 supports `paragon` only.
-     */
-    type: 'paragon';
-
-    /**
-     * Present → update. Absent → create.
-     */
-    connectorID?: string;
-
-    /**
-     * Request-side config block for a Paragon connector. Fields absent on update are
-     * unchanged.
-     */
-    paragon?: Connector.Paragon;
-  }
-
-  export namespace Connector {
-    /**
-     * Request-side config block for a Paragon connector. Fields absent on update are
-     * unchanged.
-     */
-    export interface Paragon {
-      /**
-       * Opaque per-integration configuration. Required on create.
-       */
-      configuration?: unknown;
-
-      /**
-       * Paragon integration key. Required on create.
-       */
-      integration?: string;
-    }
-  }
-
-  /**
-   * A directed edge between two named call-site nodes.
-   */
-  export interface Edge {
-    /**
-     * Name of the destination node.
-     */
-    destinationNodeName: string;
-
-    /**
-     * Name of the source node.
-     */
-    sourceNodeName: string;
-
-    /**
-     * Labelled outlet on the source node that activates this edge. Omit for the
-     * default (unlabelled) outlet.
-     */
-    destinationName?: string;
-
-    /**
-     * Opaque free-form JSON object attached to this edge. Stored and returned
-     * verbatim; the server does not interpret it.
-     */
-    metadata?: unknown;
-  }
-
-  /**
-   * A single function call-site node in a workflow DAG.
-   */
-  export interface Node {
-    /**
-     * The function (and version) to execute at this call site.
-     */
-    function: WorkflowsAPI.FunctionVersionIdentifier;
-
-    /**
-     * Opaque free-form JSON object attached to this node. Stored and returned
-     * verbatim; the server does not interpret it. Intended for client-side concerns
-     * such as canvas display properties (position, color, collapsed state, etc.).
-     */
-    metadata?: unknown;
-
-    /**
-     * Name for this call site. Must be unique within the workflow version. Defaults to
-     * the function's own name when omitted.
-     */
-    name?: string;
-  }
 }
 
 export interface WorkflowListParams extends WorkflowsPageParams {
@@ -955,25 +861,7 @@ export namespace WorkflowCallParams {
         /**
          * The input type of the content you're sending for transformation.
          */
-        inputType:
-          | 'csv'
-          | 'docx'
-          | 'email'
-          | 'heic'
-          | 'html'
-          | 'jpeg'
-          | 'json'
-          | 'heif'
-          | 'm4a'
-          | 'mp3'
-          | 'pdf'
-          | 'png'
-          | 'text'
-          | 'wav'
-          | 'webp'
-          | 'xls'
-          | 'xlsx'
-          | 'xml';
+        inputType: OutputsAPI.InputType;
 
         itemReferenceID?: string;
       }
@@ -996,25 +884,7 @@ export namespace WorkflowCallParams {
       /**
        * The input type of the content you're sending for transformation.
        */
-      inputType:
-        | 'csv'
-        | 'docx'
-        | 'email'
-        | 'heic'
-        | 'html'
-        | 'jpeg'
-        | 'json'
-        | 'heif'
-        | 'm4a'
-        | 'mp3'
-        | 'pdf'
-        | 'png'
-        | 'text'
-        | 'wav'
-        | 'webp'
-        | 'xls'
-        | 'xlsx'
-        | 'xml';
+      inputType: OutputsAPI.InputType;
     }
   }
 }
@@ -1063,7 +933,12 @@ export declare namespace Workflows {
     type FunctionVersionIdentifier as FunctionVersionIdentifier,
     type Workflow as Workflow,
     type WorkflowAudit as WorkflowAudit,
+    type WorkflowConnector as WorkflowConnector,
+    type WorkflowConnectorError as WorkflowConnectorError,
+    type WorkflowConnectorType as WorkflowConnectorType,
+    type WorkflowEdge as WorkflowEdge,
     type WorkflowEdgeResponse as WorkflowEdgeResponse,
+    type WorkflowNode as WorkflowNode,
     type WorkflowNodeResponse as WorkflowNodeResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
