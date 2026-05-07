@@ -28,3 +28,10 @@ export {
   type VerifyWebhookOptions,
   type VerifiedWebhook,
 } from './lib/webhooks';
+
+export {
+  waitForCall,
+  CallTimeoutError,
+  CallFailedError,
+  type WaitForCallOptions,
+} from './lib/wait';
