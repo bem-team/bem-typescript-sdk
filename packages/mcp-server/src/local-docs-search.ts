@@ -1853,7 +1853,7 @@ const EMBEDDED_METHODS: MethodEntry[] = [
       },
       http: {
         example:
-          'curl https://api.bem.ai/v3/eval \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ]\n        }\'',
+          'curl https://api.bem.ai/v3/eval \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ],\n          "evaluationVersion": "0.1.0-gemini"\n        }\'',
       },
     },
   },
@@ -1899,7 +1899,7 @@ const EMBEDDED_METHODS: MethodEntry[] = [
       },
       http: {
         example:
-          'curl https://api.bem.ai/v3/eval/results \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ]\n        }\'',
+          'curl https://api.bem.ai/v3/eval/results \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ],\n          "evaluationVersion": "0.1.0-gemini"\n        }\'',
       },
     },
   },
