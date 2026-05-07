@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.20.0 (2026-05-07)
+
+Full Changelog: [v0.19.1...v0.20.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.19.1...v0.20.0)
+
+### Features
+
+* **api:** add new resources and webhook support ([51cd1df](https://github.com/bem-team/bem-typescript-sdk/commit/51cd1df28b004fe172d7190d26b2b8c7add713d0))
+* **api:** api update ([10796c9](https://github.com/bem-team/bem-typescript-sdk/commit/10796c9c0cbee0b005c467f7ca0ccea9aee45274))
+
 ## 0.19.1 (2026-05-07)
 
 Full Changelog: [v0.19.0...v0.19.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.19.0...v0.19.1)

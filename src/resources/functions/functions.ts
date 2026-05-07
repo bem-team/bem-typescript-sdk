@@ -304,7 +304,7 @@ export namespace CreateFunction {
     /**
      * Destination type for a Send function.
      */
-    destinationType?: 'webhook' | 's3' | 'google_drive';
+    destinationType?: FunctionsAPI.SendDestinationType;
 
     /**
      * Display name of function. Human-readable name to help you identify the function.
@@ -517,48 +517,12 @@ export namespace CreateFunction {
      * JSON. The two toggles below independently control entity extraction (a per-call
      * output concern) and cross-document memory linking (an environment-wide concern).
      */
-    parseConfig?: ParseFunction.ParseConfig;
+    parseConfig?: FunctionsAPI.ParseConfig;
 
     /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
-  }
-
-  export namespace ParseFunction {
-    /**
-     * Per-version configuration for a Parse function.
-     *
-     * Parse renders document pages (PDF, image) via vision LLM and emits structured
-     * JSON. The two toggles below independently control entity extraction (a per-call
-     * output concern) and cross-document memory linking (an environment-wide concern).
-     */
-    export interface ParseConfig {
-      /**
-       * When true, extract named entities (people, organizations, products, studies,
-       * identifiers, etc.) and the relationships between them, and dedupe by canonical
-       * name within the document. When false, only `sections[]` is extracted;
-       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
-       * to true.
-       */
-      extractEntities?: boolean;
-
-      /**
-       * When true, link this document's entities to entities seen in earlier documents
-       * in this environment, building one canonical record per real-world thing across
-       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
-       * open / xref). Doesn't change this call's parse output. Requires
-       * `extractEntities=true`. Defaults to true.
-       */
-      linkAcrossDocuments?: boolean;
-
-      /**
-       * Optional JSONSchema. When provided, each chunk performs schema-guided
-       * extraction. When absent, chunks perform open-ended discovery and return
-       * sections, entities, and relationships per the discovery schema.
-       */
-      schema?: unknown;
-    }
   }
 }
 
@@ -988,7 +952,7 @@ export namespace Function {
     /**
      * Destination type for a Send function.
      */
-    destinationType: 'webhook' | 's3' | 'google_drive';
+    destinationType: FunctionsAPI.SendDestinationType;
 
     /**
      * Unique identifier of function.
@@ -1340,7 +1304,7 @@ export namespace Function {
      * JSON. The two toggles below independently control entity extraction (a per-call
      * output concern) and cross-document memory linking (an environment-wide concern).
      */
-    parseConfig?: ParseFunction.ParseConfig;
+    parseConfig?: FunctionsAPI.ParseConfig;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -1351,42 +1315,6 @@ export namespace Function {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
-  }
-
-  export namespace ParseFunction {
-    /**
-     * Per-version configuration for a Parse function.
-     *
-     * Parse renders document pages (PDF, image) via vision LLM and emits structured
-     * JSON. The two toggles below independently control entity extraction (a per-call
-     * output concern) and cross-document memory linking (an environment-wide concern).
-     */
-    export interface ParseConfig {
-      /**
-       * When true, extract named entities (people, organizations, products, studies,
-       * identifiers, etc.) and the relationships between them, and dedupe by canonical
-       * name within the document. When false, only `sections[]` is extracted;
-       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
-       * to true.
-       */
-      extractEntities?: boolean;
-
-      /**
-       * When true, link this document's entities to entities seen in earlier documents
-       * in this environment, building one canonical record per real-world thing across
-       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
-       * open / xref). Doesn't change this call's parse output. Requires
-       * `extractEntities=true`. Defaults to true.
-       */
-      linkAcrossDocuments?: boolean;
-
-      /**
-       * Optional JSONSchema. When provided, each chunk performs schema-guided
-       * extraction. When absent, chunks perform open-ended discovery and return
-       * sections, entities, and relationships per the discovery schema.
-       */
-      schema?: unknown;
-    }
   }
 }
 
@@ -1445,6 +1373,45 @@ export interface ListFunctionsResponse {
    */
   totalCount?: number;
 }
+
+/**
+ * Per-version configuration for a Parse function.
+ *
+ * Parse renders document pages (PDF, image) via vision LLM and emits structured
+ * JSON. The two toggles below independently control entity extraction (a per-call
+ * output concern) and cross-document memory linking (an environment-wide concern).
+ */
+export interface ParseConfig {
+  /**
+   * When true, extract named entities (people, organizations, products, studies,
+   * identifiers, etc.) and the relationships between them, and dedupe by canonical
+   * name within the document. When false, only `sections[]` is extracted;
+   * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
+   * to true.
+   */
+  extractEntities?: boolean;
+
+  /**
+   * When true, link this document's entities to entities seen in earlier documents
+   * in this environment, building one canonical record per real-world thing across
+   * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
+   * open / xref). Doesn't change this call's parse output. Requires
+   * `extractEntities=true`. Defaults to true.
+   */
+  linkAcrossDocuments?: boolean;
+
+  /**
+   * Optional JSONSchema. When provided, each chunk performs schema-guided
+   * extraction. When absent, chunks perform open-ended discovery and return
+   * sections, entities, and relationships per the discovery schema.
+   */
+  schema?: unknown;
+}
+
+/**
+ * Destination type for a Send function.
+ */
+export type SendDestinationType = 'webhook' | 's3' | 'google_drive';
 
 export interface SplitFunctionSemanticPageItemClass {
   name: string;
@@ -1592,7 +1559,7 @@ export namespace UpdateFunction {
     /**
      * Destination type for a Send function.
      */
-    destinationType?: 'webhook' | 's3' | 'google_drive';
+    destinationType?: FunctionsAPI.SendDestinationType;
 
     /**
      * Display name of function. Human-readable name to help you identify the function.
@@ -1801,48 +1768,12 @@ export namespace UpdateFunction {
      * JSON. The two toggles below independently control entity extraction (a per-call
      * output concern) and cross-document memory linking (an environment-wide concern).
      */
-    parseConfig?: ParseFunction.ParseConfig;
+    parseConfig?: FunctionsAPI.ParseConfig;
 
     /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
-  }
-
-  export namespace ParseFunction {
-    /**
-     * Per-version configuration for a Parse function.
-     *
-     * Parse renders document pages (PDF, image) via vision LLM and emits structured
-     * JSON. The two toggles below independently control entity extraction (a per-call
-     * output concern) and cross-document memory linking (an environment-wide concern).
-     */
-    export interface ParseConfig {
-      /**
-       * When true, extract named entities (people, organizations, products, studies,
-       * identifiers, etc.) and the relationships between them, and dedupe by canonical
-       * name within the document. When false, only `sections[]` is extracted;
-       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
-       * to true.
-       */
-      extractEntities?: boolean;
-
-      /**
-       * When true, link this document's entities to entities seen in earlier documents
-       * in this environment, building one canonical record per real-world thing across
-       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
-       * open / xref). Doesn't change this call's parse output. Requires
-       * `extractEntities=true`. Defaults to true.
-       */
-      linkAcrossDocuments?: boolean;
-
-      /**
-       * Optional JSONSchema. When provided, each chunk performs schema-guided
-       * extraction. When absent, chunks perform open-ended discovery and return
-       * sections, entities, and relationships per the discovery schema.
-       */
-      schema?: unknown;
-    }
   }
 }
 
@@ -2005,7 +1936,7 @@ export declare namespace FunctionCreateParams {
     /**
      * Destination type for a Send function.
      */
-    destinationType?: 'webhook' | 's3' | 'google_drive';
+    destinationType?: SendDestinationType;
 
     /**
      * Display name of function. Human-readable name to help you identify the function.
@@ -2218,48 +2149,12 @@ export declare namespace FunctionCreateParams {
      * JSON. The two toggles below independently control entity extraction (a per-call
      * output concern) and cross-document memory linking (an environment-wide concern).
      */
-    parseConfig?: CreateParseFunction.ParseConfig;
+    parseConfig?: ParseConfig;
 
     /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
-  }
-
-  export namespace CreateParseFunction {
-    /**
-     * Per-version configuration for a Parse function.
-     *
-     * Parse renders document pages (PDF, image) via vision LLM and emits structured
-     * JSON. The two toggles below independently control entity extraction (a per-call
-     * output concern) and cross-document memory linking (an environment-wide concern).
-     */
-    export interface ParseConfig {
-      /**
-       * When true, extract named entities (people, organizations, products, studies,
-       * identifiers, etc.) and the relationships between them, and dedupe by canonical
-       * name within the document. When false, only `sections[]` is extracted;
-       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
-       * to true.
-       */
-      extractEntities?: boolean;
-
-      /**
-       * When true, link this document's entities to entities seen in earlier documents
-       * in this environment, building one canonical record per real-world thing across
-       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
-       * open / xref). Doesn't change this call's parse output. Requires
-       * `extractEntities=true`. Defaults to true.
-       */
-      linkAcrossDocuments?: boolean;
-
-      /**
-       * Optional JSONSchema. When provided, each chunk performs schema-guided
-       * extraction. When absent, chunks perform open-ended discovery and return
-       * sections, entities, and relationships per the discovery schema.
-       */
-      schema?: unknown;
-    }
   }
 }
 
@@ -2361,7 +2256,7 @@ export declare namespace FunctionUpdateParams {
     /**
      * Destination type for a Send function.
      */
-    destinationType?: 'webhook' | 's3' | 'google_drive';
+    destinationType?: SendDestinationType;
 
     /**
      * Display name of function. Human-readable name to help you identify the function.
@@ -2564,48 +2459,12 @@ export declare namespace FunctionUpdateParams {
      * JSON. The two toggles below independently control entity extraction (a per-call
      * output concern) and cross-document memory linking (an environment-wide concern).
      */
-    parseConfig?: UpsertParseFunction.ParseConfig;
+    parseConfig?: ParseConfig;
 
     /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
-  }
-
-  export namespace UpsertParseFunction {
-    /**
-     * Per-version configuration for a Parse function.
-     *
-     * Parse renders document pages (PDF, image) via vision LLM and emits structured
-     * JSON. The two toggles below independently control entity extraction (a per-call
-     * output concern) and cross-document memory linking (an environment-wide concern).
-     */
-    export interface ParseConfig {
-      /**
-       * When true, extract named entities (people, organizations, products, studies,
-       * identifiers, etc.) and the relationships between them, and dedupe by canonical
-       * name within the document. When false, only `sections[]` is extracted;
-       * `entities[]` and `relationships[]` come back empty in the parse output. Defaults
-       * to true.
-       */
-      extractEntities?: boolean;
-
-      /**
-       * When true, link this document's entities to entities seen in earlier documents
-       * in this environment, building one canonical record per real-world thing across
-       * the corpus. Visible in the Memory tab and queryable via `POST /v3/fs` (op=find /
-       * open / xref). Doesn't change this call's parse output. Requires
-       * `extractEntities=true`. Defaults to true.
-       */
-      linkAcrossDocuments?: boolean;
-
-      /**
-       * Optional JSONSchema. When provided, each chunk performs schema-guided
-       * extraction. When absent, chunks perform open-ended discovery and return
-       * sections, entities, and relationships per the discovery schema.
-       */
-      schema?: unknown;
-    }
   }
 }
 
@@ -2641,6 +2500,8 @@ export declare namespace Functions {
     type FunctionResponse as FunctionResponse,
     type FunctionType as FunctionType,
     type ListFunctionsResponse as ListFunctionsResponse,
+    type ParseConfig as ParseConfig,
+    type SendDestinationType as SendDestinationType,
     type SplitFunctionSemanticPageItemClass as SplitFunctionSemanticPageItemClass,
     type UpdateFunction as UpdateFunction,
     type UserActionSummary as UserActionSummary,

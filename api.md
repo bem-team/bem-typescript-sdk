@@ -11,6 +11,8 @@ Types:
 - <code><a href="./src/resources/functions/functions.ts">FunctionResponse</a></code>
 - <code><a href="./src/resources/functions/functions.ts">FunctionType</a></code>
 - <code><a href="./src/resources/functions/functions.ts">ListFunctionsResponse</a></code>
+- <code><a href="./src/resources/functions/functions.ts">ParseConfig</a></code>
+- <code><a href="./src/resources/functions/functions.ts">SendDestinationType</a></code>
 - <code><a href="./src/resources/functions/functions.ts">SplitFunctionSemanticPageItemClass</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UpdateFunction</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UserActionSummary</a></code>
@@ -80,6 +82,7 @@ Types:
 
 - <code><a href="./src/resources/outputs.ts">AnyType</a></code>
 - <code><a href="./src/resources/outputs.ts">Event</a></code>
+- <code><a href="./src/resources/outputs.ts">InputType</a></code>
 - <code><a href="./src/resources/outputs.ts">OutputRetrieveResponse</a></code>
 
 Methods:
@@ -94,7 +97,12 @@ Types:
 - <code><a href="./src/resources/workflows/workflows.ts">FunctionVersionIdentifier</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">Workflow</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowAudit</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowConnector</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowConnectorError</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowConnectorType</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowEdge</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowEdgeResponse</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowNode</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowNodeResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowRetrieveResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowUpdateResponse</a></code>
@@ -135,13 +143,14 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/collections/collections.ts">CollectionCreateResponse</a></code>
+- <code><a href="./src/resources/collections/collections.ts">Collection</a></code>
+- <code><a href="./src/resources/collections/collections.ts">CollectionItem</a></code>
 - <code><a href="./src/resources/collections/collections.ts">CollectionListResponse</a></code>
 - <code><a href="./src/resources/collections/collections.ts">CollectionCountTokensResponse</a></code>
 
 Methods:
 
-- <code title="post /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">create</a>({ ...params }) -> CollectionCreateResponse</code>
+- <code title="post /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">create</a>({ ...params }) -> Collection</code>
 - <code title="get /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">list</a>({ ...params }) -> CollectionListResponse</code>
 - <code title="delete /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">delete</a>({ ...params }) -> void</code>
 - <code title="post /v3/collections/token-count">client.collections.<a href="./src/resources/collections/collections.ts">countTokens</a>({ ...params }) -> CollectionCountTokensResponse</code>
@@ -150,13 +159,12 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/collections/items.ts">ItemRetrieveResponse</a></code>
 - <code><a href="./src/resources/collections/items.ts">ItemUpdateResponse</a></code>
 - <code><a href="./src/resources/collections/items.ts">ItemAddResponse</a></code>
 
 Methods:
 
-- <code title="get /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">retrieve</a>({ ...params }) -> ItemRetrieveResponse</code>
+- <code title="get /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">retrieve</a>({ ...params }) -> Collection</code>
 - <code title="put /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">update</a>({ ...params }) -> ItemUpdateResponse</code>
 - <code title="delete /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">delete</a>({ ...params }) -> void</code>
 - <code title="post /v3/collections/items">client.collections.items.<a href="./src/resources/collections/items.ts">add</a>({ ...params }) -> ItemAddResponse</code>
@@ -171,17 +179,37 @@ Methods:
 
 - <code title="post /v3/events/{eventID}/feedback">client.events.<a href="./src/resources/events.ts">submitFeedback</a>(eventID, { ...params }) -> EventSubmitFeedbackResponse</code>
 
+# Webhooks
+
+Types:
+
+- <code><a href="./src/resources/webhooks.ts">ExtractWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">ClassifyWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">ParseWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">SplitCollectionWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">SplitItemWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">JoinWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">EnrichWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">PayloadShapingWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">SendWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">EvaluationWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">CollectionProcessingWebhookEvent</a></code>
+- <code><a href="./src/resources/webhooks.ts">UnwrapWebhookEvent</a></code>
+
+Methods:
+
+- <code>client.webhooks.<a href="./src/resources/webhooks.ts">unwrap</a>(body) -> void</code>
+
 # WebhookSecret
 
 Types:
 
-- <code><a href="./src/resources/webhook-secret.ts">WebhookSecretCreateResponse</a></code>
-- <code><a href="./src/resources/webhook-secret.ts">WebhookSecretRetrieveResponse</a></code>
+- <code><a href="./src/resources/webhook-secret.ts">WebhookSecret</a></code>
 
 Methods:
 
-- <code title="post /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">create</a>() -> WebhookSecretCreateResponse</code>
-- <code title="get /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">retrieve</a>() -> WebhookSecretRetrieveResponse</code>
+- <code title="post /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">create</a>() -> WebhookSecret</code>
+- <code title="get /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">retrieve</a>() -> WebhookSecret</code>
 - <code title="delete /v3/webhook-secret">client.webhookSecret.<a href="./src/resources/webhook-secret.ts">revoke</a>() -> void</code>
 
 # Eval
@@ -198,20 +226,50 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/eval/results.ts">ResultFetchResultsResponse</a></code>
-- <code><a href="./src/resources/eval/results.ts">ResultRetrieveResultsResponse</a></code>
+- <code><a href="./src/resources/eval/results.ts">EvaluationResults</a></code>
 
 Methods:
 
-- <code title="post /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">fetchResults</a>({ ...params }) -> ResultFetchResultsResponse</code>
-- <code title="get /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">retrieveResults</a>({ ...params }) -> ResultRetrieveResultsResponse</code>
+- <code title="post /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">fetchResults</a>({ ...params }) -> EvaluationResults</code>
+- <code title="get /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">retrieveResults</a>({ ...params }) -> EvaluationResults</code>
 
 # Fs
 
 Types:
 
+- <code><a href="./src/resources/fs.ts">FsOp</a></code>
 - <code><a href="./src/resources/fs.ts">FNavigateResponse</a></code>
 
 Methods:
 
 - <code title="post /v3/fs">client.fs.<a href="./src/resources/fs.ts">navigate</a>({ ...params }) -> FNavigateResponse</code>
+
+# Connectors
+
+Types:
+
+- <code><a href="./src/resources/connectors.ts">Connector</a></code>
+- <code><a href="./src/resources/connectors.ts">ConnectorType</a></code>
+- <code><a href="./src/resources/connectors.ts">ConnectorListResponse</a></code>
+- <code><a href="./src/resources/connectors.ts">ConnectorDeleteResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/connectors">client.connectors.<a href="./src/resources/connectors.ts">create</a>({ ...params }) -> Connector</code>
+- <code title="get /v3/connectors">client.connectors.<a href="./src/resources/connectors.ts">list</a>({ ...params }) -> ConnectorListResponse</code>
+- <code title="delete /v3/connectors/{connectorID}">client.connectors.<a href="./src/resources/connectors.ts">delete</a>(connectorID) -> string</code>
+
+# Subscriptions
+
+Types:
+
+- <code><a href="./src/resources/subscriptions.ts">SubscriptionV3</a></code>
+- <code><a href="./src/resources/subscriptions.ts">SubscriptionListResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/subscriptions">client.subscriptions.<a href="./src/resources/subscriptions.ts">create</a>({ ...params }) -> SubscriptionV3</code>
+- <code title="get /v3/subscriptions/{subscriptionID}">client.subscriptions.<a href="./src/resources/subscriptions.ts">retrieve</a>(subscriptionID) -> SubscriptionV3</code>
+- <code title="patch /v3/subscriptions/{subscriptionID}">client.subscriptions.<a href="./src/resources/subscriptions.ts">update</a>(subscriptionID, { ...params }) -> SubscriptionV3</code>
+- <code title="get /v3/subscriptions">client.subscriptions.<a href="./src/resources/subscriptions.ts">list</a>({ ...params }) -> SubscriptionListResponse</code>
+- <code title="delete /v3/subscriptions/{subscriptionID}">client.subscriptions.<a href="./src/resources/subscriptions.ts">delete</a>(subscriptionID) -> void</code>

@@ -2,13 +2,7 @@
 
 import { APIResource } from '../../core/resource';
 import * as ResultsAPI from './results';
-import {
-  ResultFetchResultsParams,
-  ResultFetchResultsResponse,
-  ResultRetrieveResultsParams,
-  ResultRetrieveResultsResponse,
-  Results,
-} from './results';
+import { EvaluationResults, ResultFetchResultsParams, ResultRetrieveResultsParams, Results } from './results';
 import { APIPromise } from '../../core/api-promise';
 import { RequestOptions } from '../../internal/request-options';
 
@@ -108,8 +102,7 @@ export declare namespace Eval {
 
   export {
     Results as Results,
-    type ResultFetchResultsResponse as ResultFetchResultsResponse,
-    type ResultRetrieveResultsResponse as ResultRetrieveResultsResponse,
+    type EvaluationResults as EvaluationResults,
     type ResultFetchResultsParams as ResultFetchResultsParams,
     type ResultRetrieveResultsParams as ResultRetrieveResultsParams,
   };

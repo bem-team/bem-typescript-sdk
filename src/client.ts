@@ -42,6 +42,15 @@ import {
   CallsCallsPage,
 } from './resources/calls';
 import {
+  Connector,
+  ConnectorCreateParams,
+  ConnectorDeleteResponse,
+  ConnectorListParams,
+  ConnectorListResponse,
+  ConnectorType,
+  Connectors,
+} from './resources/connectors';
+import {
   ErrorEvent,
   ErrorEventsErrorsPage,
   ErrorListParams,
@@ -50,27 +59,48 @@ import {
   InboundEmailEvent,
 } from './resources/errors';
 import { EventSubmitFeedbackParams, EventSubmitFeedbackResponse, Events } from './resources/events';
-import { FNavigateParams, FNavigateResponse, Fs } from './resources/fs';
+import { FNavigateParams, FNavigateResponse, Fs, FsOp } from './resources/fs';
 import { InferSchema, InferSchemaCreateParams, InferSchemaCreateResponse } from './resources/infer-schema';
 import {
   AnyType,
   Event,
   EventsOutputsPage,
+  InputType,
   OutputListParams,
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
 import {
-  WebhookSecret,
-  WebhookSecretCreateResponse,
-  WebhookSecretRetrieveResponse,
-} from './resources/webhook-secret';
+  SubscriptionCreateParams,
+  SubscriptionListParams,
+  SubscriptionListResponse,
+  SubscriptionUpdateParams,
+  SubscriptionV3,
+  Subscriptions,
+} from './resources/subscriptions';
+import { WebhookSecret, WebhookSecretResource } from './resources/webhook-secret';
 import {
+  ClassifyWebhookEvent,
+  CollectionProcessingWebhookEvent,
+  EnrichWebhookEvent,
+  EvaluationWebhookEvent,
+  ExtractWebhookEvent,
+  JoinWebhookEvent,
+  ParseWebhookEvent,
+  PayloadShapingWebhookEvent,
+  SendWebhookEvent,
+  SplitCollectionWebhookEvent,
+  SplitItemWebhookEvent,
+  UnwrapWebhookEvent,
+  Webhooks,
+} from './resources/webhooks';
+import {
+  Collection,
   CollectionCountTokensParams,
   CollectionCountTokensResponse,
   CollectionCreateParams,
-  CollectionCreateResponse,
   CollectionDeleteParams,
+  CollectionItem,
   CollectionListParams,
   CollectionListResponse,
   Collections,
@@ -91,6 +121,8 @@ import {
   Functions,
   FunctionsFunctionsPage,
   ListFunctionsResponse,
+  ParseConfig,
+  SendDestinationType,
   SplitFunctionSemanticPageItemClass,
   UpdateFunction,
   UserActionSummary,
@@ -101,11 +133,16 @@ import {
   Workflow,
   WorkflowAudit,
   WorkflowCallParams,
+  WorkflowConnector,
+  WorkflowConnectorError,
+  WorkflowConnectorType,
   WorkflowCopyParams,
   WorkflowCopyResponse,
   WorkflowCreateParams,
+  WorkflowEdge,
   WorkflowEdgeResponse,
   WorkflowListParams,
+  WorkflowNode,
   WorkflowNodeResponse,
   WorkflowRetrieveResponse,
   WorkflowUpdateParams,
@@ -967,18 +1004,53 @@ export class Bem {
    * Split and enrich function types do not support feedback.
    */
   events: API.Events = new API.Events(this);
+  webhooks: API.Webhooks = new API.Webhooks(this);
   /**
-   * Manage the webhook signing secret used to authenticate outbound webhook deliveries.
+   * bem POSTs a JSON event to your configured webhook URL each time a subscribed function call, workflow output, or collection-processing job fires. This section is the reference for those deliveries: the payload shape per event type, plus the endpoints you use to manage the signing secret.
    *
-   * When a signing secret is active, every webhook delivery includes a `bem-signature` header
-   * in the format `t={unix_timestamp},v1={hex_hmac_sha256}`. The signature covers
-   * `{timestamp}.{raw_request_body}` and can be verified using HMAC-SHA256 with your secret.
+   * Every variant shares the same envelope — function/workflow IDs, timestamps, the inbound email that triggered the call, and so on — and adds a payload field that depends on the function type. The `eventType` field on the body is the discriminator: dispatch on it to select which payload shape to expect. SDKs generated from this spec expose a `webhooks.unwrap()` helper that performs the dispatch and returns a typed event.
    *
-   * Rotate the secret at any time with `POST /v3/webhook-secret`. To avoid downtime during
-   * rotation, update your verification logic to accept both the old and new secret briefly
-   * before revoking the old one.
+   * ## Payloads
+   *
+   * | `eventType` | Payload | Schema |
+   * | --- | --- | --- |
+   * | `extract` | [Extract event](/api/v3/webhooks/events/extract) | `ExtractEvent` |
+   * | `classify` | [Classify event](/api/v3/webhooks/events/classify) | `ClassifyEvent` |
+   * | `parse` | [Parse event](/api/v3/webhooks/events/parse) | `ParseEvent` |
+   * | `split_collection` | [Split collection event](/api/v3/webhooks/events/split-collection) | `SplitCollectionEvent` |
+   * | `split_item` | [Split item event](/api/v3/webhooks/events/split-item) | `SplitItemEvent` |
+   * | `join` | [Join event](/api/v3/webhooks/events/join) | `JoinEvent` |
+   * | `enrich` | [Enrich event](/api/v3/webhooks/events/enrich) | `EnrichEvent` |
+   * | `payload_shaping` | [Payload shaping event](/api/v3/webhooks/events/payload-shaping) | `PayloadShapingEvent` |
+   * | `send` | [Send event](/api/v3/webhooks/events/send) | `SendEvent` |
+   * | `evaluation` | [Evaluation event](/api/v3/webhooks/events/evaluation) | `EvaluationEvent` |
+   * | `collection_processing` | [Collection processing event](/api/v3/webhooks/events/collection-processing) | `collectionProcessingEvent` |
+   * | `error` | [Error event](/api/v3/webhooks/events/error) | `ErrorEvent` |
+   *
+   * ## Signing secret
+   *
+   * Every delivery includes a `bem-signature` header in the format `t={unix_timestamp},v1={hex_hmac_sha256}`. The signature covers `{timestamp}.{raw_request_body}` and is computed with HMAC-SHA256 using the active signing secret for your environment.
+   *
+   * To verify a payload:
+   *
+   * 1. Parse `bem-signature: t={timestamp},v1={signature}`.
+   * 2. Construct the signed string: `{timestamp}.{raw_request_body}`.
+   * 3. Compute HMAC-SHA256 of that string using your secret.
+   * 4. Reject the request if the hex digest doesn't match `v1`, or if the timestamp is more than a few minutes old.
+   *
+   * Manage the secret with these endpoints:
+   *
+   * - [**Generate a signing secret**](/api/v3/webhooks/secret/generate-secret) — `POST /v3/webhook-secret`. Returns the new secret in full exactly once.
+   * - [**Get the signing secret**](/api/v3/webhooks/secret/get-secret) — `GET /v3/webhook-secret`. Returns the active secret.
+   * - [**Revoke the signing secret**](/api/v3/webhooks/secret/revoke-secret) — `DELETE /v3/webhook-secret`. Webhook deliveries continue but are unsigned until a new secret is generated.
+   *
+   * For zero-downtime rotation, briefly accept both the old and new secret in your verification logic before revoking the old one.
+   *
+   * ## Retries
+   *
+   * bem treats any non-2XX response (or a transport failure) as a delivery error and retries with exponential backoff. Return a 2XX as soon as you have durably queued the payload — do not block on downstream work.
    */
-  webhookSecret: API.WebhookSecret = new API.WebhookSecret(this);
+  webhookSecret: API.WebhookSecretResource = new API.WebhookSecretResource(this);
   /**
    * Trigger and retrieve evaluations for completed transformations.
    *
@@ -1030,6 +1102,37 @@ export class Bem {
    * `/v3/calls` and `/v3/outputs`.
    */
   fs: API.Fs = new API.Fs(this);
+  /**
+   * Connectors are integrations that trigger a Bem workflow from an external system.
+   *
+   * A connector binds an inbound source — currently Box or a Paragon-managed integration such as
+   * Google Drive — to a specific workflow (by `workflowName` or `workflowID`). When the source
+   * observes a new file, Bem invokes the bound workflow against that file.
+   *
+   * Use these endpoints to create, list, and remove connectors. The fields used at create time
+   * depend on the connector `type`: Box connectors require Box credentials and a folder to watch,
+   * while Paragon connectors carry a `paragonIntegration` identifier and an integration-specific
+   * `paragonConfiguration` object (for example, `{ "folderId": "..." }` for Google Drive).
+   */
+  connectors: API.Connectors = new API.Connectors(this);
+  /**
+   * Subscriptions wire up notifications for the events your functions and collections produce.
+   *
+   * Each subscription targets a single function (by `functionName` or `functionID`) or a single
+   * collection (by `collectionName` or `collectionID`) and selects a `type` corresponding to the
+   * event you want to receive — for example `transform`, `route`, `join`, `evaluation`, `error`,
+   * `enrich`, or `collection_processing`.
+   *
+   * Deliveries can be sent to any combination of:
+   *
+   * - `webhookURL` — HTTPS endpoint that receives a JSON POST per event.
+   * - `s3Bucket` + `s3FilePath` — sync output JSON into an AWS S3 prefix you own.
+   * - `googleDriveFolderID` — drop output JSON into a Google Drive folder.
+   *
+   * Use `disabled: true` to pause delivery without deleting the subscription. Updates follow
+   * conventional PATCH semantics — only the fields you include are changed.
+   */
+  subscriptions: API.Subscriptions = new API.Subscriptions(this);
 }
 
 Bem.Functions = Functions;
@@ -1040,9 +1143,12 @@ Bem.Workflows = Workflows;
 Bem.InferSchema = InferSchema;
 Bem.Collections = Collections;
 Bem.Events = Events;
-Bem.WebhookSecret = WebhookSecret;
+Bem.Webhooks = Webhooks;
+Bem.WebhookSecretResource = WebhookSecretResource;
 Bem.Eval = Eval;
 Bem.Fs = Fs;
+Bem.Connectors = Connectors;
+Bem.Subscriptions = Subscriptions;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -1085,6 +1191,8 @@ export declare namespace Bem {
     type FunctionResponse as FunctionResponse,
     type FunctionType as FunctionType,
     type ListFunctionsResponse as ListFunctionsResponse,
+    type ParseConfig as ParseConfig,
+    type SendDestinationType as SendDestinationType,
     type SplitFunctionSemanticPageItemClass as SplitFunctionSemanticPageItemClass,
     type UpdateFunction as UpdateFunction,
     type UserActionSummary as UserActionSummary,
@@ -1117,6 +1225,7 @@ export declare namespace Bem {
     Outputs as Outputs,
     type AnyType as AnyType,
     type Event as Event,
+    type InputType as InputType,
     type OutputRetrieveResponse as OutputRetrieveResponse,
     type EventsOutputsPage as EventsOutputsPage,
     type OutputListParams as OutputListParams,
@@ -1127,7 +1236,12 @@ export declare namespace Bem {
     type FunctionVersionIdentifier as FunctionVersionIdentifier,
     type Workflow as Workflow,
     type WorkflowAudit as WorkflowAudit,
+    type WorkflowConnector as WorkflowConnector,
+    type WorkflowConnectorError as WorkflowConnectorError,
+    type WorkflowConnectorType as WorkflowConnectorType,
+    type WorkflowEdge as WorkflowEdge,
     type WorkflowEdgeResponse as WorkflowEdgeResponse,
+    type WorkflowNode as WorkflowNode,
     type WorkflowNodeResponse as WorkflowNodeResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
@@ -1148,7 +1262,8 @@ export declare namespace Bem {
 
   export {
     Collections as Collections,
-    type CollectionCreateResponse as CollectionCreateResponse,
+    type Collection as Collection,
+    type CollectionItem as CollectionItem,
     type CollectionListResponse as CollectionListResponse,
     type CollectionCountTokensResponse as CollectionCountTokensResponse,
     type CollectionCreateParams as CollectionCreateParams,
@@ -1164,10 +1279,22 @@ export declare namespace Bem {
   };
 
   export {
-    WebhookSecret as WebhookSecret,
-    type WebhookSecretCreateResponse as WebhookSecretCreateResponse,
-    type WebhookSecretRetrieveResponse as WebhookSecretRetrieveResponse,
+    Webhooks as Webhooks,
+    type ExtractWebhookEvent as ExtractWebhookEvent,
+    type ClassifyWebhookEvent as ClassifyWebhookEvent,
+    type ParseWebhookEvent as ParseWebhookEvent,
+    type SplitCollectionWebhookEvent as SplitCollectionWebhookEvent,
+    type SplitItemWebhookEvent as SplitItemWebhookEvent,
+    type JoinWebhookEvent as JoinWebhookEvent,
+    type EnrichWebhookEvent as EnrichWebhookEvent,
+    type PayloadShapingWebhookEvent as PayloadShapingWebhookEvent,
+    type SendWebhookEvent as SendWebhookEvent,
+    type EvaluationWebhookEvent as EvaluationWebhookEvent,
+    type CollectionProcessingWebhookEvent as CollectionProcessingWebhookEvent,
+    type UnwrapWebhookEvent as UnwrapWebhookEvent,
   };
+
+  export { WebhookSecretResource as WebhookSecretResource, type WebhookSecret as WebhookSecret };
 
   export {
     Eval as Eval,
@@ -1175,5 +1302,29 @@ export declare namespace Bem {
     type EvalTriggerEvaluationParams as EvalTriggerEvaluationParams,
   };
 
-  export { Fs as Fs, type FNavigateResponse as FNavigateResponse, type FNavigateParams as FNavigateParams };
+  export {
+    Fs as Fs,
+    type FsOp as FsOp,
+    type FNavigateResponse as FNavigateResponse,
+    type FNavigateParams as FNavigateParams,
+  };
+
+  export {
+    Connectors as Connectors,
+    type Connector as Connector,
+    type ConnectorType as ConnectorType,
+    type ConnectorListResponse as ConnectorListResponse,
+    type ConnectorDeleteResponse as ConnectorDeleteResponse,
+    type ConnectorCreateParams as ConnectorCreateParams,
+    type ConnectorListParams as ConnectorListParams,
+  };
+
+  export {
+    Subscriptions as Subscriptions,
+    type SubscriptionV3 as SubscriptionV3,
+    type SubscriptionListResponse as SubscriptionListResponse,
+    type SubscriptionCreateParams as SubscriptionCreateParams,
+    type SubscriptionUpdateParams as SubscriptionUpdateParams,
+    type SubscriptionListParams as SubscriptionListParams,
+  };
 }
