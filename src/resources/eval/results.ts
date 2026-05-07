@@ -34,16 +34,14 @@ export class Results extends APIResource {
    *
    * @example
    * ```ts
-   * const response = await client.eval.results.fetchResults({
-   *   transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],
-   *   evaluationVersion: '0.1.0-gemini',
-   * });
+   * const evaluationResults =
+   *   await client.eval.results.fetchResults({
+   *     transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],
+   *     evaluationVersion: '0.1.0-gemini',
+   *   });
    * ```
    */
-  fetchResults(
-    body: ResultFetchResultsParams,
-    options?: RequestOptions,
-  ): APIPromise<ResultFetchResultsResponse> {
+  fetchResults(body: ResultFetchResultsParams, options?: RequestOptions): APIPromise<EvaluationResults> {
     return this._client.post('/v3/eval/results', { body, ...options });
   }
 
@@ -56,15 +54,16 @@ export class Results extends APIResource {
    *
    * @example
    * ```ts
-   * const response = await client.eval.results.retrieveResults({
-   *   transformationIDs: 'transformationIDs',
-   * });
+   * const evaluationResults =
+   *   await client.eval.results.retrieveResults({
+   *     transformationIDs: 'transformationIDs',
+   *   });
    * ```
    */
   retrieveResults(
     query: ResultRetrieveResultsParams,
     options?: RequestOptions,
-  ): APIPromise<ResultRetrieveResultsResponse> {
+  ): APIPromise<EvaluationResults> {
     return this._client.get('/v3/eval/results', { query, ...options });
   }
 }
@@ -74,7 +73,7 @@ export class Results extends APIResource {
  * transformation ID, partitioned into completed `results`, still-running
  * `pending`, and terminal `failed` groups.
  */
-export interface ResultFetchResultsResponse {
+export interface EvaluationResults {
   /**
    * Completed evaluation results, keyed by transformation ID.
    *
@@ -93,78 +92,15 @@ export interface ResultFetchResultsResponse {
   /**
    * Transformations whose evaluation failed or was not found.
    */
-  failed?: Array<ResultFetchResultsResponse.Failed>;
+  failed?: Array<EvaluationResults.Failed>;
 
   /**
    * Transformations whose evaluation is still running.
    */
-  pending?: Array<ResultFetchResultsResponse.Pending>;
+  pending?: Array<EvaluationResults.Pending>;
 }
 
-export namespace ResultFetchResultsResponse {
-  /**
-   * A transformation whose evaluation failed or was not found.
-   */
-  export interface Failed {
-    /**
-     * Server timestamp associated with the failure.
-     */
-    createdAt: string;
-
-    /**
-     * Human-readable failure reason.
-     */
-    errorMessage: string;
-
-    transformationId: string;
-  }
-
-  /**
-   * A transformation whose evaluation is still running.
-   */
-  export interface Pending {
-    /**
-     * Server timestamp when the evaluation was queued.
-     */
-    createdAt: string;
-
-    transformationId: string;
-  }
-}
-
-/**
- * Batched response containing the evaluation state for every requested
- * transformation ID, partitioned into completed `results`, still-running
- * `pending`, and terminal `failed` groups.
- */
-export interface ResultRetrieveResultsResponse {
-  /**
-   * Completed evaluation results, keyed by transformation ID.
-   *
-   * A transformation appears here only if its evaluation completed successfully.
-   * Still-running evaluations appear in `pending`; failed evaluations appear in
-   * `failed`.
-   */
-  results: unknown;
-
-  /**
-   * Reserved map of transformation ID to error message for validation failures on
-   * the request itself. Populated only in edge cases.
-   */
-  errors?: unknown;
-
-  /**
-   * Transformations whose evaluation failed or was not found.
-   */
-  failed?: Array<ResultRetrieveResultsResponse.Failed>;
-
-  /**
-   * Transformations whose evaluation is still running.
-   */
-  pending?: Array<ResultRetrieveResultsResponse.Pending>;
-}
-
-export namespace ResultRetrieveResultsResponse {
+export namespace EvaluationResults {
   /**
    * A transformation whose evaluation failed or was not found.
    */
@@ -222,8 +158,7 @@ export interface ResultRetrieveResultsParams {
 
 export declare namespace Results {
   export {
-    type ResultFetchResultsResponse as ResultFetchResultsResponse,
-    type ResultRetrieveResultsResponse as ResultRetrieveResultsResponse,
+    type EvaluationResults as EvaluationResults,
     type ResultFetchResultsParams as ResultFetchResultsParams,
     type ResultRetrieveResultsParams as ResultRetrieveResultsParams,
   };

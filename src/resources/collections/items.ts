@@ -1,6 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../core/resource';
+import * as CollectionsAPI from './collections';
 import { APIPromise } from '../../core/api-promise';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
@@ -37,12 +38,12 @@ export class Items extends APIResource {
    *
    * @example
    * ```ts
-   * const item = await client.collections.items.retrieve({
+   * const collection = await client.collections.items.retrieve({
    *   collectionName: 'collectionName',
    * });
    * ```
    */
-  retrieve(query: ItemRetrieveParams, options?: RequestOptions): APIPromise<ItemRetrieveResponse> {
+  retrieve(query: ItemRetrieveParams, options?: RequestOptions): APIPromise<CollectionsAPI.Collection> {
     return this._client.get('/v3/collections/items', { query, ...options });
   }
 
@@ -129,84 +130,6 @@ export class Items extends APIResource {
 }
 
 /**
- * Collection details
- */
-export interface ItemRetrieveResponse {
-  /**
-   * Unique identifier for the collection
-   */
-  collectionID: string;
-
-  /**
-   * The collection name/path. Only letters, digits, underscores, and dots are
-   * allowed.
-   */
-  collectionName: string;
-
-  /**
-   * When the collection was created
-   */
-  createdAt: string;
-
-  /**
-   * Number of items in the collection
-   */
-  itemCount: number;
-
-  /**
-   * List of items in the collection (when fetching collection details)
-   */
-  items?: Array<ItemRetrieveResponse.Item>;
-
-  /**
-   * Number of items per page
-   */
-  limit?: number;
-
-  /**
-   * Current page number
-   */
-  page?: number;
-
-  /**
-   * Total number of pages
-   */
-  totalPages?: number;
-
-  /**
-   * When the collection was last updated
-   */
-  updatedAt?: string;
-}
-
-export namespace ItemRetrieveResponse {
-  /**
-   * A single item in a collection
-   */
-  export interface Item {
-    /**
-     * Unique identifier for the item
-     */
-    collectionItemID: string;
-
-    /**
-     * When the item was created
-     */
-    createdAt: string;
-
-    /**
-     * The data stored in this item
-     */
-    data: string | unknown;
-
-    /**
-     * When the item was last updated
-     */
-    updatedAt: string;
-  }
-}
-
-/**
  * Response after queuing items for async update
  */
 export interface ItemUpdateResponse {
@@ -229,39 +152,12 @@ export interface ItemUpdateResponse {
   /**
    * Array of items that were updated (only present in synchronous mode, deprecated)
    */
-  items?: Array<ItemUpdateResponse.Item>;
+  items?: Array<CollectionsAPI.CollectionItem>;
 
   /**
    * Number of items updated (only present in synchronous mode, deprecated)
    */
   updatedCount?: number;
-}
-
-export namespace ItemUpdateResponse {
-  /**
-   * A single item in a collection
-   */
-  export interface Item {
-    /**
-     * Unique identifier for the item
-     */
-    collectionItemID: string;
-
-    /**
-     * When the item was created
-     */
-    createdAt: string;
-
-    /**
-     * The data stored in this item
-     */
-    data: string | unknown;
-
-    /**
-     * When the item was last updated
-     */
-    updatedAt: string;
-  }
 }
 
 /**
@@ -292,34 +188,7 @@ export interface ItemAddResponse {
   /**
    * Array of items that were added (only present in synchronous mode, deprecated)
    */
-  items?: Array<ItemAddResponse.Item>;
-}
-
-export namespace ItemAddResponse {
-  /**
-   * A single item in a collection
-   */
-  export interface Item {
-    /**
-     * Unique identifier for the item
-     */
-    collectionItemID: string;
-
-    /**
-     * When the item was created
-     */
-    createdAt: string;
-
-    /**
-     * The data stored in this item
-     */
-    data: string | unknown;
-
-    /**
-     * When the item was last updated
-     */
-    updatedAt: string;
-  }
+  items?: Array<CollectionsAPI.CollectionItem>;
 }
 
 export interface ItemRetrieveParams {
@@ -417,7 +286,6 @@ export namespace ItemAddParams {
 
 export declare namespace Items {
   export {
-    type ItemRetrieveResponse as ItemRetrieveResponse,
     type ItemUpdateResponse as ItemUpdateResponse,
     type ItemAddResponse as ItemAddResponse,
     type ItemRetrieveParams as ItemRetrieveParams,

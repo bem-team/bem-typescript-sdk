@@ -2,7 +2,8 @@
 
 export {
   Collections,
-  type CollectionCreateResponse,
+  type Collection,
+  type CollectionItem,
   type CollectionListResponse,
   type CollectionCountTokensResponse,
   type CollectionCreateParams,
@@ -12,7 +13,6 @@ export {
 } from './collections';
 export {
   Items,
-  type ItemRetrieveResponse,
   type ItemUpdateResponse,
   type ItemAddResponse,
   type ItemRetrieveParams,

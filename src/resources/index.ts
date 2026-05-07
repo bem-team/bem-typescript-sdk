@@ -10,7 +10,8 @@ export {
 } from './calls';
 export {
   Collections,
-  type CollectionCreateResponse,
+  type Collection,
+  type CollectionItem,
   type CollectionListResponse,
   type CollectionCountTokensResponse,
   type CollectionCreateParams,
@@ -18,6 +19,15 @@ export {
   type CollectionDeleteParams,
   type CollectionCountTokensParams,
 } from './collections/collections';
+export {
+  Connectors,
+  type Connector,
+  type ConnectorType,
+  type ConnectorListResponse,
+  type ConnectorDeleteResponse,
+  type ConnectorCreateParams,
+  type ConnectorListParams,
+} from './connectors';
 export {
   Errors,
   type ErrorEvent,
@@ -28,7 +38,7 @@ export {
 } from './errors';
 export { Eval, type EvalTriggerEvaluationResponse, type EvalTriggerEvaluationParams } from './eval/eval';
 export { Events, type EventSubmitFeedbackResponse, type EventSubmitFeedbackParams } from './events';
-export { Fs, type FNavigateResponse, type FNavigateParams } from './fs';
+export { Fs, type FsOp, type FNavigateResponse, type FNavigateParams } from './fs';
 export {
   Functions,
   type ClassificationListItem,
@@ -40,6 +50,8 @@ export {
   type FunctionResponse,
   type FunctionType,
   type ListFunctionsResponse,
+  type ParseConfig,
+  type SendDestinationType,
   type SplitFunctionSemanticPageItemClass,
   type UpdateFunction,
   type UserActionSummary,
@@ -54,21 +66,46 @@ export {
   Outputs,
   type AnyType,
   type Event,
+  type InputType,
   type OutputRetrieveResponse,
   type OutputListParams,
   type EventsOutputsPage,
 } from './outputs';
 export {
-  WebhookSecret,
-  type WebhookSecretCreateResponse,
-  type WebhookSecretRetrieveResponse,
-} from './webhook-secret';
+  Subscriptions,
+  type SubscriptionV3,
+  type SubscriptionListResponse,
+  type SubscriptionCreateParams,
+  type SubscriptionUpdateParams,
+  type SubscriptionListParams,
+} from './subscriptions';
+export { WebhookSecretResource, type WebhookSecret } from './webhook-secret';
+export {
+  Webhooks,
+  type ExtractWebhookEvent,
+  type ClassifyWebhookEvent,
+  type ParseWebhookEvent,
+  type SplitCollectionWebhookEvent,
+  type SplitItemWebhookEvent,
+  type JoinWebhookEvent,
+  type EnrichWebhookEvent,
+  type PayloadShapingWebhookEvent,
+  type SendWebhookEvent,
+  type EvaluationWebhookEvent,
+  type CollectionProcessingWebhookEvent,
+  type UnwrapWebhookEvent,
+} from './webhooks';
 export {
   Workflows,
   type FunctionVersionIdentifier,
   type Workflow,
   type WorkflowAudit,
+  type WorkflowConnector,
+  type WorkflowConnectorError,
+  type WorkflowConnectorType,
+  type WorkflowEdge,
   type WorkflowEdgeResponse,
+  type WorkflowNode,
   type WorkflowNodeResponse,
   type WorkflowRetrieveResponse,
   type WorkflowUpdateResponse,

@@ -3,8 +3,7 @@
 export { Eval, type EvalTriggerEvaluationResponse, type EvalTriggerEvaluationParams } from './eval';
 export {
   Results,
-  type ResultFetchResultsResponse,
-  type ResultRetrieveResultsResponse,
+  type EvaluationResults,
   type ResultFetchResultsParams,
   type ResultRetrieveResultsParams,
 } from './results';

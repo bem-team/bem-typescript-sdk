@@ -12,6 +12,8 @@ export {
   type FunctionResponse,
   type FunctionType,
   type ListFunctionsResponse,
+  type ParseConfig,
+  type SendDestinationType,
   type SplitFunctionSemanticPageItemClass,
   type UpdateFunction,
   type UserActionSummary,

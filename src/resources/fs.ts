@@ -115,6 +115,31 @@ export class Fs extends APIResource {
 }
 
 /**
+ * Operations exposed by `POST /v3/fs`.
+ *
+ * The verbs and their flag names mirror Unix tools so an LLM agent's existing
+ * vocabulary maps directly:
+ *
+ * - `ls` — list parsed documents
+ * - `cat` — read one parsed doc (optionally sliced by range / projected by select)
+ * - `grep` — substring or regex search across parse outputs
+ * - `head` — first N sections of one doc
+ * - `stat` — metadata only (page count, section count, parsed at, ...)
+ * - `find` — list canonical entities (cross-doc memory)
+ * - `open` — entity + mentions
+ * - `xref` — entity → sections across docs that mention it
+ *
+ * Doc-level ops (ls, cat, grep, head, stat) work on every parsed document,
+ * regardless of how the parse function was configured.
+ *
+ * Memory-level ops (find, open, xref) operate on the global entities table which
+ * is only populated when the parse function had `linkAcrossDocuments: true`. On
+ * environments with no memory-linked docs they return empty data with a hint
+ * pointing at the toggle.
+ */
+export type FsOp = 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head';
+
+/**
  * Uniform response shape returned for every `op`. `data` is op-specific JSON (a
  * list, an object, or a string), but the wrapper is constant so a client only
  * learns one parse path.
@@ -148,7 +173,7 @@ export interface FNavigateResponse {
    * environments with no memory-linked docs they return empty data with a hint
    * pointing at the toggle.
    */
-  op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head';
+  op: FsOp;
 
   /**
    * Set for ops that return a count rather than a list (`grep` with
@@ -199,7 +224,7 @@ export interface FNavigateParams {
    * environments with no memory-linked docs they return empty data with a hint
    * pointing at the toggle.
    */
-  op: 'ls' | 'find' | 'open' | 'cat' | 'grep' | 'xref' | 'stat' | 'head';
+  op: FsOp;
 
   /**
    * When true, return only the hit count without snippet payload. Cheaper than
@@ -320,5 +345,9 @@ export namespace FNavigateParams {
 }
 
 export declare namespace Fs {
-  export { type FNavigateResponse as FNavigateResponse, type FNavigateParams as FNavigateParams };
+  export {
+    type FsOp as FsOp,
+    type FNavigateResponse as FNavigateResponse,
+    type FNavigateParams as FNavigateParams,
+  };
 }
