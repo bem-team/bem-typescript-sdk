@@ -83,16 +83,8 @@ export interface VerifiedWebhook {
  * }
  * ```
  */
-export async function verifyWebhookSignature(
-  options: VerifyWebhookOptions,
-): Promise<VerifiedWebhook> {
-  const {
-    header,
-    payload,
-    secret,
-    toleranceMs = DEFAULT_TOLERANCE_MS,
-    nowMs = Date.now(),
-  } = options;
+export async function verifyWebhookSignature(options: VerifyWebhookOptions): Promise<VerifiedWebhook> {
+  const { header, payload, secret, toleranceMs = DEFAULT_TOLERANCE_MS, nowMs = Date.now() } = options;
 
   if (!header) {
     throw new WebhookSignatureError('Missing bem-signature header');
@@ -111,9 +103,7 @@ export async function verifyWebhookSignature(
   }
   // A small negative skew is allowed (clocks drift); a large one is suspicious.
   if (ageMs < -toleranceMs) {
-    throw new WebhookSignatureError(
-      `bem-signature timestamp is too far in the future (age ${ageMs}ms)`,
-    );
+    throw new WebhookSignatureError(`bem-signature timestamp is too far in the future (age ${ageMs}ms)`);
   }
 
   const payloadString = typeof payload === 'string' ? payload : new TextDecoder().decode(payload);
@@ -171,9 +161,7 @@ interface SubtleCryptoLike {
 async function hmacSha256Hex(secret: string, data: string): Promise<string> {
   const subtle = (globalThis as { crypto?: { subtle?: SubtleCryptoLike } }).crypto?.subtle;
   if (!subtle) {
-    throw new WebhookSignatureError(
-      'Web Crypto (globalThis.crypto.subtle) is not available in this runtime',
-    );
+    throw new WebhookSignatureError('Web Crypto (globalThis.crypto.subtle) is not available in this runtime');
   }
   const encoder = new TextEncoder();
   const key = await subtle.importKey(

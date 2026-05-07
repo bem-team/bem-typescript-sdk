@@ -5,11 +5,7 @@ import type {
   FunctionResponse,
   FunctionUpdateParams,
 } from '../resources/functions/functions';
-import type {
-  Workflow,
-  WorkflowCreateParams,
-  WorkflowUpdateParams,
-} from '../resources/workflows/workflows';
+import type { Workflow, WorkflowCreateParams, WorkflowUpdateParams } from '../resources/workflows/workflows';
 
 /**
  * Idempotent "create-or-update" for functions and workflows.

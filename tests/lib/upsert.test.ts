@@ -1,10 +1,4 @@
-import {
-  upsertFunction,
-  upsertWorkflow,
-  NotFoundError,
-  AuthenticationError,
-  type Bem,
-} from 'bem-ai-sdk';
+import { upsertFunction, upsertWorkflow, NotFoundError, AuthenticationError, type Bem } from 'bem-ai-sdk';
 
 function notFound(): NotFoundError {
   return new NotFoundError(404, undefined, 'Not found', new Headers());

@@ -83,7 +83,7 @@ const { call } = await client.workflows.create({
 
 try {
   const result = await waitForCall(client, call!.callID!, {
-    until: 'completed',     // throw on `failed` instead of resolving
+    until: 'completed', // throw on `failed` instead of resolving
     timeoutMs: 10 * 60_000,
     pollIntervalMs: 1000,
     maxPollIntervalMs: 10_000,
@@ -122,12 +122,7 @@ Cursor params are `startingAfter` / `endingBefore` (per-resource: `functionIDs`,
 Every API failure throws a subclass of `APIError`. Narrow with `instanceof`:
 
 ```ts
-import Bem, {
-  APIError,
-  NotFoundError,
-  RateLimitError,
-  AuthenticationError,
-} from 'bem-ai-sdk';
+import Bem, { APIError, NotFoundError, RateLimitError, AuthenticationError } from 'bem-ai-sdk';
 
 try {
   await client.functions.retrieve('does-not-exist');
@@ -225,22 +220,20 @@ await client.post('/some/path', { body: { ... }, query: { ... } });
 The `APIPromise` returned by every method has `.asResponse()` (headers immediately, body untouched) and `.withResponse()` (parsed body plus the raw `Response`). Useful for streaming, custom parsing, or surfacing trace IDs from response headers:
 
 ```ts
-const { data, response } = await client.functions
-  .retrieve('invoice-extractor')
-  .withResponse();
+const { data, response } = await client.functions.retrieve('invoice-extractor').withResponse();
 console.log(response.headers.get('x-request-id'));
 ```
 
 ## What lives where in your imports
 
-| Need | Import from `bem-ai-sdk` |
-| --- | --- |
-| Client | `Bem` (default and named export) |
-| Errors to narrow on | `APIError`, `NotFoundError`, `RateLimitError`, `AuthenticationError`, … |
-| File uploads | `toFile`, `fromPath` (Node), type `Uploadable` |
-| Wait helpers | `waitForCall`, `CallTimeoutError`, `CallFailedError` |
-| Idempotent setup | `upsertFunction`, `upsertWorkflow` |
-| Webhook verification | `verifyWebhookSignature`, `WebhookSignatureError` |
-| Resource-specific types | subpath imports like `bem-ai-sdk/resources/functions` |
+| Need                    | Import from `bem-ai-sdk`                                                |
+| ----------------------- | ----------------------------------------------------------------------- |
+| Client                  | `Bem` (default and named export)                                        |
+| Errors to narrow on     | `APIError`, `NotFoundError`, `RateLimitError`, `AuthenticationError`, … |
+| File uploads            | `toFile`, `fromPath` (Node), type `Uploadable`                          |
+| Wait helpers            | `waitForCall`, `CallTimeoutError`, `CallFailedError`                    |
+| Idempotent setup        | `upsertFunction`, `upsertWorkflow`                                      |
+| Webhook verification    | `verifyWebhookSignature`, `WebhookSignatureError`                       |
+| Resource-specific types | subpath imports like `bem-ai-sdk/resources/functions`                   |
 
 For the full method-by-method API reference, see [`api.md`](./api.md). For product concepts (function types, workflow patterns, what a parse output looks like, how feedback gets attributed), see [docs.bem.ai](https://docs.bem.ai).

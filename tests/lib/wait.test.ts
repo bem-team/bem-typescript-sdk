@@ -1,9 +1,4 @@
-import {
-  waitForCall,
-  CallTimeoutError,
-  CallFailedError,
-  type Bem,
-} from 'bem-ai-sdk';
+import { waitForCall, CallTimeoutError, CallFailedError, type Bem } from 'bem-ai-sdk';
 import type { CallGetResponse } from 'bem-ai-sdk/resources/calls';
 
 type CallStatus = NonNullable<NonNullable<CallGetResponse['call']>['status']>;
@@ -26,7 +21,12 @@ function fakeClient(responses: CallGetResponse[]): {
       },
     },
   } as unknown as Bem;
-  return { client, get retrieved() { return state.retrieved; } };
+  return {
+    client,
+    get retrieved() {
+      return state.retrieved;
+    },
+  };
 }
 
 describe('waitForCall', () => {
