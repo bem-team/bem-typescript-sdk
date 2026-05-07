@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.19.1 (2026-05-07)
+
+Full Changelog: [v0.19.0...v0.19.1](https://github.com/bem-team/bem-typescript-sdk/compare/v0.19.0...v0.19.1)
+
+### Documentation
+
+* update http mcp docs ([cdd651f](https://github.com/bem-team/bem-typescript-sdk/commit/cdd651f0b3e87fadbb46c2d99ded35e2e58eeeca))
+
 ## 0.19.0 (2026-05-04)
 
 Full Changelog: [v0.18.0...v0.19.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.18.0...v0.19.0)
