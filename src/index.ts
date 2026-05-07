@@ -37,3 +37,5 @@ export {
 } from './lib/wait';
 
 export { upsertFunction, upsertWorkflow, type UpsertResult } from './lib/upsert';
+
+export { fromPath } from './lib/uploads';
