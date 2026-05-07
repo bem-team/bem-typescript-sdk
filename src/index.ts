@@ -21,3 +21,10 @@ export {
   PermissionDeniedError,
   UnprocessableEntityError,
 } from './core/error';
+
+export {
+  verifyWebhookSignature,
+  WebhookSignatureError,
+  type VerifyWebhookOptions,
+  type VerifiedWebhook,
+} from './lib/webhooks';
