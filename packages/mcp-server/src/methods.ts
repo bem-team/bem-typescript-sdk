@@ -240,12 +240,6 @@ export const sdkMethods: SdkMethod[] = [
     httpPath: '/v3/eval',
   },
   {
-    clientCallName: 'client.eval.results.fetchResults',
-    fullyQualifiedName: 'eval.results.fetchResults',
-    httpMethod: 'post',
-    httpPath: '/v3/eval/results',
-  },
-  {
     clientCallName: 'client.eval.results.retrieveResults',
     fullyQualifiedName: 'eval.results.retrieveResults',
     httpMethod: 'get',

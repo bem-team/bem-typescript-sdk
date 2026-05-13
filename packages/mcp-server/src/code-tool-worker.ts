@@ -147,7 +147,6 @@ const fuse = new Fuse(
     'client.webhookSecret.retrieve',
     'client.webhookSecret.revoke',
     'client.eval.triggerEvaluation',
-    'client.eval.results.fetchResults',
     'client.eval.results.retrieveResults',
     'client.fs.navigate',
     'client.connectors.create',

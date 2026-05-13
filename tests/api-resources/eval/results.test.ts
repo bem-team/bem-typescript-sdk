@@ -9,10 +9,8 @@ const client = new Bem({
 
 describe('resource results', () => {
   // Mock server tests are disabled
-  test.skip('fetchResults: only required params', async () => {
-    const responsePromise = client.eval.results.fetchResults({
-      transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],
-    });
+  test.skip('retrieveResults', async () => {
+    const responsePromise = client.eval.results.retrieveResults();
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -23,30 +21,17 @@ describe('resource results', () => {
   });
 
   // Mock server tests are disabled
-  test.skip('fetchResults: required and optional params', async () => {
-    const response = await client.eval.results.fetchResults({
-      transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],
-      evaluationVersion: '0.1.0-gemini',
-    });
-  });
-
-  // Mock server tests are disabled
-  test.skip('retrieveResults: only required params', async () => {
-    const responsePromise = client.eval.results.retrieveResults({ transformationIDs: 'transformationIDs' });
-    const rawResponse = await responsePromise.asResponse();
-    expect(rawResponse).toBeInstanceOf(Response);
-    const response = await responsePromise;
-    expect(response).not.toBeInstanceOf(Response);
-    const dataAndResponse = await responsePromise.withResponse();
-    expect(dataAndResponse.data).toBe(response);
-    expect(dataAndResponse.response).toBe(rawResponse);
-  });
-
-  // Mock server tests are disabled
-  test.skip('retrieveResults: required and optional params', async () => {
-    const response = await client.eval.results.retrieveResults({
-      transformationIDs: 'transformationIDs',
-      evaluationVersion: 'evaluationVersion',
-    });
+  test.skip('retrieveResults: request options and params are passed correctly', async () => {
+    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
+    await expect(
+      client.eval.results.retrieveResults(
+        {
+          evaluationVersion: 'evaluationVersion',
+          eventIDs: 'eventIDs',
+          transformationIDs: 'transformationIDs',
+        },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(Bem.NotFoundError);
   });
 });
