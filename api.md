@@ -17,6 +17,9 @@ Types:
 - <code><a href="./src/resources/functions/functions.ts">UpdateFunction</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UserActionSummary</a></code>
 - <code><a href="./src/resources/functions/functions.ts">WorkflowUsageInfo</a></code>
+- <code><a href="./src/resources/functions/functions.ts">FunctionCompareMetricsResponse</a></code>
+- <code><a href="./src/resources/functions/functions.ts">FunctionEstimateReviewRequirementsResponse</a></code>
+- <code><a href="./src/resources/functions/functions.ts">FunctionGetMetricsResponse</a></code>
 
 Methods:
 
@@ -25,6 +28,9 @@ Methods:
 - <code title="patch /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">update</a>(pathFunctionName, { ...params }) -> FunctionResponse</code>
 - <code title="get /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">list</a>({ ...params }) -> FunctionsFunctionsPage</code>
 - <code title="delete /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">delete</a>(functionName) -> void</code>
+- <code title="post /v3/functions/compare">client.functions.<a href="./src/resources/functions/functions.ts">compareMetrics</a>({ ...params }) -> FunctionCompareMetricsResponse</code>
+- <code title="post /v3/functions/review">client.functions.<a href="./src/resources/functions/functions.ts">estimateReviewRequirements</a>({ ...params }) -> FunctionEstimateReviewRequirementsResponse</code>
+- <code title="get /v3/functions/metrics">client.functions.<a href="./src/resources/functions/functions.ts">getMetrics</a>({ ...params }) -> FunctionGetMetricsResponse</code>
 
 ## Copy
 
@@ -48,6 +54,18 @@ Methods:
 
 - <code title="get /v3/functions/{functionName}/versions/{versionNum}">client.functions.versions.<a href="./src/resources/functions/versions.ts">retrieve</a>(versionNum, { ...params }) -> VersionRetrieveResponse</code>
 - <code title="get /v3/functions/{functionName}/versions">client.functions.versions.<a href="./src/resources/functions/versions.ts">list</a>(functionName) -> ListFunctionVersionsResponse</code>
+
+## Regression
+
+Types:
+
+- <code><a href="./src/resources/functions/regression.ts">RegressionApplyCorrectionsResponse</a></code>
+- <code><a href="./src/resources/functions/regression.ts">RegressionRunResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/functions/regression/corrections">client.functions.regression.<a href="./src/resources/functions/regression.ts">applyCorrections</a>({ ...params }) -> RegressionApplyCorrectionsResponse</code>
+- <code title="post /v3/functions/regression">client.functions.regression.<a href="./src/resources/functions/regression.ts">run</a>({ ...params }) -> RegressionRunResponse</code>
 
 # Calls
 
@@ -272,3 +290,24 @@ Methods:
 - <code title="patch /v3/subscriptions/{subscriptionID}">client.subscriptions.<a href="./src/resources/subscriptions.ts">update</a>(subscriptionID, { ...params }) -> SubscriptionV3</code>
 - <code title="get /v3/subscriptions">client.subscriptions.<a href="./src/resources/subscriptions.ts">list</a>({ ...params }) -> SubscriptionListResponse</code>
 - <code title="delete /v3/subscriptions/{subscriptionID}">client.subscriptions.<a href="./src/resources/subscriptions.ts">delete</a>(subscriptionID) -> void</code>
+
+# Views
+
+Types:
+
+- <code><a href="./src/resources/views.ts">ViewCreateResponse</a></code>
+- <code><a href="./src/resources/views.ts">ViewRetrieveResponse</a></code>
+- <code><a href="./src/resources/views.ts">ViewUpdateResponse</a></code>
+- <code><a href="./src/resources/views.ts">ViewListResponse</a></code>
+- <code><a href="./src/resources/views.ts">ViewGenerateAggregationDataResponse</a></code>
+- <code><a href="./src/resources/views.ts">ViewGenerateTableDataResponse</a></code>
+
+Methods:
+
+- <code title="post /v3/views">client.views.<a href="./src/resources/views.ts">create</a>({ ...params }) -> ViewCreateResponse</code>
+- <code title="get /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">retrieve</a>(viewID) -> ViewRetrieveResponse</code>
+- <code title="put /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">update</a>(viewID, { ...params }) -> ViewUpdateResponse</code>
+- <code title="get /v3/views">client.views.<a href="./src/resources/views.ts">list</a>({ ...params }) -> ViewListResponse</code>
+- <code title="delete /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">delete</a>(viewID) -> void</code>
+- <code title="post /v3/views/aggregation-data">client.views.<a href="./src/resources/views.ts">generateAggregationData</a>({ ...params }) -> ViewGenerateAggregationDataResponse</code>
+- <code title="post /v3/views/table-data">client.views.<a href="./src/resources/views.ts">generateTableData</a>({ ...params }) -> ViewGenerateTableDataResponse</code>

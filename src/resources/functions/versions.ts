@@ -27,6 +27,14 @@ export class Versions extends APIResource {
    * Versions are immutable. Use this endpoint to inspect what a function looked like
    * at the moment a particular call was made — every event and transformation
    * records the function version it ran against.
+   *
+   * @example
+   * ```ts
+   * const version = await client.functions.versions.retrieve(
+   *   0,
+   *   { functionName: 'functionName' },
+   * );
+   * ```
    */
   retrieve(
     versionNum: number,
@@ -44,6 +52,12 @@ export class Versions extends APIResource {
    * configuration the function had between updates. Useful for audits ("when did
    * this schema change?") and for diffing two versions before promoting an update to
    * production.
+   *
+   * @example
+   * ```ts
+   * const listFunctionVersionsResponse =
+   *   await client.functions.versions.list('functionName');
+   * ```
    */
   list(functionName: string, options?: RequestOptions): APIPromise<ListFunctionVersionsResponse> {
     return this._client.get(path`/v3/functions/${functionName}/versions`, options);
