@@ -1850,13 +1850,13 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     httpMethod: 'post',
     summary: 'Trigger Transformation Evaluations',
     description:
-      "**Queue evaluation jobs for a batch of transformations.**\n\nEvaluations run asynchronously and score each transformation's output\nagainst the function's schema for confidence, hallucination detection,\nand relevance. Transformations must belong to events of a supported\ntype: `extract`, `transform`, `analyze`, or `join`.\n\nReturns immediately with a summary of queued vs. skipped transformations\nand per-transformation errors. Poll `POST /v3/eval/results` or\n`GET /v3/eval/results` to retrieve results once evaluations complete.",
+      "**Queue evaluation jobs for a batch of transformations.**\n\nEvaluations run asynchronously and score each transformation's output\nagainst the function's schema for confidence, hallucination detection,\nand relevance. Transformations must belong to events of a supported\ntype: `extract`, `transform`, `analyze`, or `join`.\n\nReturns immediately with a summary of queued vs. skipped transformations\nand per-transformation errors. Poll `GET /v3/eval/results` to retrieve\nresults once evaluations complete.",
     stainlessPath: '(resource) eval > (method) trigger_evaluation',
     qualified: 'client.eval.triggerEvaluation',
     params: ['transformationIDs: string[];', 'evaluationVersion?: string;'],
     response: '{ queued: number; skipped: number; errors?: object; }',
     markdown:
-      "## trigger_evaluation\n\n`client.eval.triggerEvaluation(transformationIDs: string[], evaluationVersion?: string): { queued: number; skipped: number; errors?: object; }`\n\n**post** `/v3/eval`\n\n**Queue evaluation jobs for a batch of transformations.**\n\nEvaluations run asynchronously and score each transformation's output\nagainst the function's schema for confidence, hallucination detection,\nand relevance. Transformations must belong to events of a supported\ntype: `extract`, `transform`, `analyze`, or `join`.\n\nReturns immediately with a summary of queued vs. skipped transformations\nand per-transformation errors. Poll `POST /v3/eval/results` or\n`GET /v3/eval/results` to retrieve results once evaluations complete.\n\n### Parameters\n\n- `transformationIDs: string[]`\n  Transformation IDs to evaluate. Up to 100 per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version (e.g. `0.1.0-gemini`). When omitted the\nserver's default evaluation version is used.\n\n### Returns\n\n- `{ queued: number; skipped: number; errors?: object; }`\n  Summary of the trigger call. Evaluations run asynchronously; use\n`POST /v3/eval/results` or `GET /v3/eval/results` to poll for results.\n\n  - `queued: number`\n  - `skipped: number`\n  - `errors?: object`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.eval.triggerEvaluation({ transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'] });\n\nconsole.log(response);\n```",
+      "## trigger_evaluation\n\n`client.eval.triggerEvaluation(transformationIDs: string[], evaluationVersion?: string): { queued: number; skipped: number; errors?: object; }`\n\n**post** `/v3/eval`\n\n**Queue evaluation jobs for a batch of transformations.**\n\nEvaluations run asynchronously and score each transformation's output\nagainst the function's schema for confidence, hallucination detection,\nand relevance. Transformations must belong to events of a supported\ntype: `extract`, `transform`, `analyze`, or `join`.\n\nReturns immediately with a summary of queued vs. skipped transformations\nand per-transformation errors. Poll `GET /v3/eval/results` to retrieve\nresults once evaluations complete.\n\n### Parameters\n\n- `transformationIDs: string[]`\n  Transformation IDs to evaluate. Up to 100 per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version (e.g. `0.1.0-gemini`). When omitted the\nserver's default evaluation version is used.\n\n### Returns\n\n- `{ queued: number; skipped: number; errors?: object; }`\n  Summary of the trigger call. Evaluations run asynchronously; use\n`GET /v3/eval/results` to poll for results.\n\n  - `queued: number`\n  - `skipped: number`\n  - `errors?: object`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.eval.triggerEvaluation({ transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'] });\n\nconsole.log(response);\n```",
     perLanguage: {
       typescript: {
         method: 'client.eval.triggerEvaluation',
@@ -1890,90 +1890,43 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     },
   },
   {
-    name: 'fetch_results',
-    endpoint: '/v3/eval/results',
-    httpMethod: 'post',
-    summary: 'Get Evaluation Results',
-    description:
-      '**Fetch evaluation results for a batch of transformations (POST).**\n\nFor each requested transformation ID the response reports one of three\nstates: a completed `result`, still-`pending`, or `failed`. The POST\nvariant accepts the ID list in the request body; use the `GET` variant\nwith query parameters for simpler clients.',
-    stainlessPath: '(resource) eval.results > (method) fetch_results',
-    qualified: 'client.eval.results.fetchResults',
-    params: ['transformationIDs: string[];', 'evaluationVersion?: string;'],
-    response:
-      '{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]; pending?: { createdAt: string; transformationId: string; }[]; }',
-    markdown:
-      "## fetch_results\n\n`client.eval.results.fetchResults(transformationIDs: string[], evaluationVersion?: string): { results: object; errors?: object; failed?: object[]; pending?: object[]; }`\n\n**post** `/v3/eval/results`\n\n**Fetch evaluation results for a batch of transformations (POST).**\n\nFor each requested transformation ID the response reports one of three\nstates: a completed `result`, still-`pending`, or `failed`. The POST\nvariant accepts the ID list in the request body; use the `GET` variant\nwith query parameters for simpler clients.\n\n### Parameters\n\n- `transformationIDs: string[]`\n  Transformation IDs to fetch results for. Up to 100 per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version filter.\n\n### Returns\n\n- `{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]; pending?: { createdAt: string; transformationId: string; }[]; }`\n  Batched response containing the evaluation state for every requested\ntransformation ID, partitioned into completed `results`, still-running\n`pending`, and terminal `failed` groups.\n\n  - `results: object`\n  - `errors?: object`\n  - `failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]`\n  - `pending?: { createdAt: string; transformationId: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst evaluationResults = await client.eval.results.fetchResults({ transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'] });\n\nconsole.log(evaluationResults);\n```",
-    perLanguage: {
-      typescript: {
-        method: 'client.eval.results.fetchResults',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst evaluationResults = await client.eval.results.fetchResults({\n  transformationIDs: ['tr_01HXAB...', 'tr_01HXCD...'],\n  evaluationVersion: '0.1.0-gemini',\n});\n\nconsole.log(evaluationResults.results);",
-      },
-      python: {
-        method: 'eval.results.fetch_results',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nevaluation_results = client.eval.results.fetch_results(\n    transformation_ids=["tr_01HXAB...", "tr_01HXCD..."],\n    evaluation_version="0.1.0-gemini",\n)\nprint(evaluation_results.results)',
-      },
-      go: {
-        method: 'client.Eval.Results.FetchResults',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tevaluationResults, err := client.Eval.Results.FetchResults(context.TODO(), bem.EvalResultFetchResultsParams{\n\t\tTransformationIDs: []string{"tr_01HXAB...", "tr_01HXCD..."},\n\t\tEvaluationVersion: bem.String("0.1.0-gemini"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", evaluationResults.Results)\n}\n',
-      },
-      cli: {
-        method: 'results fetch_results',
-        example:
-          "bem eval:results fetch-results \\\n  --api-key 'My API Key' \\\n  --transformation-id tr_01HXAB... \\\n  --transformation-id tr_01HXCD...",
-      },
-      csharp: {
-        method: 'Eval.Results.FetchResults',
-        example:
-          'ResultFetchResultsParams parameters = new()\n{\n    TransformationIds =\n    [\n        "tr_01HXAB...", "tr_01HXCD..."\n    ],\n};\n\nvar evaluationResults = await client.Eval.Results.FetchResults(parameters);\n\nConsole.WriteLine(evaluationResults);',
-      },
-      http: {
-        example:
-          'curl https://api.bem.ai/v3/eval/results \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "transformationIDs": [\n            "tr_01HXAB...",\n            "tr_01HXCD..."\n          ],\n          "evaluationVersion": "0.1.0-gemini"\n        }\'',
-      },
-    },
-  },
-  {
     name: 'retrieve_results',
     endpoint: '/v3/eval/results',
     httpMethod: 'get',
     summary: 'Get Evaluation Results',
     description:
-      '**Fetch evaluation results for a batch of transformations.**\n\nIdentical behavior to the POST variant; accepts transformation IDs as a\ncomma-separated `transformationIDs` query parameter. Limited to 100 IDs\nper request.',
+      '**Fetch evaluation results for a batch of events.**\n\nPass either `eventIDs` (preferred — the externally-stable V3\nidentifier) or `transformationIDs` as a comma-separated query\nparameter. Exactly one of the two must be provided. Up to 100 IDs per\nrequest.\n\nFor each requested ID the response reports one of three states: a\ncompleted `result`, still-`pending`, or `failed`. Results, pending,\nand failed entries are all keyed by event KSUID regardless of which\ninput form was used.',
     stainlessPath: '(resource) eval.results > (method) retrieve_results',
     qualified: 'client.eval.results.retrieveResults',
-    params: ['transformationIDs: string;', 'evaluationVersion?: string;'],
+    params: ['evaluationVersion?: string;', 'eventIDs?: string;', 'transformationIDs?: string;'],
     response:
-      '{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]; pending?: { createdAt: string; transformationId: string; }[]; }',
+      '{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; eventID: string; }[]; pending?: { createdAt: string; eventID: string; }[]; }',
     markdown:
-      "## retrieve_results\n\n`client.eval.results.retrieveResults(transformationIDs: string, evaluationVersion?: string): { results: object; errors?: object; failed?: object[]; pending?: object[]; }`\n\n**get** `/v3/eval/results`\n\n**Fetch evaluation results for a batch of transformations.**\n\nIdentical behavior to the POST variant; accepts transformation IDs as a\ncomma-separated `transformationIDs` query parameter. Limited to 100 IDs\nper request.\n\n### Parameters\n\n- `transformationIDs: string`\n  Comma-separated list of transformation IDs to fetch results for.\nBetween 1 and 100 IDs per request.\n\n- `evaluationVersion?: string`\n  Optional evaluation version filter.\n\n### Returns\n\n- `{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]; pending?: { createdAt: string; transformationId: string; }[]; }`\n  Batched response containing the evaluation state for every requested\ntransformation ID, partitioned into completed `results`, still-running\n`pending`, and terminal `failed` groups.\n\n  - `results: object`\n  - `errors?: object`\n  - `failed?: { createdAt: string; errorMessage: string; transformationId: string; }[]`\n  - `pending?: { createdAt: string; transformationId: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst evaluationResults = await client.eval.results.retrieveResults({ transformationIDs: 'transformationIDs' });\n\nconsole.log(evaluationResults);\n```",
+      "## retrieve_results\n\n`client.eval.results.retrieveResults(evaluationVersion?: string, eventIDs?: string, transformationIDs?: string): { results: object; errors?: object; failed?: object[]; pending?: object[]; }`\n\n**get** `/v3/eval/results`\n\n**Fetch evaluation results for a batch of events.**\n\nPass either `eventIDs` (preferred — the externally-stable V3\nidentifier) or `transformationIDs` as a comma-separated query\nparameter. Exactly one of the two must be provided. Up to 100 IDs per\nrequest.\n\nFor each requested ID the response reports one of three states: a\ncompleted `result`, still-`pending`, or `failed`. Results, pending,\nand failed entries are all keyed by event KSUID regardless of which\ninput form was used.\n\n### Parameters\n\n- `evaluationVersion?: string`\n  Optional evaluation version filter.\n\n- `eventIDs?: string`\n  Comma-separated list of event KSUIDs to fetch results for. Between\n1 and 100 IDs per request. Mutually exclusive with\n`transformationIDs`.\n\n- `transformationIDs?: string`\n  Comma-separated list of transformation IDs to fetch results for.\nBetween 1 and 100 IDs per request. Mutually exclusive with\n`eventIDs`. Prefer `eventIDs` for new integrations.\n\n### Returns\n\n- `{ results: object; errors?: object; failed?: { createdAt: string; errorMessage: string; eventID: string; }[]; pending?: { createdAt: string; eventID: string; }[]; }`\n  Batched response containing the evaluation state for every requested\nID, partitioned into completed `results`, still-running `pending`, and\nterminal `failed` groups. All identifiers in the response are event\nKSUIDs regardless of whether the request used `eventIDs` or\n`transformationIDs`.\n\n  - `results: object`\n  - `errors?: object`\n  - `failed?: { createdAt: string; errorMessage: string; eventID: string; }[]`\n  - `pending?: { createdAt: string; eventID: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst evaluationResults = await client.eval.results.retrieveResults();\n\nconsole.log(evaluationResults);\n```",
     perLanguage: {
       typescript: {
         method: 'client.eval.results.retrieveResults',
         example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst evaluationResults = await client.eval.results.retrieveResults({\n  transformationIDs: 'transformationIDs',\n});\n\nconsole.log(evaluationResults.results);",
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst evaluationResults = await client.eval.results.retrieveResults();\n\nconsole.log(evaluationResults.results);",
       },
       python: {
         method: 'eval.results.retrieve_results',
         example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nevaluation_results = client.eval.results.retrieve_results(\n    transformation_ids="transformationIDs",\n)\nprint(evaluation_results.results)',
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nevaluation_results = client.eval.results.retrieve_results()\nprint(evaluation_results.results)',
       },
       go: {
         method: 'client.Eval.Results.GetResults',
         example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tevaluationResults, err := client.Eval.Results.GetResults(context.TODO(), bem.EvalResultGetResultsParams{\n\t\tTransformationIDs: "transformationIDs",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", evaluationResults.Results)\n}\n',
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tevaluationResults, err := client.Eval.Results.GetResults(context.TODO(), bem.EvalResultGetResultsParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", evaluationResults.Results)\n}\n',
       },
       cli: {
         method: 'results retrieve_results',
-        example:
-          "bem eval:results retrieve-results \\\n  --api-key 'My API Key' \\\n  --transformation-ids transformationIDs",
+        example: "bem eval:results retrieve-results \\\n  --api-key 'My API Key'",
       },
       csharp: {
         method: 'Eval.Results.RetrieveResults',
         example:
-          'ResultRetrieveResultsParams parameters = new()\n{\n    TransformationIds = "transformationIDs"\n};\n\nvar evaluationResults = await client.Eval.Results.RetrieveResults(parameters);\n\nConsole.WriteLine(evaluationResults);',
+          'ResultRetrieveResultsParams parameters = new();\n\nvar evaluationResults = await client.Eval.Results.RetrieveResults(parameters);\n\nConsole.WriteLine(evaluationResults);',
       },
       http: {
         example: 'curl https://api.bem.ai/v3/eval/results \\\n    -H "x-api-key: $BEM_API_KEY"',

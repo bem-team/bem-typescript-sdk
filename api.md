@@ -230,7 +230,6 @@ Types:
 
 Methods:
 
-- <code title="post /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">fetchResults</a>({ ...params }) -> EvaluationResults</code>
 - <code title="get /v3/eval/results">client.eval.results.<a href="./src/resources/eval/results.ts">retrieveResults</a>({ ...params }) -> EvaluationResults</code>
 
 # Fs
