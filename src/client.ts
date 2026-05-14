@@ -78,6 +78,20 @@ import {
   SubscriptionV3,
   Subscriptions,
 } from './resources/subscriptions';
+import {
+  ViewCreateParams,
+  ViewCreateResponse,
+  ViewGenerateAggregationDataParams,
+  ViewGenerateAggregationDataResponse,
+  ViewGenerateTableDataParams,
+  ViewGenerateTableDataResponse,
+  ViewListParams,
+  ViewListResponse,
+  ViewRetrieveResponse,
+  ViewUpdateParams,
+  ViewUpdateResponse,
+  Views,
+} from './resources/views';
 import { WebhookSecret, WebhookSecretResource } from './resources/webhook-secret';
 import {
   ClassifyWebhookEvent,
@@ -113,7 +127,13 @@ import {
   EnrichStep,
   Function,
   FunctionAudit,
+  FunctionCompareMetricsParams,
+  FunctionCompareMetricsResponse,
   FunctionCreateParams,
+  FunctionEstimateReviewRequirementsParams,
+  FunctionEstimateReviewRequirementsResponse,
+  FunctionGetMetricsParams,
+  FunctionGetMetricsResponse,
   FunctionListParams,
   FunctionResponse,
   FunctionType,
@@ -883,20 +903,6 @@ export class Bem {
 
   static toFile = Uploads.toFile;
 
-  /**
-   * Functions are the core building blocks of data transformation in Bem. Each function type serves a specific purpose:
-   *
-   * - **Extract**: Extract structured JSON data from unstructured documents (PDFs, emails, images, spreadsheets), with optional layout-aware bounding-box extraction
-   * - **Route**: Direct data to different processing paths based on conditions
-   * - **Split**: Break multi-page documents into individual pages for parallel processing
-   * - **Join**: Combine outputs from multiple function calls into a single result
-   * - **Parse**: Render documents into a navigable structure of page-aware sections, named entities, and relationships — designed to be walked by an LLM agent via the [File System API](/api/v3/file-system) (`POST /v3/fs`). Two toggles, both `true` by default: `extractEntities` controls per-document entity and relationship extraction; `linkAcrossDocuments` merges entities into one canonical record per real-world thing across the environment, populating cross-document memory.
-   * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
-   * - **Enrich**: Enhance data with semantic search against collections
-   * - **Send**: Deliver workflow outputs to downstream destinations
-   *
-   * Use these endpoints to create, update, list, and manage your functions.
-   */
   functions: API.Functions = new API.Functions(this);
   /**
    * The Calls API provides a unified interface for invoking both **Workflows** and **Functions**.
@@ -1159,6 +1165,40 @@ export class Bem {
    * conventional PATCH semantics — only the fields you include are changed.
    */
   subscriptions: API.Subscriptions = new API.Subscriptions(this);
+  /**
+   * Views are tabular projections over the `transformations` your functions
+   * produce — a saved query that turns raw extracted JSON into a
+   * filterable, paginatable, aggregatable table.
+   *
+   * ## Anatomy
+   *
+   * A view declares:
+   * - One or more **functions** to read from (by `functionID` or `functionName`).
+   * - A list of **columns**, each pinned to a `valueSchemaPath` (a JSON
+   *   Pointer into the function's output schema).
+   * - Optional **filters** (string equality, numeric comparators,
+   *   null-checks) and **aggregations** (`count`, `count_distinct`,
+   *   `sum`, `average`, `min`, `max`).
+   *
+   * Views are versioned: every update produces a new version, and the
+   * previous version remains immutable and addressable. Function types
+   * that produce transformations with an output schema — `extract`,
+   * `transform`, `analyze`, `join` — are all queryable through views;
+   * `extract` works uniformly across vision and OCR inputs.
+   *
+   * ## Reading data
+   *
+   * - **`POST /v3/views/table-data`** — paginated rows of column values.
+   *   Each row reports the underlying event's `eventID` (the
+   *   externally-stable KSUID used everywhere else in V3) plus the
+   *   projected column values.
+   * - **`POST /v3/views/aggregation-data`** — group-by-able aggregate
+   *   values across the same query surface.
+   *
+   * Both endpoints take a `timeWindow` to bound the transformation set
+   * and require at least one `function` to read from.
+   */
+  views: API.Views = new API.Views(this);
 }
 
 Bem.Functions = Functions;
@@ -1175,6 +1215,7 @@ Bem.Eval = Eval;
 Bem.Fs = Fs;
 Bem.Connectors = Connectors;
 Bem.Subscriptions = Subscriptions;
+Bem.Views = Views;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -1223,10 +1264,16 @@ export declare namespace Bem {
     type UpdateFunction as UpdateFunction,
     type UserActionSummary as UserActionSummary,
     type WorkflowUsageInfo as WorkflowUsageInfo,
+    type FunctionCompareMetricsResponse as FunctionCompareMetricsResponse,
+    type FunctionEstimateReviewRequirementsResponse as FunctionEstimateReviewRequirementsResponse,
+    type FunctionGetMetricsResponse as FunctionGetMetricsResponse,
     type FunctionsFunctionsPage as FunctionsFunctionsPage,
     type FunctionCreateParams as FunctionCreateParams,
     type FunctionUpdateParams as FunctionUpdateParams,
     type FunctionListParams as FunctionListParams,
+    type FunctionCompareMetricsParams as FunctionCompareMetricsParams,
+    type FunctionEstimateReviewRequirementsParams as FunctionEstimateReviewRequirementsParams,
+    type FunctionGetMetricsParams as FunctionGetMetricsParams,
   };
 
   export {
@@ -1352,5 +1399,20 @@ export declare namespace Bem {
     type SubscriptionCreateParams as SubscriptionCreateParams,
     type SubscriptionUpdateParams as SubscriptionUpdateParams,
     type SubscriptionListParams as SubscriptionListParams,
+  };
+
+  export {
+    Views as Views,
+    type ViewCreateResponse as ViewCreateResponse,
+    type ViewRetrieveResponse as ViewRetrieveResponse,
+    type ViewUpdateResponse as ViewUpdateResponse,
+    type ViewListResponse as ViewListResponse,
+    type ViewGenerateAggregationDataResponse as ViewGenerateAggregationDataResponse,
+    type ViewGenerateTableDataResponse as ViewGenerateTableDataResponse,
+    type ViewCreateParams as ViewCreateParams,
+    type ViewUpdateParams as ViewUpdateParams,
+    type ViewListParams as ViewListParams,
+    type ViewGenerateAggregationDataParams as ViewGenerateAggregationDataParams,
+    type ViewGenerateTableDataParams as ViewGenerateTableDataParams,
   };
 }

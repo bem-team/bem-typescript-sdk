@@ -286,6 +286,166 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     },
   },
   {
+    name: 'compare_metrics',
+    endpoint: '/v3/functions/compare',
+    httpMethod: 'post',
+    summary: 'Compare Metrics Between Function Versions',
+    description:
+      '**Compare metrics between two function versions.**\n\nComputes aggregate and field-level lift/regression between any two\nversions of a function: accuracy, precision, recall, F1, and PR-AUC.\nField-level changes are returned only for fields whose lift exceeds\n1% in either direction.\n\nSupported for every function type that produces labeled\ntransformations: `extract`, `transform`, `analyze`, `join`. Pass\n`isRegression: true` to compare only the regression dataset (rows\nproduced by `POST /v3/functions/regression`) — the canonical way to\njudge a candidate version before promoting it.\n\nDefaults: `baselineVersionNum = currentVersionNum - 1`,\n`comparisonVersionNum = currentVersionNum`.',
+    stainlessPath: '(resource) functions > (method) compare_metrics',
+    qualified: 'client.functions.compareMetrics',
+    params: [
+      'functionName: string;',
+      'baselineVersionNum?: number;',
+      'comparisonVersionNum?: number;',
+      'isRegression?: boolean;',
+    ],
+    response:
+      '{ baselineVersionNum: number; comparisonVersionNum: number; functionName: string; aggregateComparison?: { accuracy?: object; f1Score?: object; precision?: object; recall?: object; }; baselineMetrics?: { aggregateMetrics?: object; fieldMetrics?: object[]; precisionRecallAuc?: number; }; baselineTransformationCount?: number; comparisonMetrics?: { aggregateMetrics?: object; fieldMetrics?: object[]; precisionRecallAuc?: number; }; comparisonTransformationCount?: number; fieldMetricsChanges?: { comparison: object; fieldPath: string; }[]; message?: string; }',
+    markdown:
+      "## compare_metrics\n\n`client.functions.compareMetrics(functionName: string, baselineVersionNum?: number, comparisonVersionNum?: number, isRegression?: boolean): { baselineVersionNum: number; comparisonVersionNum: number; functionName: string; aggregateComparison?: object; baselineMetrics?: object; baselineTransformationCount?: number; comparisonMetrics?: object; comparisonTransformationCount?: number; fieldMetricsChanges?: object[]; message?: string; }`\n\n**post** `/v3/functions/compare`\n\n**Compare metrics between two function versions.**\n\nComputes aggregate and field-level lift/regression between any two\nversions of a function: accuracy, precision, recall, F1, and PR-AUC.\nField-level changes are returned only for fields whose lift exceeds\n1% in either direction.\n\nSupported for every function type that produces labeled\ntransformations: `extract`, `transform`, `analyze`, `join`. Pass\n`isRegression: true` to compare only the regression dataset (rows\nproduced by `POST /v3/functions/regression`) — the canonical way to\njudge a candidate version before promoting it.\n\nDefaults: `baselineVersionNum = currentVersionNum - 1`,\n`comparisonVersionNum = currentVersionNum`.\n\n### Parameters\n\n- `functionName: string`\n  Name of the function to compare versions for\n\n- `baselineVersionNum?: number`\n  **Baseline version number for comparison**\n\nIf not provided, defaults to the previous version (current - 1).\n\n- `comparisonVersionNum?: number`\n  **Comparison version number**\n\nIf not provided, defaults to the current version.\n\n- `isRegression?: boolean`\n  **Whether to compare regression test data only**\n\nIf true, only compares transformations marked as regression tests.\n\n### Returns\n\n- `{ baselineVersionNum: number; comparisonVersionNum: number; functionName: string; aggregateComparison?: { accuracy?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; f1Score?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; precision?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; recall?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; }; baselineMetrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: object; }[]; precisionRecallAuc?: number; }; baselineTransformationCount?: number; comparisonMetrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: object; }[]; precisionRecallAuc?: number; }; comparisonTransformationCount?: number; fieldMetricsChanges?: { comparison: { accuracy?: object; f1Score?: object; precision?: object; recall?: object; }; fieldPath: string; }[]; message?: string; }`\n  **Response containing metrics comparison between two function versions**\n\nShows absolute differences, lift percentages, and field-level changes.\n\n  - `baselineVersionNum: number`\n  - `comparisonVersionNum: number`\n  - `functionName: string`\n  - `aggregateComparison?: { accuracy?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; f1Score?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; precision?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; recall?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; }`\n  - `baselineMetrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; }[]; precisionRecallAuc?: number; }`\n  - `baselineTransformationCount?: number`\n  - `comparisonMetrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; }[]; precisionRecallAuc?: number; }`\n  - `comparisonTransformationCount?: number`\n  - `fieldMetricsChanges?: { comparison: { accuracy?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; f1Score?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; precision?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; recall?: { baselineValue?: number; comparisonValue?: number; difference?: number; liftPercent?: number; }; }; fieldPath: string; }[]`\n  - `message?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.functions.compareMetrics({ functionName: 'invoice-extractor' });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.functions.compareMetrics',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.functions.compareMetrics({\n  functionName: 'invoice-extractor',\n  baselineVersionNum: 2,\n  comparisonVersionNum: 3,\n  isRegression: true,\n});\n\nconsole.log(response.baselineVersionNum);",
+      },
+      python: {
+        method: 'functions.compare_metrics',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.functions.compare_metrics(\n    function_name="invoice-extractor",\n    baseline_version_num=2,\n    comparison_version_num=3,\n    is_regression=True,\n)\nprint(response.baseline_version_num)',
+      },
+      go: {
+        method: 'client.Functions.CompareMetrics',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Functions.CompareMetrics(context.TODO(), bem.FunctionCompareMetricsParams{\n\t\tFunctionName:         "invoice-extractor",\n\t\tBaselineVersionNum:   bem.Int(2),\n\t\tComparisonVersionNum: bem.Int(3),\n\t\tIsRegression:         bem.Bool(true),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.BaselineVersionNum)\n}\n',
+      },
+      cli: {
+        method: 'functions compare_metrics',
+        example:
+          "bem functions compare-metrics \\\n  --api-key 'My API Key' \\\n  --function-name invoice-extractor",
+      },
+      csharp: {
+        method: 'Functions.CompareMetrics',
+        example:
+          'FunctionCompareMetricsParams parameters = new()\n{\n    FunctionName = "invoice-extractor"\n};\n\nvar response = await client.Functions.CompareMetrics(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/functions/compare \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "functionName": "invoice-extractor",\n          "baselineVersionNum": 2,\n          "comparisonVersionNum": 3,\n          "isRegression": true\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'get_metrics',
+    endpoint: '/v3/functions/metrics',
+    httpMethod: 'get',
+    summary: 'Get Function Metrics',
+    description:
+      '**Retrieve performance metrics for functions based on labeled transformation data.**\n\nCalculates accuracy, precision, recall, F1, and the underlying confusion-matrix\ncounts for each matching function by comparing model outputs against user\ncorrections. Metrics are aggregated across every transformation the function\nhas produced, regardless of function type — `extract`, `transform`, `analyze`,\nand `join` all populate the same `metrics` column on the transformation row,\nso v3 surfaces all of them uniformly.\n\n## Filtering\n\nCombine `functionIDs` / `functionNames` / `types` to narrow the result set.\n`types` accepts `extract` alongside the legacy `transform` / `analyze` types\n(which remain readable). Pagination is cursor-based.\n\n## Requirements\n\nA function only shows non-zero metrics once at least one of its transformations\nhas been labeled — submit corrections via `POST /v3/events/{eventID}/feedback`.',
+    stainlessPath: '(resource) functions > (method) get_metrics',
+    qualified: 'client.functions.getMetrics',
+    params: [
+      'endingBefore?: string;',
+      'functionIDs?: string[];',
+      'functionNames?: string[];',
+      'limit?: number;',
+      "sortOrder?: 'asc' | 'desc';",
+      'startingAfter?: string;',
+      'types?: string[];',
+    ],
+    response:
+      '{ functions: { functionName: string; metrics: { accuracy: number; f1Score: number; fn: number; fp: number; precision: number; recall: number; tn: number; tp: number; }; totalLabeledResults: number; totalResults: number; }[]; totalCount: number; }',
+    markdown:
+      "## get_metrics\n\n`client.functions.getMetrics(endingBefore?: string, functionIDs?: string[], functionNames?: string[], limit?: number, sortOrder?: 'asc' | 'desc', startingAfter?: string, types?: string[]): { functions: object[]; totalCount: number; }`\n\n**get** `/v3/functions/metrics`\n\n**Retrieve performance metrics for functions based on labeled transformation data.**\n\nCalculates accuracy, precision, recall, F1, and the underlying confusion-matrix\ncounts for each matching function by comparing model outputs against user\ncorrections. Metrics are aggregated across every transformation the function\nhas produced, regardless of function type — `extract`, `transform`, `analyze`,\nand `join` all populate the same `metrics` column on the transformation row,\nso v3 surfaces all of them uniformly.\n\n## Filtering\n\nCombine `functionIDs` / `functionNames` / `types` to narrow the result set.\n`types` accepts `extract` alongside the legacy `transform` / `analyze` types\n(which remain readable). Pagination is cursor-based.\n\n## Requirements\n\nA function only shows non-zero metrics once at least one of its transformations\nhas been labeled — submit corrections via `POST /v3/events/{eventID}/feedback`.\n\n### Parameters\n\n- `endingBefore?: string`\n  Cursor — a `functionID` defining your place in the list.\n\n- `functionIDs?: string[]`\n\n- `functionNames?: string[]`\n\n- `limit?: number`\n\n- `sortOrder?: 'asc' | 'desc'`\n  Sort direction over the result set (default `asc`). Pagination works\nsymmetrically in both directions via `startingAfter` / `endingBefore`.\n\n- `startingAfter?: string`\n  Cursor — a `functionID` defining your place in the list.\n\n- `types?: string[]`\n\n### Returns\n\n- `{ functions: { functionName: string; metrics: { accuracy: number; f1Score: number; fn: number; fp: number; precision: number; recall: number; tn: number; tp: number; }; totalLabeledResults: number; totalResults: number; }[]; totalCount: number; }`\n\n  - `functions: { functionName: string; metrics: { accuracy: number; f1Score: number; fn: number; fp: number; precision: number; recall: number; tn: number; tp: number; }; totalLabeledResults: number; totalResults: number; }[]`\n  - `totalCount: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.functions.getMetrics();\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.functions.getMetrics',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.functions.getMetrics();\n\nconsole.log(response.functions);",
+      },
+      python: {
+        method: 'functions.get_metrics',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.functions.get_metrics()\nprint(response.functions)',
+      },
+      go: {
+        method: 'client.Functions.GetMetrics',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Functions.GetMetrics(context.TODO(), bem.FunctionGetMetricsParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Functions)\n}\n',
+      },
+      cli: {
+        method: 'functions get_metrics',
+        example: "bem functions get-metrics \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'Functions.GetMetrics',
+        example:
+          'FunctionGetMetricsParams parameters = new();\n\nvar response = await client.Functions.GetMetrics(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/functions/metrics \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'estimate_review_requirements',
+    endpoint: '/v3/functions/review',
+    httpMethod: 'post',
+    summary: 'Function Review',
+    description:
+      "**Estimate human review requirements for a function.**\n\nCombines confusion-matrix metrics with the per-transformation evaluation\nscores (confidence / hallucination / relevance produced by the eval service)\nto compute:\n\n- A confidence-bucketed distribution of the function's outputs.\n- Sample-size estimates at configurable margin-of-error and confidence\nlevels (Wald or Wilson intervals).\n- A precision-recall AUC and a per-threshold matrix you can use to\npick a review cutoff.\n\nSupported for every function type that produces transformations and feeds\nthe auto-evaluation pipeline: `extract`, `transform`, `analyze`, `join`.\nExtract works on both vision (PDF/PNG/JPEG/HEIC/HEIF/WebP) and OCR-routed\ninputs.\n\nPass `isRegression: true` to scope the review to transformations created\nby a previous regression run (see `POST /v3/functions/regression`).",
+    stainlessPath: '(resource) functions > (method) estimate_review_requirements',
+    qualified: 'client.functions.estimateReviewRequirements',
+    params: [
+      'functionName: string;',
+      'confidenceLevels?: number[];',
+      "confidenceMethod?: 'wald' | 'wilson';",
+      "evaluationVersion?: '0.1.0-gemini';",
+      'functionVersionNum?: number;',
+      'isRegression?: boolean;',
+      'marginOfError?: number;',
+      'thresholdMax?: number;',
+      'thresholdMin?: number;',
+      'thresholdStep?: number;',
+    ],
+    response:
+      '{ estimate: { confidenceDistribution: { high?: number; low?: number; medium?: number; }; labeledTransformations: number; missingEvaluations: number; thresholdMatrix: { fn: number; fp: number; threshold: number; tn: number; tp: number; accuracyAboveThreshold?: object; falseDiscoveryRate?: object; falsePositiveRate?: object; precision?: object; recall?: object; }[]; totalTransformations: number; unlabeledTransformations: number; }; functionName: string; functionVersionNum: number; metrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: object; }[]; precisionRecallAuc?: number; }; }',
+    markdown:
+      "## estimate_review_requirements\n\n`client.functions.estimateReviewRequirements(functionName: string, confidenceLevels?: number[], confidenceMethod?: 'wald' | 'wilson', evaluationVersion?: '0.1.0-gemini', functionVersionNum?: number, isRegression?: boolean, marginOfError?: number, thresholdMax?: number, thresholdMin?: number, thresholdStep?: number): { estimate: object; functionName: string; functionVersionNum: number; metrics?: object; }`\n\n**post** `/v3/functions/review`\n\n**Estimate human review requirements for a function.**\n\nCombines confusion-matrix metrics with the per-transformation evaluation\nscores (confidence / hallucination / relevance produced by the eval service)\nto compute:\n\n- A confidence-bucketed distribution of the function's outputs.\n- Sample-size estimates at configurable margin-of-error and confidence\nlevels (Wald or Wilson intervals).\n- A precision-recall AUC and a per-threshold matrix you can use to\npick a review cutoff.\n\nSupported for every function type that produces transformations and feeds\nthe auto-evaluation pipeline: `extract`, `transform`, `analyze`, `join`.\nExtract works on both vision (PDF/PNG/JPEG/HEIC/HEIF/WebP) and OCR-routed\ninputs.\n\nPass `isRegression: true` to scope the review to transformations created\nby a previous regression run (see `POST /v3/functions/regression`).\n\n### Parameters\n\n- `functionName: string`\n  Name of the function to analyze\n\n- `confidenceLevels?: number[]`\n  Confidence levels for statistical analysis as integers representing percentages (e.g., [90, 95, 99] for 90%, 95%, 99%). IMPORTANT: Only integers are accepted, floats like 0.95 will be rejected.\n\n- `confidenceMethod?: 'wald' | 'wilson'`\n  Confidence interval calculation method (default \"wald\").\n\n- \"wald\": Normal approximation method (faster, standard)\n- \"wilson\": Wilson score interval (more robust for extreme rates)\n\n- `evaluationVersion?: '0.1.0-gemini'`\n  Optional evaluation version to filter evaluations by. Must be one of the supported versions. If not provided, defaults to \"0.1.0-gemini\".\n\n- `functionVersionNum?: number`\n  Optional function version number to analyze. If not provided, uses the latest/current version of the function.\n\n- `isRegression?: boolean`\n  Internal flag indicating if the request is from a regression test\n\n- `marginOfError?: number`\n  Margin of error for statistical calculations\n\n- `thresholdMax?: number`\n  Maximum confidence threshold to analyze\n\n- `thresholdMin?: number`\n  Minimum confidence threshold to analyze\n\n- `thresholdStep?: number`\n  Step size for threshold analysis (smaller = more granular)\n\n### Returns\n\n- `{ estimate: { confidenceDistribution: { high?: number; low?: number; medium?: number; }; labeledTransformations: number; missingEvaluations: number; thresholdMatrix: { fn: number; fp: number; threshold: number; tn: number; tp: number; accuracyAboveThreshold?: object; falseDiscoveryRate?: object; falsePositiveRate?: object; precision?: object; recall?: object; }[]; totalTransformations: number; unlabeledTransformations: number; }; functionName: string; functionVersionNum: number; metrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: object; }[]; precisionRecallAuc?: number; }; }`\n  Response containing review requirements estimate\n\n  - `estimate: { confidenceDistribution: { high?: number; low?: number; medium?: number; }; labeledTransformations: number; missingEvaluations: number; thresholdMatrix: { fn: number; fp: number; threshold: number; tn: number; tp: number; accuracyAboveThreshold?: { 95?: { currentSample: number; sampleNeeded: number; ciLower?: number; ciUpper?: number; mid?: number; }; }; falseDiscoveryRate?: { 95?: { currentSample: number; sampleNeeded: number; ciLower?: number; ciUpper?: number; mid?: number; }; }; falsePositiveRate?: { 95?: { currentSample: number; sampleNeeded: number; ciLower?: number; ciUpper?: number; mid?: number; }; }; precision?: { 95?: { currentSample: number; sampleNeeded: number; ciLower?: number; ciUpper?: number; mid?: number; }; }; recall?: { 95?: { currentSample: number; sampleNeeded: number; ciLower?: number; ciUpper?: number; mid?: number; }; }; }[]; totalTransformations: number; unlabeledTransformations: number; }`\n  - `functionName: string`\n  - `functionVersionNum: number`\n  - `metrics?: { aggregateMetrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; fieldMetrics?: { fieldPath: string; metrics?: { accuracy?: number; f1Score?: number; fn?: number; fp?: number; precision?: number; recall?: number; tn?: number; tp?: number; }; }[]; precisionRecallAuc?: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.functions.estimateReviewRequirements({ functionName: 'invoice-extractor' });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.functions.estimateReviewRequirements',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.functions.estimateReviewRequirements({\n  functionName: 'invoice-extractor',\n  functionVersionNum: 2,\n  isRegression: true,\n  marginOfError: 0.05,\n});\n\nconsole.log(response.estimate);",
+      },
+      python: {
+        method: 'functions.estimate_review_requirements',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.functions.estimate_review_requirements(\n    function_name="invoice-extractor",\n    function_version_num=2,\n    is_regression=True,\n    margin_of_error=0.05,\n)\nprint(response.estimate)',
+      },
+      go: {
+        method: 'client.Functions.EstimateReviewRequirements',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Functions.EstimateReviewRequirements(context.TODO(), bem.FunctionEstimateReviewRequirementsParams{\n\t\tFunctionName:       "invoice-extractor",\n\t\tFunctionVersionNum: bem.Int(2),\n\t\tIsRegression:       bem.Bool(true),\n\t\tMarginOfError:      bem.Float(0.05),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Estimate)\n}\n',
+      },
+      cli: {
+        method: 'functions estimate_review_requirements',
+        example:
+          "bem functions estimate-review-requirements \\\n  --api-key 'My API Key' \\\n  --function-name invoice-extractor",
+      },
+      csharp: {
+        method: 'Functions.EstimateReviewRequirements',
+        example:
+          'FunctionEstimateReviewRequirementsParams parameters = new()\n{\n    FunctionName = "invoice-extractor"\n};\n\nvar response = await client.Functions.EstimateReviewRequirements(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/functions/review \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "functionName": "invoice-extractor",\n          "functionVersionNum": 2,\n          "isRegression": true,\n          "marginOfError": 0.05\n        }\'',
+      },
+    },
+  },
+  {
     name: 'create',
     endpoint: '/v3/functions/copy',
     httpMethod: 'post',
@@ -426,6 +586,103 @@ const EMBEDDED_METHODS: MethodEntry[] = [
       http: {
         example:
           'curl https://api.bem.ai/v3/functions/$FUNCTION_NAME/versions/$VERSION_NUM \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'run',
+    endpoint: '/v3/functions/regression',
+    httpMethod: 'post',
+    summary: 'Run Function Regression Testing',
+    description:
+      '**Kick off a regression run between two versions of a function.**\n\nReplays a sample of corrected historical inputs against the comparison\nversion, producing fresh transformations marked `isRegression: true`.\nEach new run returns the workflow `callID`s you can monitor via\n`GET /v3/calls/{callID}`.\n\nSupported for every function type that produces correctable\ntransformations: `extract`, `transform`, `analyze`, `join`. For\n`extract` specifically, the regression sample is dispatched through\nthe same OCR vs. vision path used at original call time (PDF, PNG,\nJPEG, HEIC, HEIF, WebP go through the vision worker; everything else\ngoes through OCR → transform).\n\nThe comparison version must share a schema-compatible output shape\nwith the baseline; structural differences are reported as a 400 with\nthe offending field-level diffs.\n\n## Typical flow\n\n1. `POST /v3/functions/regression` — queues calls, returns\n`{ originalReferenceID, callID }` per sample.\n2. Wait (poll `GET /v3/calls/{callID}` or subscribe to webhooks).\n3. `POST /v3/functions/regression/corrections` to copy baseline\ncorrections onto the new regression transformations.\n4. `POST /v3/functions/compare` to compare baseline vs comparison\nmetrics for the regression dataset.',
+    stainlessPath: '(resource) functions.regression > (method) run',
+    qualified: 'client.functions.regression.run',
+    params: [
+      'functionName: string;',
+      'baselineVersionNum?: number;',
+      'comparisonVersionNum?: number;',
+      'onlyCorrectedData?: boolean;',
+      'sampleSize?: number;',
+    ],
+    response:
+      '{ functionName: string; result: { functionName: string; totalSamples: number; calls?: { callID: string; originalReferenceID: string; }[]; }; }',
+    markdown:
+      "## run\n\n`client.functions.regression.run(functionName: string, baselineVersionNum?: number, comparisonVersionNum?: number, onlyCorrectedData?: boolean, sampleSize?: number): { functionName: string; result: object; }`\n\n**post** `/v3/functions/regression`\n\n**Kick off a regression run between two versions of a function.**\n\nReplays a sample of corrected historical inputs against the comparison\nversion, producing fresh transformations marked `isRegression: true`.\nEach new run returns the workflow `callID`s you can monitor via\n`GET /v3/calls/{callID}`.\n\nSupported for every function type that produces correctable\ntransformations: `extract`, `transform`, `analyze`, `join`. For\n`extract` specifically, the regression sample is dispatched through\nthe same OCR vs. vision path used at original call time (PDF, PNG,\nJPEG, HEIC, HEIF, WebP go through the vision worker; everything else\ngoes through OCR → transform).\n\nThe comparison version must share a schema-compatible output shape\nwith the baseline; structural differences are reported as a 400 with\nthe offending field-level diffs.\n\n## Typical flow\n\n1. `POST /v3/functions/regression` — queues calls, returns\n`{ originalReferenceID, callID }` per sample.\n2. Wait (poll `GET /v3/calls/{callID}` or subscribe to webhooks).\n3. `POST /v3/functions/regression/corrections` to copy baseline\ncorrections onto the new regression transformations.\n4. `POST /v3/functions/compare` to compare baseline vs comparison\nmetrics for the regression dataset.\n\n### Parameters\n\n- `functionName: string`\n  **Name of the function to test for regressions**\n\nMust be an existing function with historical transformation data containing user corrections.\nThe function must be currently active and callable.\n\n- `baselineVersionNum?: number`\n  **Function version number to use as baseline for comparison**\n\n- Defaults to `currentVersionNum - 1` (previous version)\n- Must be a valid, existing version number for the function\n- Used to retrieve historical transformation data for comparison\n- Cannot be the same as `comparisonVersionNum`\n\n- `comparisonVersionNum?: number`\n  **Function version number to test against the baseline**\n\n- Defaults to current version number (latest version)\n- Must be a valid, existing version number for the function\n- This version will be used to create new function calls for testing\n- Cannot be the same as `baselineVersionNum`\n\n- `onlyCorrectedData?: boolean`\n  **Whether to only test transformations with user corrections**\n\n- Defaults to `true` (recommended)\n- When `true`: Only uses transformations with `correctedJSON` as ground truth\n- When `false`: May include transformations without corrections (less reliable)\n- Corrected data provides the most accurate regression testing results\n\n- `sampleSize?: number`\n  **Number of historical samples to test**\n\n- Defaults to 50 samples\n- Minimum: 1, Maximum: 1000\n- Only transformations with `correctedJSON` (user corrections) are eligible\n- Actual sample size may be smaller if insufficient corrected data exists\n- Larger samples provide more statistical confidence but take longer to process\n\n### Returns\n\n- `{ functionName: string; result: { functionName: string; totalSamples: number; calls?: { callID: string; originalReferenceID: string; }[]; }; }`\n  **Response from initiating a regression test**\n\nContains the function call IDs created for async processing and tracking information.\nUse the returned function call IDs to monitor progress and retrieve results.\n\n  - `functionName: string`\n  - `result: { functionName: string; totalSamples: number; calls?: { callID: string; originalReferenceID: string; }[]; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.functions.regression.run({ functionName: 'invoice-extractor' });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.functions.regression.run',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.functions.regression.run({\n  functionName: 'invoice-extractor',\n  baselineVersionNum: 3,\n  comparisonVersionNum: 5,\n  onlyCorrectedData: true,\n  sampleSize: 100,\n});\n\nconsole.log(response.functionName);",
+      },
+      python: {
+        method: 'functions.regression.run',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.functions.regression.run(\n    function_name="invoice-extractor",\n    baseline_version_num=3,\n    comparison_version_num=5,\n    only_corrected_data=True,\n    sample_size=100,\n)\nprint(response.function_name)',
+      },
+      go: {
+        method: 'client.Functions.Regression.Run',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Functions.Regression.Run(context.TODO(), bem.FunctionRegressionRunParams{\n\t\tFunctionName:         "invoice-extractor",\n\t\tBaselineVersionNum:   bem.Int(3),\n\t\tComparisonVersionNum: bem.Int(5),\n\t\tOnlyCorrectedData:    bem.Bool(true),\n\t\tSampleSize:           bem.Int(100),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.FunctionName)\n}\n',
+      },
+      cli: {
+        method: 'regression run',
+        example:
+          "bem functions:regression run \\\n  --api-key 'My API Key' \\\n  --function-name invoice-extractor",
+      },
+      csharp: {
+        method: 'Functions.Regression.Run',
+        example:
+          'RegressionRunParams parameters = new() { FunctionName = "invoice-extractor" };\n\nvar response = await client.Functions.Regression.Run(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/functions/regression \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "functionName": "invoice-extractor",\n          "baselineVersionNum": 3,\n          "comparisonVersionNum": 5,\n          "onlyCorrectedData": true,\n          "sampleSize": 100\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'apply_corrections',
+    endpoint: '/v3/functions/regression/corrections',
+    httpMethod: 'post',
+    summary: 'Apply Baseline Corrections to Regression Transformations',
+    description:
+      "**Copy baseline corrections onto regression transformations.**\n\nLooks up regression transformations created against the comparison\nversion (`isRegression: true`, `correctedJSON IS NULL`), finds the\nmatching baseline transformation by `referenceID`, and copies the\nbaseline's `correctedJSON` onto the regression row via the same code\npath used by `POST /v3/events/{eventID}/feedback`. The applied\ncorrections are immediately scored against the regression output,\npopulating the confusion-matrix metrics used by `function-review` and\n`function-version-compare`.\n\nWorks for every function type that produces correctable\ntransformations, including `extract` on both the vision and OCR\npaths. (Previously the vision path silently dropped `is_regression`\nduring the original regression run, so no rows matched the\npredicate — that has been fixed.)\n\nReturns counts plus the list of **event KSUIDs** whose underlying\nregression transformation received a correction. Errors (e.g.\nbaseline transformation missing for a given `referenceID`) are\nreturned per-row in the `errors` map, keyed by event KSUID, rather\nthan aborting the whole call.",
+    stainlessPath: '(resource) functions.regression > (method) apply_corrections',
+    qualified: 'client.functions.regression.applyCorrections',
+    params: ['baselineVersionNum: number;', 'comparisonVersionNum: number;', 'functionName: string;'],
+    response: '{ applied: number; appliedEventIDs: string[]; errors: object; skipped: number; }',
+    markdown:
+      "## apply_corrections\n\n`client.functions.regression.applyCorrections(baselineVersionNum: number, comparisonVersionNum: number, functionName: string): { applied: number; appliedEventIDs: string[]; errors: object; skipped: number; }`\n\n**post** `/v3/functions/regression/corrections`\n\n**Copy baseline corrections onto regression transformations.**\n\nLooks up regression transformations created against the comparison\nversion (`isRegression: true`, `correctedJSON IS NULL`), finds the\nmatching baseline transformation by `referenceID`, and copies the\nbaseline's `correctedJSON` onto the regression row via the same code\npath used by `POST /v3/events/{eventID}/feedback`. The applied\ncorrections are immediately scored against the regression output,\npopulating the confusion-matrix metrics used by `function-review` and\n`function-version-compare`.\n\nWorks for every function type that produces correctable\ntransformations, including `extract` on both the vision and OCR\npaths. (Previously the vision path silently dropped `is_regression`\nduring the original regression run, so no rows matched the\npredicate — that has been fixed.)\n\nReturns counts plus the list of **event KSUIDs** whose underlying\nregression transformation received a correction. Errors (e.g.\nbaseline transformation missing for a given `referenceID`) are\nreturned per-row in the `errors` map, keyed by event KSUID, rather\nthan aborting the whole call.\n\n### Parameters\n\n- `baselineVersionNum: number`\n  **Baseline version number (source of corrected data)**\n\nThe function version number that contains transformations with corrected JSON\nthat should be copied to regression transformations.\n\n- `comparisonVersionNum: number`\n  **Comparison version number (target for applying corrections)**\n\nThe function version number of regression transformations that should\nreceive the corrected JSON from the baseline version.\n\n- `functionName: string`\n  **Name of the function to apply corrections for**\n\nMust be an existing function with both baseline and regression transformation data.\n\n### Returns\n\n- `{ applied: number; appliedEventIDs: string[]; errors: object; skipped: number; }`\n  V3 response from applying baseline corrections to regression\ntransformations. Identifiers are surfaced as event KSUIDs — the\nexternally-stable IDs used everywhere else in V3 — in place of the\ninternal transformation IDs returned by the V2 endpoint.\n\n  - `applied: number`\n  - `appliedEventIDs: string[]`\n  - `errors: object`\n  - `skipped: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.functions.regression.applyCorrections({\n  baselineVersionNum: 3,\n  comparisonVersionNum: 4,\n  functionName: 'invoice-extractor',\n});\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.functions.regression.applyCorrections',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.functions.regression.applyCorrections({\n  baselineVersionNum: 3,\n  comparisonVersionNum: 4,\n  functionName: 'invoice-extractor',\n});\n\nconsole.log(response.applied);",
+      },
+      python: {
+        method: 'functions.regression.apply_corrections',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.functions.regression.apply_corrections(\n    baseline_version_num=3,\n    comparison_version_num=4,\n    function_name="invoice-extractor",\n)\nprint(response.applied)',
+      },
+      go: {
+        method: 'client.Functions.Regression.ApplyCorrections',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Functions.Regression.ApplyCorrections(context.TODO(), bem.FunctionRegressionApplyCorrectionsParams{\n\t\tBaselineVersionNum:   3,\n\t\tComparisonVersionNum: 4,\n\t\tFunctionName:         "invoice-extractor",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Applied)\n}\n',
+      },
+      cli: {
+        method: 'regression apply_corrections',
+        example:
+          "bem functions:regression apply-corrections \\\n  --api-key 'My API Key' \\\n  --baseline-version-num 3 \\\n  --comparison-version-num 4 \\\n  --function-name invoice-extractor",
+      },
+      csharp: {
+        method: 'Functions.Regression.ApplyCorrections',
+        example:
+          'RegressionApplyCorrectionsParams parameters = new()\n{\n    BaselineVersionNum = 3,\n    ComparisonVersionNum = 4,\n    FunctionName = "invoice-extractor",\n};\n\nvar response = await client.Functions.Regression.ApplyCorrections(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/functions/regression/corrections \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "baselineVersionNum": 3,\n          "comparisonVersionNum": 4,\n          "functionName": "invoice-extractor"\n        }\'',
       },
     },
   },
@@ -2381,6 +2638,358 @@ const EMBEDDED_METHODS: MethodEntry[] = [
       http: {
         example:
           "curl https://api.bem.ai/v3/subscriptions/$SUBSCRIPTION_ID \\\n    -X PATCH \\\n    -H 'Content-Type: application/json' \\\n    -H \"x-api-key: $BEM_API_KEY\" \\\n    -d '{}'",
+      },
+    },
+  },
+  {
+    name: 'list',
+    endpoint: '/v3/views',
+    httpMethod: 'get',
+    summary: 'List Views',
+    description:
+      '**List views in the current environment, optionally filtered by the functions they read from.**\n\nViews are tabular projections over `transformations` rows: each view names\none or more functions and a list of columns (JSON-pointer paths into\n`extractedJson`), and produces a uniform table that can be filtered,\npaginated, and aggregated.\n\nFilters AND together when combined. Pagination is cursor-based on\n`viewID`; default limit is 50, maximum 100.',
+    stainlessPath: '(resource) views > (method) list',
+    qualified: 'client.views.list',
+    params: [
+      'endingBefore?: string;',
+      'functionIDs?: string[];',
+      'functionNames?: string[];',
+      'limit?: number;',
+      "sortOrder?: 'asc' | 'desc';",
+      'startingAfter?: string;',
+      'viewIDs?: string[];',
+      'viewNameSubstring?: string;',
+    ],
+    response:
+      "{ totalCount: number; views: { aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }[]; }",
+    markdown:
+      "## list\n\n`client.views.list(endingBefore?: string, functionIDs?: string[], functionNames?: string[], limit?: number, sortOrder?: 'asc' | 'desc', startingAfter?: string, viewIDs?: string[], viewNameSubstring?: string): { totalCount: number; views: object[]; }`\n\n**get** `/v3/views`\n\n**List views in the current environment, optionally filtered by the functions they read from.**\n\nViews are tabular projections over `transformations` rows: each view names\none or more functions and a list of columns (JSON-pointer paths into\n`extractedJson`), and produces a uniform table that can be filtered,\npaginated, and aggregated.\n\nFilters AND together when combined. Pagination is cursor-based on\n`viewID`; default limit is 50, maximum 100.\n\n### Parameters\n\n- `endingBefore?: string`\n  Cursor — a `viewID` defining your place in the list.\n\n- `functionIDs?: string[]`\n  Return only views that read from at least one of the named functions.\n\n- `functionNames?: string[]`\n  Return only views that read from at least one of the named functions.\n\n- `limit?: number`\n\n- `sortOrder?: 'asc' | 'desc'`\n  Sort order over view IDs (default `asc`).\n\n- `startingAfter?: string`\n  Cursor — a `viewID` defining your place in the list.\n\n- `viewIDs?: string[]`\n  Return only the specified view IDs.\n\n- `viewNameSubstring?: string`\n  Case-insensitive substring search over view names.\n\n### Returns\n\n- `{ totalCount: number; views: { aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }[]; }`\n  Response containing a list of views\n\n  - `totalCount: number`\n  - `views: { aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst views = await client.views.list();\n\nconsole.log(views);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst views = await client.views.list();\n\nconsole.log(views.totalCount);",
+      },
+      python: {
+        method: 'views.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nviews = client.views.list()\nprint(views.total_count)',
+      },
+      go: {
+        method: 'client.Views.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tviews, err := client.Views.List(context.TODO(), bem.ViewListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", views.TotalCount)\n}\n',
+      },
+      cli: {
+        method: 'views list',
+        example: "bem views list \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'Views.List',
+        example:
+          'ViewListParams parameters = new();\n\nvar views = await client.Views.List(parameters);\n\nConsole.WriteLine(views);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/views \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'create',
+    endpoint: '/v3/views',
+    httpMethod: 'post',
+    summary: 'Create a View',
+    description:
+      "**Create a view.**\n\nA view is a tabular projection over the `transformations` produced by\none or more functions. Each column declares a `valueSchemaPath` — a JSON\nPointer path into the function's output schema — and the view can\nadditionally carry filters and aggregations.\n\nSupported for every function type that produces correctable\ntransformations and an output schema: `extract`, `transform`, `analyze`,\n`join`. Extract works on both vision (PDF/PNG/JPEG/HEIC/HEIF/WebP) and\nOCR-routed inputs — the resulting rows surface through views uniformly.\n\nThe new view is created at `versionNum: 1`. Subsequent updates produce\nnew versions; the version-1 configuration remains addressable.",
+    stainlessPath: '(resource) views > (method) create',
+    qualified: 'client.views.create',
+    params: [
+      "aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[];",
+      'columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[];',
+      'filters: { columnName: string; filterType: string; number?: number; string?: string; }[];',
+      'functions: { id?: string; name?: string; }[];',
+      'name: string;',
+    ],
+    response:
+      "{ aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }",
+    markdown:
+      "## create\n\n`client.views.create(aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[], columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[], filters: { columnName: string; filterType: string; number?: number; string?: string; }[], functions: { id?: string; name?: string; }[], name: string): { aggregations: object[]; columns: object[]; currentVersionNum: number; filters: object[]; functions: object[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }`\n\n**post** `/v3/views`\n\n**Create a view.**\n\nA view is a tabular projection over the `transformations` produced by\none or more functions. Each column declares a `valueSchemaPath` — a JSON\nPointer path into the function's output schema — and the view can\nadditionally carry filters and aggregations.\n\nSupported for every function type that produces correctable\ntransformations and an output schema: `extract`, `transform`, `analyze`,\n`join`. Extract works on both vision (PDF/PNG/JPEG/HEIC/HEIF/WebP) and\nOCR-routed inputs — the resulting rows surface through views uniformly.\n\nThe new view is created at `versionNum: 1`. Subsequent updates produce\nnew versions; the version-1 configuration remains addressable.\n\n### Parameters\n\n- `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  List of aggregations defined for the view\n\n- `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  List of columns in the view\n\n- `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  List of filters applied to the view\n\n- `functions: { id?: string; name?: string; }[]`\n  List of functions that this view queries transformations from\n\n- `name: string`\n  Name of the view\n\n### Returns\n\n- `{ aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }`\n  A view is a table visualization of transformations that allows customers to have insight into their transformations\n\n  - `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  - `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  - `currentVersionNum: number`\n  - `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  - `functions: { id?: string; name?: string; }[]`\n  - `name: string`\n  - `viewID: string`\n  - `description?: string`\n  - `displayType?: 'table' | 'bar_chart' | 'pie_chart'`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst view = await client.views.create({\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [{\n  displayOrderIndex: 0,\n  name: 'name',\n  valueSchemaPath: ['string'],\n}],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n});\n\nconsole.log(view);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst view = await client.views.create({\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [\n    {\n      displayOrderIndex: 0,\n      name: 'name',\n      valueSchemaPath: ['string'],\n    },\n  ],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n});\n\nconsole.log(view.aggregations);",
+      },
+      python: {
+        method: 'views.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nview = client.views.create(\n    aggregations=[{\n        "function": "count",\n        "name": "name",\n    }],\n    columns=[{\n        "display_order_index": 0,\n        "name": "name",\n        "value_schema_path": ["string"],\n    }],\n    filters=[{\n        "column_name": "columnName",\n        "filter_type": "equals_string",\n    }],\n    functions=[{}],\n    name="name",\n)\nprint(view.aggregations)',
+      },
+      go: {
+        method: 'client.Views.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tview, err := client.Views.New(context.TODO(), bem.ViewNewParams{\n\t\tAggregations: []bem.ViewNewParamsAggregation{{\n\t\t\tFunction: "count",\n\t\t\tName:     "name",\n\t\t}},\n\t\tColumns: []bem.ViewNewParamsColumn{{\n\t\t\tDisplayOrderIndex: 0,\n\t\t\tName:              "name",\n\t\t\tValueSchemaPath:   []string{"string"},\n\t\t}},\n\t\tFilters: []bem.ViewNewParamsFilter{{\n\t\t\tColumnName: "columnName",\n\t\t\tFilterType: "equals_string",\n\t\t}},\n\t\tFunctions: []bem.ViewNewParamsFunction{{}},\n\t\tName:      "name",\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", view.Aggregations)\n}\n',
+      },
+      cli: {
+        method: 'views create',
+        example:
+          "bem views create \\\n  --api-key 'My API Key' \\\n  --aggregation '{function: count, name: name}' \\\n  --column '{displayOrderIndex: 0, name: name, valueSchemaPath: [string]}' \\\n  --filter '{columnName: columnName, filterType: equals_string}' \\\n  --function '{}' \\\n  --name name",
+      },
+      csharp: {
+        method: 'Views.Create',
+        example:
+          'ViewCreateParams parameters = new()\n{\n    Aggregations =\n    [\n        new()\n        {\n            Function = Function.Count,\n            Name = "name",\n            AggregateColumnName = "aggregateColumnName",\n            GroupByColumnName = "groupByColumnName",\n        },\n    ],\n    Columns =\n    [\n        new()\n        {\n            DisplayOrderIndex = 0,\n            Name = "name",\n            ValueSchemaPath =\n            [\n                "string"\n            ],\n        },\n    ],\n    Filters =\n    [\n        new()\n        {\n            ColumnName = "columnName",\n            FilterType = FilterType.EqualsString,\n            Number = 0,\n            String = "string",\n        },\n    ],\n    Functions =\n    [\n        new()\n        {\n            ID = "id",\n            Name = "name",\n        },\n    ],\n    Name = "name",\n};\n\nvar view = await client.Views.Create(parameters);\n\nConsole.WriteLine(view);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/views \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "aggregations": [\n            {\n              "function": "count",\n              "name": "name"\n            }\n          ],\n          "columns": [\n            {\n              "displayOrderIndex": 0,\n              "name": "name",\n              "valueSchemaPath": [\n                "string"\n              ]\n            }\n          ],\n          "filters": [\n            {\n              "columnName": "columnName",\n              "filterType": "equals_string"\n            }\n          ],\n          "functions": [\n            {}\n          ],\n          "name": "name"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'generate_aggregation_data',
+    endpoint: '/v3/views/aggregation-data',
+    httpMethod: 'post',
+    summary: 'Generate View Aggregation Data',
+    description:
+      "**Generate aggregation results for a view.**\n\nExecutes each aggregation declared on the view against the\n`transformations` rows produced by the named functions inside the\nsupplied `timeWindow`, applying the view's filters. Supported\naggregation functions: `count`, `count_distinct`, `sum`, `average`,\n`min`, `max`. Grouped aggregations return up to 200 groups per\naggregation; non-grouped aggregations return a single group with an\nempty `groupName`.\n\nAs with table-data, the `functions` field is required.",
+    stainlessPath: '(resource) views > (method) generate_aggregation_data',
+    qualified: 'client.views.generateAggregationData',
+    params: [
+      "aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[];",
+      'columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[];',
+      'filters: { columnName: string; filterType: string; number?: number; string?: string; }[];',
+      'functions: { id?: string; name?: string; }[];',
+      'name: string;',
+      'timeWindow: { end: string; start: string; };',
+    ],
+    response: '{ aggregations: { groups: { groupName: string; value: number; }[]; name: string; }[]; }',
+    markdown:
+      "## generate_aggregation_data\n\n`client.views.generateAggregationData(aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[], columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[], filters: { columnName: string; filterType: string; number?: number; string?: string; }[], functions: { id?: string; name?: string; }[], name: string, timeWindow: { end: string; start: string; }): { aggregations: object[]; }`\n\n**post** `/v3/views/aggregation-data`\n\n**Generate aggregation results for a view.**\n\nExecutes each aggregation declared on the view against the\n`transformations` rows produced by the named functions inside the\nsupplied `timeWindow`, applying the view's filters. Supported\naggregation functions: `count`, `count_distinct`, `sum`, `average`,\n`min`, `max`. Grouped aggregations return up to 200 groups per\naggregation; non-grouped aggregations return a single group with an\nempty `groupName`.\n\nAs with table-data, the `functions` field is required.\n\n### Parameters\n\n- `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  List of aggregations defined for the view\n\n- `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  List of columns in the view\n\n- `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  List of filters applied to the view\n\n- `functions: { id?: string; name?: string; }[]`\n  List of functions that this view queries transformations from\n\n- `name: string`\n  Name of the view\n\n- `timeWindow: { end: string; start: string; }`\n  Time window for filtering transformations in a view\n  - `end: string`\n    End of the time window in ISO 8601 (RFC 3339) format in UTC\n  - `start: string`\n    Start of the time window in ISO 8601 (RFC 3339) format in UTC\n\n### Returns\n\n- `{ aggregations: { groups: { groupName: string; value: number; }[]; name: string; }[]; }`\n  Response containing aggregation data for a view\n\n  - `aggregations: { groups: { groupName: string; value: number; }[]; name: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.views.generateAggregationData({\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [{\n  displayOrderIndex: 0,\n  name: 'name',\n  valueSchemaPath: ['string'],\n}],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n  timeWindow: { end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z' },\n});\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.generateAggregationData',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.views.generateAggregationData({\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [\n    {\n      displayOrderIndex: 0,\n      name: 'name',\n      valueSchemaPath: ['string'],\n    },\n  ],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n  timeWindow: { end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z' },\n});\n\nconsole.log(response.aggregations);",
+      },
+      python: {
+        method: 'views.generate_aggregation_data',
+        example:
+          'import os\nfrom datetime import datetime\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.views.generate_aggregation_data(\n    aggregations=[{\n        "function": "count",\n        "name": "name",\n    }],\n    columns=[{\n        "display_order_index": 0,\n        "name": "name",\n        "value_schema_path": ["string"],\n    }],\n    filters=[{\n        "column_name": "columnName",\n        "filter_type": "equals_string",\n    }],\n    functions=[{}],\n    name="name",\n    time_window={\n        "end": datetime.fromisoformat("2019-12-27T18:11:19.117"),\n        "start": datetime.fromisoformat("2019-12-27T18:11:19.117"),\n    },\n)\nprint(response.aggregations)',
+      },
+      go: {
+        method: 'client.Views.GenerateAggregationData',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\t"time"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Views.GenerateAggregationData(context.TODO(), bem.ViewGenerateAggregationDataParams{\n\t\tAggregations: []bem.ViewGenerateAggregationDataParamsAggregation{{\n\t\t\tFunction: "count",\n\t\t\tName:     "name",\n\t\t}},\n\t\tColumns: []bem.ViewGenerateAggregationDataParamsColumn{{\n\t\t\tDisplayOrderIndex: 0,\n\t\t\tName:              "name",\n\t\t\tValueSchemaPath:   []string{"string"},\n\t\t}},\n\t\tFilters: []bem.ViewGenerateAggregationDataParamsFilter{{\n\t\t\tColumnName: "columnName",\n\t\t\tFilterType: "equals_string",\n\t\t}},\n\t\tFunctions: []bem.ViewGenerateAggregationDataParamsFunction{{}},\n\t\tName:      "name",\n\t\tTimeWindow: bem.ViewGenerateAggregationDataParamsTimeWindow{\n\t\t\tEnd:   time.Now(),\n\t\t\tStart: time.Now(),\n\t\t},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Aggregations)\n}\n',
+      },
+      cli: {
+        method: 'views generate_aggregation_data',
+        example:
+          "bem views generate-aggregation-data \\\n  --api-key 'My API Key' \\\n  --aggregation '{function: count, name: name}' \\\n  --column '{displayOrderIndex: 0, name: name, valueSchemaPath: [string]}' \\\n  --filter '{columnName: columnName, filterType: equals_string}' \\\n  --function '{}' \\\n  --name name \\\n  --time-window \"{end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z'}\"",
+      },
+      csharp: {
+        method: 'Views.GenerateAggregationData',
+        example:
+          'ViewGenerateAggregationDataParams parameters = new()\n{\n    Aggregations =\n    [\n        new()\n        {\n            Function = Function.Count,\n            Name = "name",\n            AggregateColumnName = "aggregateColumnName",\n            GroupByColumnName = "groupByColumnName",\n        },\n    ],\n    Columns =\n    [\n        new()\n        {\n            DisplayOrderIndex = 0,\n            Name = "name",\n            ValueSchemaPath =\n            [\n                "string"\n            ],\n        },\n    ],\n    Filters =\n    [\n        new()\n        {\n            ColumnName = "columnName",\n            FilterType = FilterType.EqualsString,\n            Number = 0,\n            String = "string",\n        },\n    ],\n    Functions =\n    [\n        new()\n        {\n            ID = "id",\n            Name = "name",\n        },\n    ],\n    Name = "name",\n    TimeWindow = new()\n    {\n        End = DateTimeOffset.Parse("2019-12-27T18:11:19.117Z"),\n        Start = DateTimeOffset.Parse("2019-12-27T18:11:19.117Z"),\n    },\n};\n\nvar response = await client.Views.GenerateAggregationData(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/views/aggregation-data \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "aggregations": [\n            {\n              "function": "count",\n              "name": "name"\n            }\n          ],\n          "columns": [\n            {\n              "displayOrderIndex": 0,\n              "name": "name",\n              "valueSchemaPath": [\n                "string"\n              ]\n            }\n          ],\n          "filters": [\n            {\n              "columnName": "columnName",\n              "filterType": "equals_string"\n            }\n          ],\n          "functions": [\n            {}\n          ],\n          "name": "name",\n          "timeWindow": {\n            "end": "2019-12-27T18:11:19.117Z",\n            "start": "2019-12-27T18:11:19.117Z"\n          }\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'generate_table_data',
+    endpoint: '/v3/views/table-data',
+    httpMethod: 'post',
+    summary: 'Generate View Table Data',
+    description:
+      "**Generate paginated table data for a view.**\n\nExecutes the view's query against `transformations` rows produced by the\nnamed functions inside the supplied `timeWindow`, applies the view's\nfilters, and returns matching rows. Each row reports the event\n`eventID` (externally-stable KSUID) plus the projected column values.\n\nThe `functions` field is required — at least one `functionID` or\n`functionName` must be supplied. `limit` defaults to 50 with a maximum\nof 200; `offset` is zero-based. The response's `totalCount` reflects\nthe match count before pagination, so paging can be driven off it.",
+    stainlessPath: '(resource) views > (method) generate_table_data',
+    qualified: 'client.views.generateTableData',
+    params: [
+      "aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[];",
+      'columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[];',
+      'filters: { columnName: string; filterType: string; number?: number; string?: string; }[];',
+      'functions: { id?: string; name?: string; }[];',
+      'name: string;',
+      'timeWindow: { end: string; start: string; };',
+      'limit?: number;',
+      'offset?: number;',
+    ],
+    response:
+      '{ rows: { columns: { columnName: string; value: string | number | boolean | object | object | object[]; }[]; eventID: string; }[]; totalCount: number; }',
+    markdown:
+      "## generate_table_data\n\n`client.views.generateTableData(aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[], columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[], filters: { columnName: string; filterType: string; number?: number; string?: string; }[], functions: { id?: string; name?: string; }[], name: string, timeWindow: { end: string; start: string; }, limit?: number, offset?: number): { rows: object[]; totalCount: number; }`\n\n**post** `/v3/views/table-data`\n\n**Generate paginated table data for a view.**\n\nExecutes the view's query against `transformations` rows produced by the\nnamed functions inside the supplied `timeWindow`, applies the view's\nfilters, and returns matching rows. Each row reports the event\n`eventID` (externally-stable KSUID) plus the projected column values.\n\nThe `functions` field is required — at least one `functionID` or\n`functionName` must be supplied. `limit` defaults to 50 with a maximum\nof 200; `offset` is zero-based. The response's `totalCount` reflects\nthe match count before pagination, so paging can be driven off it.\n\n### Parameters\n\n- `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  List of aggregations defined for the view\n\n- `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  List of columns in the view\n\n- `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  List of filters applied to the view\n\n- `functions: { id?: string; name?: string; }[]`\n  List of functions that this view queries transformations from\n\n- `name: string`\n  Name of the view\n\n- `timeWindow: { end: string; start: string; }`\n  Time window for filtering transformations in a view\n  - `end: string`\n    End of the time window in ISO 8601 (RFC 3339) format in UTC\n  - `start: string`\n    Start of the time window in ISO 8601 (RFC 3339) format in UTC\n\n- `limit?: number`\n  Maximum number of rows to return (default: 50, max: 200)\n\n- `offset?: number`\n  Number of rows to skip for pagination\n\n### Returns\n\n- `{ rows: { columns: { columnName: string; value: string | number | boolean | object | object | object[]; }[]; eventID: string; }[]; totalCount: number; }`\n  Response containing paginated view table data\n\n  - `rows: { columns: { columnName: string; value: string | number | boolean | object | object | object[]; }[]; eventID: string; }[]`\n  - `totalCount: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.views.generateTableData({\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [{\n  displayOrderIndex: 0,\n  name: 'name',\n  valueSchemaPath: ['string'],\n}],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n  timeWindow: { end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z' },\n});\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.generateTableData',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.views.generateTableData({\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [\n    {\n      displayOrderIndex: 0,\n      name: 'name',\n      valueSchemaPath: ['string'],\n    },\n  ],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n  timeWindow: { end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z' },\n});\n\nconsole.log(response.rows);",
+      },
+      python: {
+        method: 'views.generate_table_data',
+        example:
+          'import os\nfrom datetime import datetime\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.views.generate_table_data(\n    aggregations=[{\n        "function": "count",\n        "name": "name",\n    }],\n    columns=[{\n        "display_order_index": 0,\n        "name": "name",\n        "value_schema_path": ["string"],\n    }],\n    filters=[{\n        "column_name": "columnName",\n        "filter_type": "equals_string",\n    }],\n    functions=[{}],\n    name="name",\n    time_window={\n        "end": datetime.fromisoformat("2019-12-27T18:11:19.117"),\n        "start": datetime.fromisoformat("2019-12-27T18:11:19.117"),\n    },\n)\nprint(response.rows)',
+      },
+      go: {
+        method: 'client.Views.GenerateTableData',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\t"time"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Views.GenerateTableData(context.TODO(), bem.ViewGenerateTableDataParams{\n\t\tAggregations: []bem.ViewGenerateTableDataParamsAggregation{{\n\t\t\tFunction: "count",\n\t\t\tName:     "name",\n\t\t}},\n\t\tColumns: []bem.ViewGenerateTableDataParamsColumn{{\n\t\t\tDisplayOrderIndex: 0,\n\t\t\tName:              "name",\n\t\t\tValueSchemaPath:   []string{"string"},\n\t\t}},\n\t\tFilters: []bem.ViewGenerateTableDataParamsFilter{{\n\t\t\tColumnName: "columnName",\n\t\t\tFilterType: "equals_string",\n\t\t}},\n\t\tFunctions: []bem.ViewGenerateTableDataParamsFunction{{}},\n\t\tName:      "name",\n\t\tTimeWindow: bem.ViewGenerateTableDataParamsTimeWindow{\n\t\t\tEnd:   time.Now(),\n\t\t\tStart: time.Now(),\n\t\t},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Rows)\n}\n',
+      },
+      cli: {
+        method: 'views generate_table_data',
+        example:
+          "bem views generate-table-data \\\n  --api-key 'My API Key' \\\n  --aggregation '{function: count, name: name}' \\\n  --column '{displayOrderIndex: 0, name: name, valueSchemaPath: [string]}' \\\n  --filter '{columnName: columnName, filterType: equals_string}' \\\n  --function '{}' \\\n  --name name \\\n  --time-window \"{end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z'}\"",
+      },
+      csharp: {
+        method: 'Views.GenerateTableData',
+        example:
+          'ViewGenerateTableDataParams parameters = new()\n{\n    Aggregations =\n    [\n        new()\n        {\n            Function = Function.Count,\n            Name = "name",\n            AggregateColumnName = "aggregateColumnName",\n            GroupByColumnName = "groupByColumnName",\n        },\n    ],\n    Columns =\n    [\n        new()\n        {\n            DisplayOrderIndex = 0,\n            Name = "name",\n            ValueSchemaPath =\n            [\n                "string"\n            ],\n        },\n    ],\n    Filters =\n    [\n        new()\n        {\n            ColumnName = "columnName",\n            FilterType = FilterType.EqualsString,\n            Number = 0,\n            String = "string",\n        },\n    ],\n    Functions =\n    [\n        new()\n        {\n            ID = "id",\n            Name = "name",\n        },\n    ],\n    Name = "name",\n    TimeWindow = new()\n    {\n        End = DateTimeOffset.Parse("2019-12-27T18:11:19.117Z"),\n        Start = DateTimeOffset.Parse("2019-12-27T18:11:19.117Z"),\n    },\n};\n\nvar response = await client.Views.GenerateTableData(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/views/table-data \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "aggregations": [\n            {\n              "function": "count",\n              "name": "name"\n            }\n          ],\n          "columns": [\n            {\n              "displayOrderIndex": 0,\n              "name": "name",\n              "valueSchemaPath": [\n                "string"\n              ]\n            }\n          ],\n          "filters": [\n            {\n              "columnName": "columnName",\n              "filterType": "equals_string"\n            }\n          ],\n          "functions": [\n            {}\n          ],\n          "name": "name",\n          "timeWindow": {\n            "end": "2019-12-27T18:11:19.117Z",\n            "start": "2019-12-27T18:11:19.117Z"\n          }\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'delete',
+    endpoint: '/v3/views/{view_id}',
+    httpMethod: 'delete',
+    summary: 'Delete a View',
+    description:
+      '**Delete a view and every one of its versions.**\n\nPermanent. Any cached data-table or aggregation result clients have\nfetched remains valid, but subsequent calls to\n`POST /v3/views/table-data` or `POST /v3/views/aggregation-data` for\nthis view will fail.',
+    stainlessPath: '(resource) views > (method) delete',
+    qualified: 'client.views.delete',
+    params: ['view_id: string;'],
+    markdown:
+      "## delete\n\n`client.views.delete(view_id: string): void`\n\n**delete** `/v3/views/{view_id}`\n\n**Delete a view and every one of its versions.**\n\nPermanent. Any cached data-table or aggregation result clients have\nfetched remains valid, but subsequent calls to\n`POST /v3/views/table-data` or `POST /v3/views/aggregation-data` for\nthis view will fail.\n\n### Parameters\n\n- `view_id: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.views.delete('view_id')\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.views.delete('view_id');",
+      },
+      python: {
+        method: 'views.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.views.delete(\n    "view_id",\n)',
+      },
+      go: {
+        method: 'client.Views.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Views.Delete(context.TODO(), "view_id")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      cli: {
+        method: 'views delete',
+        example: "bem views delete \\\n  --api-key 'My API Key' \\\n  --view-id view_id",
+      },
+      csharp: {
+        method: 'Views.Delete',
+        example:
+          'ViewDeleteParams parameters = new() { ViewID = "view_id" };\n\nawait client.Views.Delete(parameters);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/views/$VIEW_ID \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/views/{view_id}',
+    httpMethod: 'get',
+    summary: 'Get a View',
+    description:
+      "**Retrieve a view by ID.**\n\nReturns the view's current version. To inspect a historical version,\nfetch the list of versions on the View object and re-request with the\ndesired version pinned (versions are immutable once created).",
+    stainlessPath: '(resource) views > (method) retrieve',
+    qualified: 'client.views.retrieve',
+    params: ['view_id: string;'],
+    response:
+      "{ aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }",
+    markdown:
+      "## retrieve\n\n`client.views.retrieve(view_id: string): { aggregations: object[]; columns: object[]; currentVersionNum: number; filters: object[]; functions: object[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }`\n\n**get** `/v3/views/{view_id}`\n\n**Retrieve a view by ID.**\n\nReturns the view's current version. To inspect a historical version,\nfetch the list of versions on the View object and re-request with the\ndesired version pinned (versions are immutable once created).\n\n### Parameters\n\n- `view_id: string`\n\n### Returns\n\n- `{ aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }`\n  A view is a table visualization of transformations that allows customers to have insight into their transformations\n\n  - `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  - `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  - `currentVersionNum: number`\n  - `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  - `functions: { id?: string; name?: string; }[]`\n  - `name: string`\n  - `viewID: string`\n  - `description?: string`\n  - `displayType?: 'table' | 'bar_chart' | 'pie_chart'`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst view = await client.views.retrieve('view_id');\n\nconsole.log(view);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst view = await client.views.retrieve('view_id');\n\nconsole.log(view.aggregations);",
+      },
+      python: {
+        method: 'views.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nview = client.views.retrieve(\n    "view_id",\n)\nprint(view.aggregations)',
+      },
+      go: {
+        method: 'client.Views.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tview, err := client.Views.Get(context.TODO(), "view_id")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", view.Aggregations)\n}\n',
+      },
+      cli: {
+        method: 'views retrieve',
+        example: "bem views retrieve \\\n  --api-key 'My API Key' \\\n  --view-id view_id",
+      },
+      csharp: {
+        method: 'Views.Retrieve',
+        example:
+          'ViewRetrieveParams parameters = new() { ViewID = "view_id" };\n\nvar view = await client.Views.Retrieve(parameters);\n\nConsole.WriteLine(view);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/views/$VIEW_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'update',
+    endpoint: '/v3/views/{view_id}',
+    httpMethod: 'put',
+    summary: 'Update a View',
+    description:
+      '**Update a view. Updates create a new version.**\n\nThe previous version remains addressable and immutable. The new\nconfiguration is fully replacing — pass the complete view body, not a\npatch. The version number is auto-incremented.',
+    stainlessPath: '(resource) views > (method) update',
+    qualified: 'client.views.update',
+    params: [
+      'view_id: string;',
+      "aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[];",
+      'columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[];',
+      'filters: { columnName: string; filterType: string; number?: number; string?: string; }[];',
+      'functions: { id?: string; name?: string; }[];',
+      'name: string;',
+    ],
+    response:
+      "{ aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }",
+    markdown:
+      "## update\n\n`client.views.update(view_id: string, aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[], columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[], filters: { columnName: string; filterType: string; number?: number; string?: string; }[], functions: { id?: string; name?: string; }[], name: string): { aggregations: object[]; columns: object[]; currentVersionNum: number; filters: object[]; functions: object[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }`\n\n**put** `/v3/views/{view_id}`\n\n**Update a view. Updates create a new version.**\n\nThe previous version remains addressable and immutable. The new\nconfiguration is fully replacing — pass the complete view body, not a\npatch. The version number is auto-incremented.\n\n### Parameters\n\n- `view_id: string`\n\n- `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  List of aggregations defined for the view\n\n- `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  List of columns in the view\n\n- `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  List of filters applied to the view\n\n- `functions: { id?: string; name?: string; }[]`\n  List of functions that this view queries transformations from\n\n- `name: string`\n  Name of the view\n\n### Returns\n\n- `{ aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]; columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]; currentVersionNum: number; filters: { columnName: string; filterType: string; number?: number; string?: string; }[]; functions: { id?: string; name?: string; }[]; name: string; viewID: string; description?: string; displayType?: 'table' | 'bar_chart' | 'pie_chart'; }`\n  A view is a table visualization of transformations that allows customers to have insight into their transformations\n\n  - `aggregations: { function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max'; name: string; aggregateColumnName?: string; groupByColumnName?: string; }[]`\n  - `columns: { displayOrderIndex: number; name: string; valueSchemaPath: string[]; }[]`\n  - `currentVersionNum: number`\n  - `filters: { columnName: string; filterType: string; number?: number; string?: string; }[]`\n  - `functions: { id?: string; name?: string; }[]`\n  - `name: string`\n  - `viewID: string`\n  - `description?: string`\n  - `displayType?: 'table' | 'bar_chart' | 'pie_chart'`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst view = await client.views.update('view_id', {\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [{\n  displayOrderIndex: 0,\n  name: 'name',\n  valueSchemaPath: ['string'],\n}],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n});\n\nconsole.log(view);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.views.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst view = await client.views.update('view_id', {\n  aggregations: [{ function: 'count', name: 'name' }],\n  columns: [\n    {\n      displayOrderIndex: 0,\n      name: 'name',\n      valueSchemaPath: ['string'],\n    },\n  ],\n  filters: [{ columnName: 'columnName', filterType: 'equals_string' }],\n  functions: [{}],\n  name: 'name',\n});\n\nconsole.log(view.aggregations);",
+      },
+      python: {
+        method: 'views.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nview = client.views.update(\n    view_id="view_id",\n    aggregations=[{\n        "function": "count",\n        "name": "name",\n    }],\n    columns=[{\n        "display_order_index": 0,\n        "name": "name",\n        "value_schema_path": ["string"],\n    }],\n    filters=[{\n        "column_name": "columnName",\n        "filter_type": "equals_string",\n    }],\n    functions=[{}],\n    name="name",\n)\nprint(view.aggregations)',
+      },
+      go: {
+        method: 'client.Views.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tview, err := client.Views.Update(\n\t\tcontext.TODO(),\n\t\t"view_id",\n\t\tbem.ViewUpdateParams{\n\t\t\tAggregations: []bem.ViewUpdateParamsAggregation{{\n\t\t\t\tFunction: "count",\n\t\t\t\tName:     "name",\n\t\t\t}},\n\t\t\tColumns: []bem.ViewUpdateParamsColumn{{\n\t\t\t\tDisplayOrderIndex: 0,\n\t\t\t\tName:              "name",\n\t\t\t\tValueSchemaPath:   []string{"string"},\n\t\t\t}},\n\t\t\tFilters: []bem.ViewUpdateParamsFilter{{\n\t\t\t\tColumnName: "columnName",\n\t\t\t\tFilterType: "equals_string",\n\t\t\t}},\n\t\t\tFunctions: []bem.ViewUpdateParamsFunction{{}},\n\t\t\tName:      "name",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", view.Aggregations)\n}\n',
+      },
+      cli: {
+        method: 'views update',
+        example:
+          "bem views update \\\n  --api-key 'My API Key' \\\n  --view-id view_id \\\n  --aggregation '{function: count, name: name}' \\\n  --column '{displayOrderIndex: 0, name: name, valueSchemaPath: [string]}' \\\n  --filter '{columnName: columnName, filterType: equals_string}' \\\n  --function '{}' \\\n  --name name",
+      },
+      csharp: {
+        method: 'Views.Update',
+        example:
+          'ViewUpdateParams parameters = new()\n{\n    ViewID = "view_id",\n    Aggregations =\n    [\n        new()\n        {\n            Function = Function.Count,\n            Name = "name",\n            AggregateColumnName = "aggregateColumnName",\n            GroupByColumnName = "groupByColumnName",\n        },\n    ],\n    Columns =\n    [\n        new()\n        {\n            DisplayOrderIndex = 0,\n            Name = "name",\n            ValueSchemaPath =\n            [\n                "string"\n            ],\n        },\n    ],\n    Filters =\n    [\n        new()\n        {\n            ColumnName = "columnName",\n            FilterType = FilterType.EqualsString,\n            Number = 0,\n            String = "string",\n        },\n    ],\n    Functions =\n    [\n        new()\n        {\n            ID = "id",\n            Name = "name",\n        },\n    ],\n    Name = "name",\n};\n\nvar view = await client.Views.Update(parameters);\n\nConsole.WriteLine(view);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/views/$VIEW_ID \\\n    -X PUT \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "aggregations": [\n            {\n              "function": "count",\n              "name": "name"\n            }\n          ],\n          "columns": [\n            {\n              "displayOrderIndex": 0,\n              "name": "name",\n              "valueSchemaPath": [\n                "string"\n              ]\n            }\n          ],\n          "filters": [\n            {\n              "columnName": "columnName",\n              "filterType": "equals_string"\n            }\n          ],\n          "functions": [\n            {}\n          ],\n          "name": "name"\n        }\'',
       },
     },
   },

@@ -18,11 +18,24 @@ export {
   type UpdateFunction,
   type UserActionSummary,
   type WorkflowUsageInfo,
+  type FunctionCompareMetricsResponse,
+  type FunctionEstimateReviewRequirementsResponse,
+  type FunctionGetMetricsResponse,
   type FunctionCreateParams,
   type FunctionUpdateParams,
   type FunctionListParams,
+  type FunctionCompareMetricsParams,
+  type FunctionEstimateReviewRequirementsParams,
+  type FunctionGetMetricsParams,
   type FunctionsFunctionsPage,
 } from './functions';
+export {
+  Regression,
+  type RegressionApplyCorrectionsResponse,
+  type RegressionRunResponse,
+  type RegressionApplyCorrectionsParams,
+  type RegressionRunParams,
+} from './regression';
 export {
   Versions,
   type FunctionVersion,

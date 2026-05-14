@@ -41,6 +41,24 @@ export const sdkMethods: SdkMethod[] = [
     httpPath: '/v3/functions/{functionName}',
   },
   {
+    clientCallName: 'client.functions.compareMetrics',
+    fullyQualifiedName: 'functions.compareMetrics',
+    httpMethod: 'post',
+    httpPath: '/v3/functions/compare',
+  },
+  {
+    clientCallName: 'client.functions.estimateReviewRequirements',
+    fullyQualifiedName: 'functions.estimateReviewRequirements',
+    httpMethod: 'post',
+    httpPath: '/v3/functions/review',
+  },
+  {
+    clientCallName: 'client.functions.getMetrics',
+    fullyQualifiedName: 'functions.getMetrics',
+    httpMethod: 'get',
+    httpPath: '/v3/functions/metrics',
+  },
+  {
     clientCallName: 'client.functions.copy.create',
     fullyQualifiedName: 'functions.copy.create',
     httpMethod: 'post',
@@ -57,6 +75,18 @@ export const sdkMethods: SdkMethod[] = [
     fullyQualifiedName: 'functions.versions.list',
     httpMethod: 'get',
     httpPath: '/v3/functions/{functionName}/versions',
+  },
+  {
+    clientCallName: 'client.functions.regression.applyCorrections',
+    fullyQualifiedName: 'functions.regression.applyCorrections',
+    httpMethod: 'post',
+    httpPath: '/v3/functions/regression/corrections',
+  },
+  {
+    clientCallName: 'client.functions.regression.run',
+    fullyQualifiedName: 'functions.regression.run',
+    httpMethod: 'post',
+    httpPath: '/v3/functions/regression',
   },
   {
     clientCallName: 'client.calls.retrieve',
@@ -298,6 +328,48 @@ export const sdkMethods: SdkMethod[] = [
     fullyQualifiedName: 'subscriptions.delete',
     httpMethod: 'delete',
     httpPath: '/v3/subscriptions/{subscriptionID}',
+  },
+  {
+    clientCallName: 'client.views.create',
+    fullyQualifiedName: 'views.create',
+    httpMethod: 'post',
+    httpPath: '/v3/views',
+  },
+  {
+    clientCallName: 'client.views.retrieve',
+    fullyQualifiedName: 'views.retrieve',
+    httpMethod: 'get',
+    httpPath: '/v3/views/{view_id}',
+  },
+  {
+    clientCallName: 'client.views.update',
+    fullyQualifiedName: 'views.update',
+    httpMethod: 'put',
+    httpPath: '/v3/views/{view_id}',
+  },
+  {
+    clientCallName: 'client.views.list',
+    fullyQualifiedName: 'views.list',
+    httpMethod: 'get',
+    httpPath: '/v3/views',
+  },
+  {
+    clientCallName: 'client.views.delete',
+    fullyQualifiedName: 'views.delete',
+    httpMethod: 'delete',
+    httpPath: '/v3/views/{view_id}',
+  },
+  {
+    clientCallName: 'client.views.generateAggregationData',
+    fullyQualifiedName: 'views.generateAggregationData',
+    httpMethod: 'post',
+    httpPath: '/v3/views/aggregation-data',
+  },
+  {
+    clientCallName: 'client.views.generateTableData',
+    fullyQualifiedName: 'views.generateTableData',
+    httpMethod: 'post',
+    httpPath: '/v3/views/table-data',
   },
 ];
 

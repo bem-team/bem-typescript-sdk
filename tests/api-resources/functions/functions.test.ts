@@ -120,4 +120,87 @@ describe('resource functions', () => {
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
   });
+
+  // Mock server tests are disabled
+  test.skip('compareMetrics: only required params', async () => {
+    const responsePromise = client.functions.compareMetrics({ functionName: 'invoice-extractor' });
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('compareMetrics: required and optional params', async () => {
+    const response = await client.functions.compareMetrics({
+      functionName: 'invoice-extractor',
+      baselineVersionNum: 2,
+      comparisonVersionNum: 3,
+      isRegression: true,
+    });
+  });
+
+  // Mock server tests are disabled
+  test.skip('estimateReviewRequirements: only required params', async () => {
+    const responsePromise = client.functions.estimateReviewRequirements({
+      functionName: 'invoice-extractor',
+    });
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('estimateReviewRequirements: required and optional params', async () => {
+    const response = await client.functions.estimateReviewRequirements({
+      functionName: 'invoice-extractor',
+      confidenceLevels: [0],
+      confidenceMethod: 'wald',
+      evaluationVersion: '0.1.0-gemini',
+      functionVersionNum: 2,
+      isRegression: true,
+      marginOfError: 0.05,
+      thresholdMax: 0,
+      thresholdMin: 0,
+      thresholdStep: 0.001,
+    });
+  });
+
+  // Mock server tests are disabled
+  test.skip('getMetrics', async () => {
+    const responsePromise = client.functions.getMetrics();
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('getMetrics: request options and params are passed correctly', async () => {
+    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
+    await expect(
+      client.functions.getMetrics(
+        {
+          endingBefore: 'endingBefore',
+          functionIDs: ['string'],
+          functionNames: ['string'],
+          limit: 1,
+          sortOrder: 'asc',
+          startingAfter: 'startingAfter',
+          types: ['transform'],
+        },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(Bem.NotFoundError);
+  });
 });

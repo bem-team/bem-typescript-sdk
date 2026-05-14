@@ -56,9 +56,15 @@ export {
   type UpdateFunction,
   type UserActionSummary,
   type WorkflowUsageInfo,
+  type FunctionCompareMetricsResponse,
+  type FunctionEstimateReviewRequirementsResponse,
+  type FunctionGetMetricsResponse,
   type FunctionCreateParams,
   type FunctionUpdateParams,
   type FunctionListParams,
+  type FunctionCompareMetricsParams,
+  type FunctionEstimateReviewRequirementsParams,
+  type FunctionGetMetricsParams,
   type FunctionsFunctionsPage,
 } from './functions/functions';
 export { InferSchema, type InferSchemaCreateResponse, type InferSchemaCreateParams } from './infer-schema';
@@ -79,6 +85,20 @@ export {
   type SubscriptionUpdateParams,
   type SubscriptionListParams,
 } from './subscriptions';
+export {
+  Views,
+  type ViewCreateResponse,
+  type ViewRetrieveResponse,
+  type ViewUpdateResponse,
+  type ViewListResponse,
+  type ViewGenerateAggregationDataResponse,
+  type ViewGenerateTableDataResponse,
+  type ViewCreateParams,
+  type ViewUpdateParams,
+  type ViewListParams,
+  type ViewGenerateAggregationDataParams,
+  type ViewGenerateTableDataParams,
+} from './views';
 export { WebhookSecretResource, type WebhookSecret } from './webhook-secret';
 export {
   Webhooks,

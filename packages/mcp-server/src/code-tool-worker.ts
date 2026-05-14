@@ -108,14 +108,19 @@ function getTSDiagnostics(code: string): string[] {
 
 const fuse = new Fuse(
   [
+    'client.functions.compareMetrics',
     'client.functions.create',
     'client.functions.delete',
+    'client.functions.estimateReviewRequirements',
+    'client.functions.getMetrics',
     'client.functions.list',
     'client.functions.retrieve',
     'client.functions.update',
     'client.functions.copy.create',
     'client.functions.versions.list',
     'client.functions.versions.retrieve',
+    'client.functions.regression.applyCorrections',
+    'client.functions.regression.run',
     'client.calls.list',
     'client.calls.retrieve',
     'client.calls.retrieveTrace',
@@ -157,6 +162,13 @@ const fuse = new Fuse(
     'client.subscriptions.list',
     'client.subscriptions.retrieve',
     'client.subscriptions.update',
+    'client.views.create',
+    'client.views.delete',
+    'client.views.generateAggregationData',
+    'client.views.generateTableData',
+    'client.views.list',
+    'client.views.retrieve',
+    'client.views.update',
   ],
   { threshold: 1, shouldSort: true },
 );
