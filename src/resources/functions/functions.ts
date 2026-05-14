@@ -4,6 +4,14 @@ import { APIResource } from '../../core/resource';
 import * as FunctionsAPI from './functions';
 import * as CopyAPI from './copy';
 import { Copy, CopyCreateParams, FunctionCopyRequest } from './copy';
+import * as RegressionAPI from './regression';
+import {
+  Regression,
+  RegressionApplyCorrectionsParams,
+  RegressionApplyCorrectionsResponse,
+  RegressionRunParams,
+  RegressionRunResponse,
+} from './regression';
 import * as VersionsAPI from './versions';
 import {
   FunctionVersion,
@@ -18,23 +26,10 @@ import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { path } from '../../internal/utils/path';
 
-/**
- * Functions are the core building blocks of data transformation in Bem. Each function type serves a specific purpose:
- *
- * - **Extract**: Extract structured JSON data from unstructured documents (PDFs, emails, images, spreadsheets), with optional layout-aware bounding-box extraction
- * - **Route**: Direct data to different processing paths based on conditions
- * - **Split**: Break multi-page documents into individual pages for parallel processing
- * - **Join**: Combine outputs from multiple function calls into a single result
- * - **Parse**: Render documents into a navigable structure of page-aware sections, named entities, and relationships — designed to be walked by an LLM agent via the [File System API](/api/v3/file-system) (`POST /v3/fs`). Two toggles, both `true` by default: `extractEntities` controls per-document entity and relationship extraction; `linkAcrossDocuments` merges entities into one canonical record per real-world thing across the environment, populating cross-document memory.
- * - **Payload Shaping**: Transform and restructure data using JMESPath expressions
- * - **Enrich**: Enhance data with semantic search against collections
- * - **Send**: Deliver workflow outputs to downstream destinations
- *
- * Use these endpoints to create, update, list, and manage your functions.
- */
 export class Functions extends APIResource {
   copy: CopyAPI.Copy = new CopyAPI.Copy(this._client);
   versions: VersionsAPI.Versions = new VersionsAPI.Versions(this._client);
+  regression: RegressionAPI.Regression = new RegressionAPI.Regression(this._client);
 
   /**
    * **Create a function.**
@@ -58,6 +53,14 @@ export class Functions extends APIResource {
    * The new function is created at `versionNum: 1`. Subsequent
    * `PATCH /v3/functions/{functionName}` calls produce new versions — the version-1
    * configuration remains immutable and addressable.
+   *
+   * @example
+   * ```ts
+   * const functionResponse = await client.functions.create({
+   *   functionName: 'functionName',
+   *   type: 'extract',
+   * });
+   * ```
    */
   create(body: FunctionCreateParams, options?: RequestOptions): APIPromise<FunctionResponse> {
     return this._client.post('/v3/functions', { body, ...options });
@@ -69,6 +72,13 @@ export class Functions extends APIResource {
    * Returns the function record with its `currentVersionNum` and the configuration
    * of that version. To inspect a historical version, use
    * `GET /v3/functions/{functionName}/versions/{versionNum}`.
+   *
+   * @example
+   * ```ts
+   * const functionResponse = await client.functions.retrieve(
+   *   'functionName',
+   * );
+   * ```
    */
   retrieve(functionName: string, options?: RequestOptions): APIPromise<FunctionResponse> {
     return this._client.get(path`/v3/functions/${functionName}`, options);
@@ -95,6 +105,14 @@ export class Functions extends APIResource {
    *   so the version history is a complete record of every change.
    * - To revert, fetch the previous version and re-submit its configuration as a new
    *   update — versions themselves are immutable.
+   *
+   * @example
+   * ```ts
+   * const functionResponse = await client.functions.update(
+   *   'functionName',
+   *   { type: 'extract' },
+   * );
+   * ```
    */
   update(
     pathFunctionName: string,
@@ -126,6 +144,14 @@ export class Functions extends APIResource {
    *
    * Cursor-based with `startingAfter` and `endingBefore` (functionIDs). Default
    * limit 50, maximum 100.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const _function of client.functions.list()) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     query: FunctionListParams | null | undefined = {},
@@ -152,12 +178,121 @@ export class Functions extends APIResource {
    *
    * Update or remove those workflows, or create a replacement function and re-point
    * the workflow nodes, before deleting.
+   *
+   * @example
+   * ```ts
+   * await client.functions.delete('functionName');
+   * ```
    */
   delete(functionName: string, options?: RequestOptions): APIPromise<void> {
     return this._client.delete(path`/v3/functions/${functionName}`, {
       ...options,
       headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
     });
+  }
+
+  /**
+   * **Compare metrics between two function versions.**
+   *
+   * Computes aggregate and field-level lift/regression between any two versions of a
+   * function: accuracy, precision, recall, F1, and PR-AUC. Field-level changes are
+   * returned only for fields whose lift exceeds 1% in either direction.
+   *
+   * Supported for every function type that produces labeled transformations:
+   * `extract`, `transform`, `analyze`, `join`. Pass `isRegression: true` to compare
+   * only the regression dataset (rows produced by `POST /v3/functions/regression`) —
+   * the canonical way to judge a candidate version before promoting it.
+   *
+   * Defaults: `baselineVersionNum = currentVersionNum - 1`,
+   * `comparisonVersionNum = currentVersionNum`.
+   *
+   * @example
+   * ```ts
+   * const response = await client.functions.compareMetrics({
+   *   functionName: 'invoice-extractor',
+   *   baselineVersionNum: 2,
+   *   comparisonVersionNum: 3,
+   *   isRegression: true,
+   * });
+   * ```
+   */
+  compareMetrics(
+    body: FunctionCompareMetricsParams,
+    options?: RequestOptions,
+  ): APIPromise<FunctionCompareMetricsResponse> {
+    return this._client.post('/v3/functions/compare', { body, ...options });
+  }
+
+  /**
+   * **Estimate human review requirements for a function.**
+   *
+   * Combines confusion-matrix metrics with the per-transformation evaluation scores
+   * (confidence / hallucination / relevance produced by the eval service) to
+   * compute:
+   *
+   * - A confidence-bucketed distribution of the function's outputs.
+   * - Sample-size estimates at configurable margin-of-error and confidence levels
+   *   (Wald or Wilson intervals).
+   * - A precision-recall AUC and a per-threshold matrix you can use to pick a review
+   *   cutoff.
+   *
+   * Supported for every function type that produces transformations and feeds the
+   * auto-evaluation pipeline: `extract`, `transform`, `analyze`, `join`. Extract
+   * works on both vision (PDF/PNG/JPEG/HEIC/HEIF/WebP) and OCR-routed inputs.
+   *
+   * Pass `isRegression: true` to scope the review to transformations created by a
+   * previous regression run (see `POST /v3/functions/regression`).
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.functions.estimateReviewRequirements({
+   *     functionName: 'invoice-extractor',
+   *     functionVersionNum: 2,
+   *     isRegression: true,
+   *     marginOfError: 0.05,
+   *   });
+   * ```
+   */
+  estimateReviewRequirements(
+    body: FunctionEstimateReviewRequirementsParams,
+    options?: RequestOptions,
+  ): APIPromise<FunctionEstimateReviewRequirementsResponse> {
+    return this._client.post('/v3/functions/review', { body, ...options });
+  }
+
+  /**
+   * **Retrieve performance metrics for functions based on labeled transformation
+   * data.**
+   *
+   * Calculates accuracy, precision, recall, F1, and the underlying confusion-matrix
+   * counts for each matching function by comparing model outputs against user
+   * corrections. Metrics are aggregated across every transformation the function has
+   * produced, regardless of function type — `extract`, `transform`, `analyze`, and
+   * `join` all populate the same `metrics` column on the transformation row, so v3
+   * surfaces all of them uniformly.
+   *
+   * ## Filtering
+   *
+   * Combine `functionIDs` / `functionNames` / `types` to narrow the result set.
+   * `types` accepts `extract` alongside the legacy `transform` / `analyze` types
+   * (which remain readable). Pagination is cursor-based.
+   *
+   * ## Requirements
+   *
+   * A function only shows non-zero metrics once at least one of its transformations
+   * has been labeled — submit corrections via `POST /v3/events/{eventID}/feedback`.
+   *
+   * @example
+   * ```ts
+   * const response = await client.functions.getMetrics();
+   * ```
+   */
+  getMetrics(
+    query: FunctionGetMetricsParams | null | undefined = {},
+    options?: RequestOptions,
+  ): APIPromise<FunctionGetMetricsResponse> {
+    return this._client.get('/v3/functions/metrics', { query, ...options });
   }
 }
 
@@ -1833,6 +1968,1229 @@ export interface WorkflowUsageInfo {
   workflowName: string;
 }
 
+/**
+ * **Response containing metrics comparison between two function versions**
+ *
+ * Shows absolute differences, lift percentages, and field-level changes.
+ */
+export interface FunctionCompareMetricsResponse {
+  /**
+   * Baseline version number used for comparison
+   */
+  baselineVersionNum: number;
+
+  /**
+   * Comparison version number
+   */
+  comparisonVersionNum: number;
+
+  /**
+   * Name of the compared function
+   */
+  functionName: string;
+
+  /**
+   * Comparison of metrics between two versions
+   */
+  aggregateComparison?: FunctionCompareMetricsResponse.AggregateComparison;
+
+  /**
+   * Detailed performance metrics and analysis
+   */
+  baselineMetrics?: FunctionCompareMetricsResponse.BaselineMetrics;
+
+  /**
+   * Number of transformations used to calculate baseline metrics
+   */
+  baselineTransformationCount?: number;
+
+  /**
+   * Detailed performance metrics and analysis
+   */
+  comparisonMetrics?: FunctionCompareMetricsResponse.ComparisonMetrics;
+
+  /**
+   * Number of transformations used to calculate comparison metrics
+   */
+  comparisonTransformationCount?: number;
+
+  /**
+   * **Field-level metrics that changed significantly**
+   *
+   * Only includes fields where metrics changed by more than 1%.
+   */
+  fieldMetricsChanges?: Array<FunctionCompareMetricsResponse.FieldMetricsChange>;
+
+  /**
+   * Optional message with additional details
+   */
+  message?: string;
+}
+
+export namespace FunctionCompareMetricsResponse {
+  /**
+   * Comparison of metrics between two versions
+   */
+  export interface AggregateComparison {
+    /**
+     * Comparison of a single metric between two versions
+     */
+    accuracy?: AggregateComparison.Accuracy;
+
+    /**
+     * Comparison of a single metric between two versions
+     */
+    f1Score?: AggregateComparison.F1Score;
+
+    /**
+     * Comparison of a single metric between two versions
+     */
+    precision?: AggregateComparison.Precision;
+
+    /**
+     * Comparison of a single metric between two versions
+     */
+    recall?: AggregateComparison.Recall;
+  }
+
+  export namespace AggregateComparison {
+    /**
+     * Comparison of a single metric between two versions
+     */
+    export interface Accuracy {
+      /**
+       * Value in baseline version (null if not available)
+       */
+      baselineValue?: number | null;
+
+      /**
+       * Value in comparison version (null if not available)
+       */
+      comparisonValue?: number | null;
+
+      /**
+       * Absolute difference (comparisonValue - baselineValue)
+       */
+      difference?: number | null;
+
+      /**
+       * **Percentage change from baseline to comparison**
+       *
+       * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+       *
+       * - Positive values indicate improvement
+       * - Negative values indicate regression
+       */
+      liftPercent?: number | null;
+    }
+
+    /**
+     * Comparison of a single metric between two versions
+     */
+    export interface F1Score {
+      /**
+       * Value in baseline version (null if not available)
+       */
+      baselineValue?: number | null;
+
+      /**
+       * Value in comparison version (null if not available)
+       */
+      comparisonValue?: number | null;
+
+      /**
+       * Absolute difference (comparisonValue - baselineValue)
+       */
+      difference?: number | null;
+
+      /**
+       * **Percentage change from baseline to comparison**
+       *
+       * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+       *
+       * - Positive values indicate improvement
+       * - Negative values indicate regression
+       */
+      liftPercent?: number | null;
+    }
+
+    /**
+     * Comparison of a single metric between two versions
+     */
+    export interface Precision {
+      /**
+       * Value in baseline version (null if not available)
+       */
+      baselineValue?: number | null;
+
+      /**
+       * Value in comparison version (null if not available)
+       */
+      comparisonValue?: number | null;
+
+      /**
+       * Absolute difference (comparisonValue - baselineValue)
+       */
+      difference?: number | null;
+
+      /**
+       * **Percentage change from baseline to comparison**
+       *
+       * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+       *
+       * - Positive values indicate improvement
+       * - Negative values indicate regression
+       */
+      liftPercent?: number | null;
+    }
+
+    /**
+     * Comparison of a single metric between two versions
+     */
+    export interface Recall {
+      /**
+       * Value in baseline version (null if not available)
+       */
+      baselineValue?: number | null;
+
+      /**
+       * Value in comparison version (null if not available)
+       */
+      comparisonValue?: number | null;
+
+      /**
+       * Absolute difference (comparisonValue - baselineValue)
+       */
+      difference?: number | null;
+
+      /**
+       * **Percentage change from baseline to comparison**
+       *
+       * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+       *
+       * - Positive values indicate improvement
+       * - Negative values indicate regression
+       */
+      liftPercent?: number | null;
+    }
+  }
+
+  /**
+   * Detailed performance metrics and analysis
+   */
+  export interface BaselineMetrics {
+    /**
+     * Comprehensive performance metrics
+     */
+    aggregateMetrics?: BaselineMetrics.AggregateMetrics;
+
+    /**
+     * Enhanced field metrics with comprehensive analytics
+     */
+    fieldMetrics?: Array<BaselineMetrics.FieldMetric>;
+
+    /**
+     * Area Under the Precision-Recall Curve
+     */
+    precisionRecallAuc?: number;
+  }
+
+  export namespace BaselineMetrics {
+    /**
+     * Comprehensive performance metrics
+     */
+    export interface AggregateMetrics {
+      /**
+       * Overall accuracy
+       */
+      accuracy?: number | null;
+
+      /**
+       * F1 Score (harmonic mean of precision and recall)
+       */
+      f1Score?: number | null;
+
+      /**
+       * False Negatives
+       */
+      fn?: number;
+
+      /**
+       * False Positives
+       */
+      fp?: number;
+
+      /**
+       * Precision (TP / (TP + FP))
+       */
+      precision?: number | null;
+
+      /**
+       * Recall (TP / (TP + FN))
+       */
+      recall?: number | null;
+
+      /**
+       * True Negatives
+       */
+      tn?: number;
+
+      /**
+       * True Positives
+       */
+      tp?: number;
+    }
+
+    /**
+     * Enhanced field metrics with comprehensive analytics
+     */
+    export interface FieldMetric {
+      /**
+       * JSON path to the field
+       */
+      fieldPath: string;
+
+      /**
+       * Comprehensive performance metrics
+       */
+      metrics?: FieldMetric.Metrics;
+    }
+
+    export namespace FieldMetric {
+      /**
+       * Comprehensive performance metrics
+       */
+      export interface Metrics {
+        /**
+         * Overall accuracy
+         */
+        accuracy?: number | null;
+
+        /**
+         * F1 Score (harmonic mean of precision and recall)
+         */
+        f1Score?: number | null;
+
+        /**
+         * False Negatives
+         */
+        fn?: number;
+
+        /**
+         * False Positives
+         */
+        fp?: number;
+
+        /**
+         * Precision (TP / (TP + FP))
+         */
+        precision?: number | null;
+
+        /**
+         * Recall (TP / (TP + FN))
+         */
+        recall?: number | null;
+
+        /**
+         * True Negatives
+         */
+        tn?: number;
+
+        /**
+         * True Positives
+         */
+        tp?: number;
+      }
+    }
+  }
+
+  /**
+   * Detailed performance metrics and analysis
+   */
+  export interface ComparisonMetrics {
+    /**
+     * Comprehensive performance metrics
+     */
+    aggregateMetrics?: ComparisonMetrics.AggregateMetrics;
+
+    /**
+     * Enhanced field metrics with comprehensive analytics
+     */
+    fieldMetrics?: Array<ComparisonMetrics.FieldMetric>;
+
+    /**
+     * Area Under the Precision-Recall Curve
+     */
+    precisionRecallAuc?: number;
+  }
+
+  export namespace ComparisonMetrics {
+    /**
+     * Comprehensive performance metrics
+     */
+    export interface AggregateMetrics {
+      /**
+       * Overall accuracy
+       */
+      accuracy?: number | null;
+
+      /**
+       * F1 Score (harmonic mean of precision and recall)
+       */
+      f1Score?: number | null;
+
+      /**
+       * False Negatives
+       */
+      fn?: number;
+
+      /**
+       * False Positives
+       */
+      fp?: number;
+
+      /**
+       * Precision (TP / (TP + FP))
+       */
+      precision?: number | null;
+
+      /**
+       * Recall (TP / (TP + FN))
+       */
+      recall?: number | null;
+
+      /**
+       * True Negatives
+       */
+      tn?: number;
+
+      /**
+       * True Positives
+       */
+      tp?: number;
+    }
+
+    /**
+     * Enhanced field metrics with comprehensive analytics
+     */
+    export interface FieldMetric {
+      /**
+       * JSON path to the field
+       */
+      fieldPath: string;
+
+      /**
+       * Comprehensive performance metrics
+       */
+      metrics?: FieldMetric.Metrics;
+    }
+
+    export namespace FieldMetric {
+      /**
+       * Comprehensive performance metrics
+       */
+      export interface Metrics {
+        /**
+         * Overall accuracy
+         */
+        accuracy?: number | null;
+
+        /**
+         * F1 Score (harmonic mean of precision and recall)
+         */
+        f1Score?: number | null;
+
+        /**
+         * False Negatives
+         */
+        fn?: number;
+
+        /**
+         * False Positives
+         */
+        fp?: number;
+
+        /**
+         * Precision (TP / (TP + FP))
+         */
+        precision?: number | null;
+
+        /**
+         * Recall (TP / (TP + FN))
+         */
+        recall?: number | null;
+
+        /**
+         * True Negatives
+         */
+        tn?: number;
+
+        /**
+         * True Positives
+         */
+        tp?: number;
+      }
+    }
+  }
+
+  /**
+   * Comparison of field-level metrics
+   */
+  export interface FieldMetricsChange {
+    /**
+     * Comparison of metrics between two versions
+     */
+    comparison: FieldMetricsChange.Comparison;
+
+    /**
+     * JSON pointer path to the field
+     */
+    fieldPath: string;
+  }
+
+  export namespace FieldMetricsChange {
+    /**
+     * Comparison of metrics between two versions
+     */
+    export interface Comparison {
+      /**
+       * Comparison of a single metric between two versions
+       */
+      accuracy?: Comparison.Accuracy;
+
+      /**
+       * Comparison of a single metric between two versions
+       */
+      f1Score?: Comparison.F1Score;
+
+      /**
+       * Comparison of a single metric between two versions
+       */
+      precision?: Comparison.Precision;
+
+      /**
+       * Comparison of a single metric between two versions
+       */
+      recall?: Comparison.Recall;
+    }
+
+    export namespace Comparison {
+      /**
+       * Comparison of a single metric between two versions
+       */
+      export interface Accuracy {
+        /**
+         * Value in baseline version (null if not available)
+         */
+        baselineValue?: number | null;
+
+        /**
+         * Value in comparison version (null if not available)
+         */
+        comparisonValue?: number | null;
+
+        /**
+         * Absolute difference (comparisonValue - baselineValue)
+         */
+        difference?: number | null;
+
+        /**
+         * **Percentage change from baseline to comparison**
+         *
+         * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+         *
+         * - Positive values indicate improvement
+         * - Negative values indicate regression
+         */
+        liftPercent?: number | null;
+      }
+
+      /**
+       * Comparison of a single metric between two versions
+       */
+      export interface F1Score {
+        /**
+         * Value in baseline version (null if not available)
+         */
+        baselineValue?: number | null;
+
+        /**
+         * Value in comparison version (null if not available)
+         */
+        comparisonValue?: number | null;
+
+        /**
+         * Absolute difference (comparisonValue - baselineValue)
+         */
+        difference?: number | null;
+
+        /**
+         * **Percentage change from baseline to comparison**
+         *
+         * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+         *
+         * - Positive values indicate improvement
+         * - Negative values indicate regression
+         */
+        liftPercent?: number | null;
+      }
+
+      /**
+       * Comparison of a single metric between two versions
+       */
+      export interface Precision {
+        /**
+         * Value in baseline version (null if not available)
+         */
+        baselineValue?: number | null;
+
+        /**
+         * Value in comparison version (null if not available)
+         */
+        comparisonValue?: number | null;
+
+        /**
+         * Absolute difference (comparisonValue - baselineValue)
+         */
+        difference?: number | null;
+
+        /**
+         * **Percentage change from baseline to comparison**
+         *
+         * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+         *
+         * - Positive values indicate improvement
+         * - Negative values indicate regression
+         */
+        liftPercent?: number | null;
+      }
+
+      /**
+       * Comparison of a single metric between two versions
+       */
+      export interface Recall {
+        /**
+         * Value in baseline version (null if not available)
+         */
+        baselineValue?: number | null;
+
+        /**
+         * Value in comparison version (null if not available)
+         */
+        comparisonValue?: number | null;
+
+        /**
+         * Absolute difference (comparisonValue - baselineValue)
+         */
+        difference?: number | null;
+
+        /**
+         * **Percentage change from baseline to comparison**
+         *
+         * Formula: ((comparisonValue - baselineValue) / baselineValue) \* 100
+         *
+         * - Positive values indicate improvement
+         * - Negative values indicate regression
+         */
+        liftPercent?: number | null;
+      }
+    }
+  }
+}
+
+/**
+ * Response containing review requirements estimate
+ */
+export interface FunctionEstimateReviewRequirementsResponse {
+  /**
+   * Detailed review requirements estimate
+   */
+  estimate: FunctionEstimateReviewRequirementsResponse.Estimate;
+
+  /**
+   * Name of the analyzed function
+   */
+  functionName: string;
+
+  /**
+   * Version number of the function that was analyzed
+   */
+  functionVersionNum: number;
+
+  /**
+   * Detailed performance metrics and analysis
+   */
+  metrics?: FunctionEstimateReviewRequirementsResponse.Metrics;
+}
+
+export namespace FunctionEstimateReviewRequirementsResponse {
+  /**
+   * Detailed review requirements estimate
+   */
+  export interface Estimate {
+    /**
+     * Distribution of confidence levels
+     */
+    confidenceDistribution: Estimate.ConfidenceDistribution;
+
+    /**
+     * Number of transformations already labeled
+     */
+    labeledTransformations: number;
+
+    /**
+     * Number of transformations without evaluation data
+     */
+    missingEvaluations: number;
+
+    /**
+     * Statistical analysis across confidence thresholds
+     */
+    thresholdMatrix: Array<Estimate.ThresholdMatrix>;
+
+    /**
+     * Total number of transformations analyzed
+     */
+    totalTransformations: number;
+
+    /**
+     * Number of transformations not yet labeled
+     */
+    unlabeledTransformations: number;
+  }
+
+  export namespace Estimate {
+    /**
+     * Distribution of confidence levels
+     */
+    export interface ConfidenceDistribution {
+      high?: number;
+
+      low?: number;
+
+      medium?: number;
+    }
+
+    /**
+     * Results for a specific confidence threshold analysis
+     */
+    export interface ThresholdMatrix {
+      /**
+       * False Negatives
+       */
+      fn: number;
+
+      /**
+       * False Positives
+       */
+      fp: number;
+
+      /**
+       * Confidence threshold value
+       */
+      threshold: number;
+
+      /**
+       * True Negatives
+       */
+      tn: number;
+
+      /**
+       * True Positives
+       */
+      tp: number;
+
+      /**
+       * Accuracy confidence intervals for samples above threshold, by confidence level.
+       * Keys are confidence levels as strings ("90", "95", "99"). Values contain
+       * statistical confidence intervals.
+       */
+      accuracyAboveThreshold?: ThresholdMatrix.AccuracyAboveThreshold;
+
+      /**
+       * False Discovery Rate confidence intervals by confidence level. Keys are
+       * confidence levels as strings ("90", "95", "99"). Values contain statistical
+       * confidence intervals.
+       */
+      falseDiscoveryRate?: ThresholdMatrix.FalseDiscoveryRate;
+
+      /**
+       * False Positive Rate confidence intervals by confidence level. Keys are
+       * confidence levels as strings ("90", "95", "99"). Values contain statistical
+       * confidence intervals.
+       */
+      falsePositiveRate?: ThresholdMatrix.FalsePositiveRate;
+
+      /**
+       * Precision confidence intervals by confidence level. Keys are confidence levels
+       * as strings ("90", "95", "99"). Values contain statistical confidence intervals.
+       */
+      precision?: ThresholdMatrix.Precision;
+
+      /**
+       * Recall confidence intervals by confidence level. Keys are confidence levels as
+       * strings ("90", "95", "99"). Values contain statistical confidence intervals.
+       */
+      recall?: ThresholdMatrix.Recall;
+    }
+
+    export namespace ThresholdMatrix {
+      /**
+       * Accuracy confidence intervals for samples above threshold, by confidence level.
+       * Keys are confidence levels as strings ("90", "95", "99"). Values contain
+       * statistical confidence intervals.
+       */
+      export interface AccuracyAboveThreshold {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        '95'?: AccuracyAboveThreshold._95;
+      }
+
+      export namespace AccuracyAboveThreshold {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        export interface _95 {
+          /**
+           * Current number of samples/observations available
+           */
+          currentSample: number;
+
+          /**
+           * Minimum number of samples needed for reliable confidence interval calculation
+           */
+          sampleNeeded: number;
+
+          /**
+           * Lower bound of the confidence interval (null if insufficient sample size)
+           */
+          ciLower?: number | null;
+
+          /**
+           * Upper bound of the confidence interval (null if insufficient sample size)
+           */
+          ciUpper?: number | null;
+
+          /**
+           * Point estimate (observed rate) at the center of the interval (null if
+           * insufficient sample size)
+           */
+          mid?: number | null;
+        }
+      }
+
+      /**
+       * False Discovery Rate confidence intervals by confidence level. Keys are
+       * confidence levels as strings ("90", "95", "99"). Values contain statistical
+       * confidence intervals.
+       */
+      export interface FalseDiscoveryRate {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        '95'?: FalseDiscoveryRate._95;
+      }
+
+      export namespace FalseDiscoveryRate {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        export interface _95 {
+          /**
+           * Current number of samples/observations available
+           */
+          currentSample: number;
+
+          /**
+           * Minimum number of samples needed for reliable confidence interval calculation
+           */
+          sampleNeeded: number;
+
+          /**
+           * Lower bound of the confidence interval (null if insufficient sample size)
+           */
+          ciLower?: number | null;
+
+          /**
+           * Upper bound of the confidence interval (null if insufficient sample size)
+           */
+          ciUpper?: number | null;
+
+          /**
+           * Point estimate (observed rate) at the center of the interval (null if
+           * insufficient sample size)
+           */
+          mid?: number | null;
+        }
+      }
+
+      /**
+       * False Positive Rate confidence intervals by confidence level. Keys are
+       * confidence levels as strings ("90", "95", "99"). Values contain statistical
+       * confidence intervals.
+       */
+      export interface FalsePositiveRate {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        '95'?: FalsePositiveRate._95;
+      }
+
+      export namespace FalsePositiveRate {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        export interface _95 {
+          /**
+           * Current number of samples/observations available
+           */
+          currentSample: number;
+
+          /**
+           * Minimum number of samples needed for reliable confidence interval calculation
+           */
+          sampleNeeded: number;
+
+          /**
+           * Lower bound of the confidence interval (null if insufficient sample size)
+           */
+          ciLower?: number | null;
+
+          /**
+           * Upper bound of the confidence interval (null if insufficient sample size)
+           */
+          ciUpper?: number | null;
+
+          /**
+           * Point estimate (observed rate) at the center of the interval (null if
+           * insufficient sample size)
+           */
+          mid?: number | null;
+        }
+      }
+
+      /**
+       * Precision confidence intervals by confidence level. Keys are confidence levels
+       * as strings ("90", "95", "99"). Values contain statistical confidence intervals.
+       */
+      export interface Precision {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        '95'?: Precision._95;
+      }
+
+      export namespace Precision {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        export interface _95 {
+          /**
+           * Current number of samples/observations available
+           */
+          currentSample: number;
+
+          /**
+           * Minimum number of samples needed for reliable confidence interval calculation
+           */
+          sampleNeeded: number;
+
+          /**
+           * Lower bound of the confidence interval (null if insufficient sample size)
+           */
+          ciLower?: number | null;
+
+          /**
+           * Upper bound of the confidence interval (null if insufficient sample size)
+           */
+          ciUpper?: number | null;
+
+          /**
+           * Point estimate (observed rate) at the center of the interval (null if
+           * insufficient sample size)
+           */
+          mid?: number | null;
+        }
+      }
+
+      /**
+       * Recall confidence intervals by confidence level. Keys are confidence levels as
+       * strings ("90", "95", "99"). Values contain statistical confidence intervals.
+       */
+      export interface Recall {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        '95'?: Recall._95;
+      }
+
+      export namespace Recall {
+        /**
+         * Confidence interval for a rate/proportion using Wald (normal approximation)
+         * method by default.
+         *
+         * Wald confidence intervals use the normal approximation to the binomial
+         * distribution. For extreme rates or small sample sizes, Wilson confidence
+         * intervals may be more appropriate.
+         */
+        export interface _95 {
+          /**
+           * Current number of samples/observations available
+           */
+          currentSample: number;
+
+          /**
+           * Minimum number of samples needed for reliable confidence interval calculation
+           */
+          sampleNeeded: number;
+
+          /**
+           * Lower bound of the confidence interval (null if insufficient sample size)
+           */
+          ciLower?: number | null;
+
+          /**
+           * Upper bound of the confidence interval (null if insufficient sample size)
+           */
+          ciUpper?: number | null;
+
+          /**
+           * Point estimate (observed rate) at the center of the interval (null if
+           * insufficient sample size)
+           */
+          mid?: number | null;
+        }
+      }
+    }
+  }
+
+  /**
+   * Detailed performance metrics and analysis
+   */
+  export interface Metrics {
+    /**
+     * Comprehensive performance metrics
+     */
+    aggregateMetrics?: Metrics.AggregateMetrics;
+
+    /**
+     * Enhanced field metrics with comprehensive analytics
+     */
+    fieldMetrics?: Array<Metrics.FieldMetric>;
+
+    /**
+     * Area Under the Precision-Recall Curve
+     */
+    precisionRecallAuc?: number;
+  }
+
+  export namespace Metrics {
+    /**
+     * Comprehensive performance metrics
+     */
+    export interface AggregateMetrics {
+      /**
+       * Overall accuracy
+       */
+      accuracy?: number | null;
+
+      /**
+       * F1 Score (harmonic mean of precision and recall)
+       */
+      f1Score?: number | null;
+
+      /**
+       * False Negatives
+       */
+      fn?: number;
+
+      /**
+       * False Positives
+       */
+      fp?: number;
+
+      /**
+       * Precision (TP / (TP + FP))
+       */
+      precision?: number | null;
+
+      /**
+       * Recall (TP / (TP + FN))
+       */
+      recall?: number | null;
+
+      /**
+       * True Negatives
+       */
+      tn?: number;
+
+      /**
+       * True Positives
+       */
+      tp?: number;
+    }
+
+    /**
+     * Enhanced field metrics with comprehensive analytics
+     */
+    export interface FieldMetric {
+      /**
+       * JSON path to the field
+       */
+      fieldPath: string;
+
+      /**
+       * Comprehensive performance metrics
+       */
+      metrics?: FieldMetric.Metrics;
+    }
+
+    export namespace FieldMetric {
+      /**
+       * Comprehensive performance metrics
+       */
+      export interface Metrics {
+        /**
+         * Overall accuracy
+         */
+        accuracy?: number | null;
+
+        /**
+         * F1 Score (harmonic mean of precision and recall)
+         */
+        f1Score?: number | null;
+
+        /**
+         * False Negatives
+         */
+        fn?: number;
+
+        /**
+         * False Positives
+         */
+        fp?: number;
+
+        /**
+         * Precision (TP / (TP + FP))
+         */
+        precision?: number | null;
+
+        /**
+         * Recall (TP / (TP + FN))
+         */
+        recall?: number | null;
+
+        /**
+         * True Negatives
+         */
+        tn?: number;
+
+        /**
+         * True Positives
+         */
+        tp?: number;
+      }
+    }
+  }
+}
+
+export interface FunctionGetMetricsResponse {
+  functions: Array<FunctionGetMetricsResponse.Function>;
+
+  /**
+   * Total number of functions
+   */
+  totalCount: number;
+}
+
+export namespace FunctionGetMetricsResponse {
+  export interface Function {
+    /**
+     * The function name
+     */
+    functionName: string;
+
+    metrics: Function.Metrics;
+
+    /**
+     * Number of transformations that have been labeled/evaluated for metrics
+     * calculation
+     */
+    totalLabeledResults: number;
+
+    /**
+     * Total number of results processed by the function
+     */
+    totalResults: number;
+  }
+
+  export namespace Function {
+    export interface Metrics {
+      accuracy: number | null;
+
+      f1Score: number | null;
+
+      fn: number;
+
+      fp: number;
+
+      precision: number | null;
+
+      recall: number | null;
+
+      tn: number;
+
+      tp: number;
+    }
+  }
+}
+
 export type FunctionCreateParams =
   | FunctionCreateParams.CreateExtractFunction
   | FunctionCreateParams.CreateClassifyFunction
@@ -2486,8 +3844,122 @@ export interface FunctionListParams extends FunctionsPageParams {
   workflowNames?: Array<string>;
 }
 
+export interface FunctionCompareMetricsParams {
+  /**
+   * Name of the function to compare versions for
+   */
+  functionName: string;
+
+  /**
+   * **Baseline version number for comparison**
+   *
+   * If not provided, defaults to the previous version (current - 1).
+   */
+  baselineVersionNum?: number;
+
+  /**
+   * **Comparison version number**
+   *
+   * If not provided, defaults to the current version.
+   */
+  comparisonVersionNum?: number;
+
+  /**
+   * **Whether to compare regression test data only**
+   *
+   * If true, only compares transformations marked as regression tests.
+   */
+  isRegression?: boolean;
+}
+
+export interface FunctionEstimateReviewRequirementsParams {
+  /**
+   * Name of the function to analyze
+   */
+  functionName: string;
+
+  /**
+   * Confidence levels for statistical analysis as integers representing percentages
+   * (e.g., [90, 95, 99] for 90%, 95%, 99%). IMPORTANT: Only integers are accepted,
+   * floats like 0.95 will be rejected.
+   */
+  confidenceLevels?: Array<number>;
+
+  /**
+   * Confidence interval calculation method (default "wald").
+   *
+   * - "wald": Normal approximation method (faster, standard)
+   * - "wilson": Wilson score interval (more robust for extreme rates)
+   */
+  confidenceMethod?: 'wald' | 'wilson';
+
+  /**
+   * Optional evaluation version to filter evaluations by. Must be one of the
+   * supported versions. If not provided, defaults to "0.1.0-gemini".
+   */
+  evaluationVersion?: '0.1.0-gemini';
+
+  /**
+   * Optional function version number to analyze. If not provided, uses the
+   * latest/current version of the function.
+   */
+  functionVersionNum?: number;
+
+  /**
+   * Internal flag indicating if the request is from a regression test
+   */
+  isRegression?: boolean;
+
+  /**
+   * Margin of error for statistical calculations
+   */
+  marginOfError?: number;
+
+  /**
+   * Maximum confidence threshold to analyze
+   */
+  thresholdMax?: number;
+
+  /**
+   * Minimum confidence threshold to analyze
+   */
+  thresholdMin?: number;
+
+  /**
+   * Step size for threshold analysis (smaller = more granular)
+   */
+  thresholdStep?: number;
+}
+
+export interface FunctionGetMetricsParams {
+  /**
+   * Cursor — a `functionID` defining your place in the list.
+   */
+  endingBefore?: string;
+
+  functionIDs?: Array<string>;
+
+  functionNames?: Array<string>;
+
+  limit?: number;
+
+  /**
+   * Sort direction over the result set (default `asc`). Pagination works
+   * symmetrically in both directions via `startingAfter` / `endingBefore`.
+   */
+  sortOrder?: 'asc' | 'desc';
+
+  /**
+   * Cursor — a `functionID` defining your place in the list.
+   */
+  startingAfter?: string;
+
+  types?: Array<FunctionType>;
+}
+
 Functions.Copy = Copy;
 Functions.Versions = Versions;
+Functions.Regression = Regression;
 
 export declare namespace Functions {
   export {
@@ -2506,10 +3978,16 @@ export declare namespace Functions {
     type UpdateFunction as UpdateFunction,
     type UserActionSummary as UserActionSummary,
     type WorkflowUsageInfo as WorkflowUsageInfo,
+    type FunctionCompareMetricsResponse as FunctionCompareMetricsResponse,
+    type FunctionEstimateReviewRequirementsResponse as FunctionEstimateReviewRequirementsResponse,
+    type FunctionGetMetricsResponse as FunctionGetMetricsResponse,
     type FunctionsFunctionsPage as FunctionsFunctionsPage,
     type FunctionCreateParams as FunctionCreateParams,
     type FunctionUpdateParams as FunctionUpdateParams,
     type FunctionListParams as FunctionListParams,
+    type FunctionCompareMetricsParams as FunctionCompareMetricsParams,
+    type FunctionEstimateReviewRequirementsParams as FunctionEstimateReviewRequirementsParams,
+    type FunctionGetMetricsParams as FunctionGetMetricsParams,
   };
 
   export {
@@ -2524,5 +4002,13 @@ export declare namespace Functions {
     type ListFunctionVersionsResponse as ListFunctionVersionsResponse,
     type VersionRetrieveResponse as VersionRetrieveResponse,
     type VersionRetrieveParams as VersionRetrieveParams,
+  };
+
+  export {
+    Regression as Regression,
+    type RegressionApplyCorrectionsResponse as RegressionApplyCorrectionsResponse,
+    type RegressionRunResponse as RegressionRunResponse,
+    type RegressionApplyCorrectionsParams as RegressionApplyCorrectionsParams,
+    type RegressionRunParams as RegressionRunParams,
   };
 }

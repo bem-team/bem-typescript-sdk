@@ -32,6 +32,16 @@ export class Copy extends APIResource {
    *
    * The destination name must be unique in the environment. A copy does not migrate
    * workflows: existing workflow nodes continue to reference the original function.
+   *
+   * @example
+   * ```ts
+   * const functionResponse = await client.functions.copy.create(
+   *   {
+   *     sourceFunctionName: 'sourceFunctionName',
+   *     targetFunctionName: 'targetFunctionName',
+   *   },
+   * );
+   * ```
    */
   create(body: CopyCreateParams, options?: RequestOptions): APIPromise<FunctionsAPI.FunctionResponse> {
     return this._client.post('/v3/functions/copy', { body, ...options });

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.22.0 (2026-05-14)
+
+Full Changelog: [v0.21.0...v0.22.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.21.0...v0.22.0)
+
+### Features
+
+* **api:** function regression and view endpoint support ([4185d3e](https://github.com/bem-team/bem-typescript-sdk/commit/4185d3e31f9e2f8adcb5d2622711a881e92d280c))
+
 ## 0.21.0 (2026-05-14)
 
 Full Changelog: [v0.20.0...v0.21.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.20.0...v0.21.0)
