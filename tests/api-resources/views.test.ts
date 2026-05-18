@@ -40,6 +40,7 @@ describe('resource views', () => {
           function: 'count',
           name: 'name',
           aggregateColumnName: 'aggregateColumnName',
+          displayType: 'table',
           groupByColumnName: 'groupByColumnName',
         },
       ],
@@ -60,6 +61,7 @@ describe('resource views', () => {
       ],
       functions: [{ id: 'id', name: 'name' }],
       name: 'name',
+      description: 'description',
     });
   });
 
@@ -107,6 +109,7 @@ describe('resource views', () => {
           function: 'count',
           name: 'name',
           aggregateColumnName: 'aggregateColumnName',
+          displayType: 'table',
           groupByColumnName: 'groupByColumnName',
         },
       ],
@@ -127,6 +130,7 @@ describe('resource views', () => {
       ],
       functions: [{ id: 'id', name: 'name' }],
       name: 'name',
+      description: 'description',
     });
   });
 
@@ -207,6 +211,7 @@ describe('resource views', () => {
           function: 'count',
           name: 'name',
           aggregateColumnName: 'aggregateColumnName',
+          displayType: 'table',
           groupByColumnName: 'groupByColumnName',
         },
       ],
@@ -228,6 +233,7 @@ describe('resource views', () => {
       functions: [{ id: 'id', name: 'name' }],
       name: 'name',
       timeWindow: { end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z' },
+      description: 'description',
     });
   });
 
@@ -264,6 +270,7 @@ describe('resource views', () => {
           function: 'count',
           name: 'name',
           aggregateColumnName: 'aggregateColumnName',
+          displayType: 'table',
           groupByColumnName: 'groupByColumnName',
         },
       ],
@@ -285,6 +292,7 @@ describe('resource views', () => {
       functions: [{ id: 'id', name: 'name' }],
       name: 'name',
       timeWindow: { end: '2019-12-27T18:11:19.117Z', start: '2019-12-27T18:11:19.117Z' },
+      description: 'description',
       limit: 1,
       offset: 0,
     });
