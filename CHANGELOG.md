@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.23.0 (2026-05-19)
+
+Full Changelog: [v0.22.0...v0.23.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.22.0...v0.23.0)
+
+### Features
+
+* **api:** api update ([7d2e1f1](https://github.com/bem-team/bem-typescript-sdk/commit/7d2e1f19a2a8da73197c86e7dbf225b2229bcd7a))
+
+
+### Bug Fixes
+
+* **typescript:** upgrade tsc-multi so that it works with Node 26 ([2987404](https://github.com/bem-team/bem-typescript-sdk/commit/298740490768179ac23a16ac5b31631acde2778a))
+
+
+### Chores
+
+* **tests:** remove redundant File import ([c73f53d](https://github.com/bem-team/bem-typescript-sdk/commit/c73f53d56fb69245aa6a1e67cb10bd7d36c5c8ca))
+
 ## 0.22.0 (2026-05-14)
 
 Full Changelog: [v0.21.0...v0.22.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.21.0...v0.22.0)
