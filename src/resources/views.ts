@@ -199,11 +199,6 @@ export interface ViewCreateResponse {
    * Description of the view
    */
   description?: string | null;
-
-  /**
-   * Display type of the view
-   */
-  displayType?: 'table' | 'bar_chart' | 'pie_chart';
 }
 
 export namespace ViewCreateResponse {
@@ -226,6 +221,11 @@ export namespace ViewCreateResponse {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
@@ -345,11 +345,6 @@ export interface ViewRetrieveResponse {
    * Description of the view
    */
   description?: string | null;
-
-  /**
-   * Display type of the view
-   */
-  displayType?: 'table' | 'bar_chart' | 'pie_chart';
 }
 
 export namespace ViewRetrieveResponse {
@@ -372,6 +367,11 @@ export namespace ViewRetrieveResponse {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
@@ -491,11 +491,6 @@ export interface ViewUpdateResponse {
    * Description of the view
    */
   description?: string | null;
-
-  /**
-   * Display type of the view
-   */
-  displayType?: 'table' | 'bar_chart' | 'pie_chart';
 }
 
 export namespace ViewUpdateResponse {
@@ -518,6 +513,11 @@ export namespace ViewUpdateResponse {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
@@ -653,11 +653,6 @@ export namespace ViewListResponse {
      * Description of the view
      */
     description?: string | null;
-
-    /**
-     * Display type of the view
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
   }
 
   export namespace View {
@@ -680,6 +675,11 @@ export namespace ViewListResponse {
        * max functions)
        */
       aggregateColumnName?: string | null;
+
+      /**
+       * How to display the aggregation results
+       */
+      displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
       /**
        * Name of the column to group by (optional, for grouped aggregations)
@@ -875,6 +875,11 @@ export interface ViewCreateParams {
    * Name of the view
    */
   name: string;
+
+  /**
+   * Description of the view
+   */
+  description?: string;
 }
 
 export namespace ViewCreateParams {
@@ -897,6 +902,11 @@ export namespace ViewCreateParams {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
@@ -997,6 +1007,11 @@ export interface ViewUpdateParams {
    * Name of the view
    */
   name: string;
+
+  /**
+   * Description of the view
+   */
+  description?: string;
 }
 
 export namespace ViewUpdateParams {
@@ -1019,6 +1034,11 @@ export namespace ViewUpdateParams {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
@@ -1163,6 +1183,11 @@ export interface ViewGenerateAggregationDataParams {
    * Time window for filtering transformations in a view
    */
   timeWindow: ViewGenerateAggregationDataParams.TimeWindow;
+
+  /**
+   * Description of the view
+   */
+  description?: string;
 }
 
 export namespace ViewGenerateAggregationDataParams {
@@ -1185,6 +1210,11 @@ export namespace ViewGenerateAggregationDataParams {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
@@ -1307,6 +1337,11 @@ export interface ViewGenerateTableDataParams {
   timeWindow: ViewGenerateTableDataParams.TimeWindow;
 
   /**
+   * Description of the view
+   */
+  description?: string;
+
+  /**
    * Maximum number of rows to return (default: 50, max: 200)
    */
   limit?: number | null;
@@ -1337,6 +1372,11 @@ export namespace ViewGenerateTableDataParams {
      * max functions)
      */
     aggregateColumnName?: string | null;
+
+    /**
+     * How to display the aggregation results
+     */
+    displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
     /**
      * Name of the column to group by (optional, for grouped aggregations)
