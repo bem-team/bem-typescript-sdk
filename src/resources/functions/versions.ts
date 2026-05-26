@@ -704,6 +704,13 @@ export namespace FunctionVersion {
     displayName?: string;
 
     /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    extraConfig?: ParseFunctionVersion.ExtraConfig;
+
+    /**
      * Per-version configuration for a Parse function.
      *
      * Parse renders document pages (PDF, image) via vision LLM and emits structured
@@ -721,6 +728,26 @@ export namespace FunctionVersion {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace ParseFunctionVersion {
+    /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    export interface ExtraConfig {
+      /**
+       * When true, return per-section and per-entity-mention coordinates in the parse
+       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
+       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
+       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
+       * output. Only applies to the open-ended discovery path (no `schema`) and to
+       * vision input types. Bedrock-backed parse functions silently return an empty map
+       * (no native bbox support). Defaults to false.
+       */
+      enableBoundingBoxes?: boolean;
+    }
   }
 }
 
