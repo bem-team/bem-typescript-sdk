@@ -646,6 +646,13 @@ export namespace CreateFunction {
     displayName?: string;
 
     /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    extraConfig?: ParseFunction.ExtraConfig;
+
+    /**
      * Per-version configuration for a Parse function.
      *
      * Parse renders document pages (PDF, image) via vision LLM and emits structured
@@ -658,6 +665,26 @@ export namespace CreateFunction {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export namespace ParseFunction {
+    /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    export interface ExtraConfig {
+      /**
+       * When true, return per-section and per-entity-mention coordinates in the parse
+       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
+       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
+       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
+       * output. Only applies to the open-ended discovery path (no `schema`) and to
+       * vision input types. Bedrock-backed parse functions silently return an empty map
+       * (no native bbox support). Defaults to false.
+       */
+      enableBoundingBoxes?: boolean;
+    }
   }
 }
 
@@ -1433,6 +1460,13 @@ export namespace Function {
     displayName?: string;
 
     /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    extraConfig?: ParseFunction.ExtraConfig;
+
+    /**
      * Per-version configuration for a Parse function.
      *
      * Parse renders document pages (PDF, image) via vision LLM and emits structured
@@ -1450,6 +1484,26 @@ export namespace Function {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace ParseFunction {
+    /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    export interface ExtraConfig {
+      /**
+       * When true, return per-section and per-entity-mention coordinates in the parse
+       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
+       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
+       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
+       * output. Only applies to the open-ended discovery path (no `schema`) and to
+       * vision input types. Bedrock-backed parse functions silently return an empty map
+       * (no native bbox support). Defaults to false.
+       */
+      enableBoundingBoxes?: boolean;
+    }
   }
 }
 
@@ -1517,17 +1571,6 @@ export interface ListFunctionsResponse {
  * output concern) and cross-document memory linking (an environment-wide concern).
  */
 export interface ParseConfig {
-  /**
-   * When true, return per-section and per-entity-mention coordinates in the parse
-   * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
-   * array of `{page, left, top, width, height}` with coordinates normalized to [0,
-   * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
-   * output. Only applies to the open-ended discovery path (no `schema`) and to
-   * vision input types. Bedrock-backed parse functions silently return an empty map
-   * (no native bbox support). Defaults to false.
-   */
-  enableBoundingBoxes?: boolean;
-
   /**
    * When true, extract named entities (people, organizations, products, studies,
    * identifiers, etc.) and the relationships between them, and dedupe by canonical
@@ -1903,6 +1946,13 @@ export namespace UpdateFunction {
     displayName?: string;
 
     /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    extraConfig?: ParseFunction.ExtraConfig;
+
+    /**
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName?: string;
@@ -1920,6 +1970,26 @@ export namespace UpdateFunction {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export namespace ParseFunction {
+    /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    export interface ExtraConfig {
+      /**
+       * When true, return per-section and per-entity-mention coordinates in the parse
+       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
+       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
+       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
+       * output. Only applies to the open-ended discovery path (no `schema`) and to
+       * vision input types. Bedrock-backed parse functions silently return an empty map
+       * (no native bbox support). Defaults to false.
+       */
+      enableBoundingBoxes?: boolean;
+    }
   }
 }
 
@@ -3512,6 +3582,13 @@ export declare namespace FunctionCreateParams {
     displayName?: string;
 
     /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    extraConfig?: CreateParseFunction.ExtraConfig;
+
+    /**
      * Per-version configuration for a Parse function.
      *
      * Parse renders document pages (PDF, image) via vision LLM and emits structured
@@ -3524,6 +3601,26 @@ export declare namespace FunctionCreateParams {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export namespace CreateParseFunction {
+    /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    export interface ExtraConfig {
+      /**
+       * When true, return per-section and per-entity-mention coordinates in the parse
+       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
+       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
+       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
+       * output. Only applies to the open-ended discovery path (no `schema`) and to
+       * vision input types. Bedrock-backed parse functions silently return an empty map
+       * (no native bbox support). Defaults to false.
+       */
+      enableBoundingBoxes?: boolean;
+    }
   }
 }
 
@@ -3817,6 +3914,13 @@ export declare namespace FunctionUpdateParams {
     displayName?: string;
 
     /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    extraConfig?: UpsertParseFunction.ExtraConfig;
+
+    /**
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName?: string;
@@ -3834,6 +3938,26 @@ export declare namespace FunctionUpdateParams {
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
+  }
+
+  export namespace UpsertParseFunction {
+    /**
+     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
+     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
+     * stays distinct from operator-level execution flags.
+     */
+    export interface ExtraConfig {
+      /**
+       * When true, return per-section and per-entity-mention coordinates in the parse
+       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
+       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
+       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
+       * output. Only applies to the open-ended discovery path (no `schema`) and to
+       * vision input types. Bedrock-backed parse functions silently return an empty map
+       * (no native bbox support). Defaults to false.
+       */
+      enableBoundingBoxes?: boolean;
+    }
   }
 }
 
