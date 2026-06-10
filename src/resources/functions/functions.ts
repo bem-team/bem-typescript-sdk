@@ -593,31 +593,38 @@ export namespace CreateFunction {
     type: 'enrich';
 
     /**
-     * Configuration for enrich function with semantic search steps.
+     * Configuration for an enrich function.
      *
      * **How Enrich Functions Work:**
      *
-     * Enrich functions use semantic search to augment JSON data with relevant
-     * information from collections. They take JSON input (typically from a transform
-     * function), extract specified fields, perform vector-based semantic search
-     * against collections, and inject the results back into the data.
+     * Enrich functions augment JSON input with data from external sources. They take
+     * JSON input (typically from a previous function), extract specified fields, fetch
+     * or search for matching data, and inject the results back into the JSON.
+     *
+     * **Data Sources:**
+     *
+     * - **Collections** (`source: "collection"`): Vector/keyword search against a BEM
+     *   collection. Best for semantic matching against pre-indexed documents.
+     * - **Endpoints** (`source: "endpoint"`): HTTP call to any user-provided REST API.
+     *   Best for looking up live data from CRMs, ERPs, or other external systems.
+     *   Optionally uses LLM agent reasoning to rank candidates returned by the
+     *   endpoint.
      *
      * **Input Requirements:**
      *
-     * - Must receive JSON input (typically uploaded to S3 from a previous function)
-     * - Can be chained after transform or other functions that produce JSON output
+     * - Must receive JSON input (typically from a previous function's output)
      *
      * **Example Use Cases:**
      *
-     * - Match product descriptions to SKU codes from a product catalog
-     * - Enrich customer data with account information
-     * - Link order line items to inventory records
+     * - Match product descriptions to SKU codes from a product catalog collection
+     * - Enrich customer data with account details from a CRM endpoint
+     * - Use LLM agent reasoning to fuzzy-match line item descriptions to catalog
+     *   products
      *
      * **Configuration:**
      *
-     * - Define one or more enrichment steps
-     * - Each step extracts values, searches a collection, and injects results
-     * - Steps are executed sequentially
+     * - Define named endpoints (for endpoint-source steps)
+     * - Define one or more enrichment steps; steps are executed sequentially
      */
     config?: FunctionsAPI.EnrichConfig;
 
@@ -689,43 +696,202 @@ export namespace CreateFunction {
 }
 
 /**
- * Configuration for enrich function with semantic search steps.
+ * Configuration for an enrich function.
  *
  * **How Enrich Functions Work:**
  *
- * Enrich functions use semantic search to augment JSON data with relevant
- * information from collections. They take JSON input (typically from a transform
- * function), extract specified fields, perform vector-based semantic search
- * against collections, and inject the results back into the data.
+ * Enrich functions augment JSON input with data from external sources. They take
+ * JSON input (typically from a previous function), extract specified fields, fetch
+ * or search for matching data, and inject the results back into the JSON.
+ *
+ * **Data Sources:**
+ *
+ * - **Collections** (`source: "collection"`): Vector/keyword search against a BEM
+ *   collection. Best for semantic matching against pre-indexed documents.
+ * - **Endpoints** (`source: "endpoint"`): HTTP call to any user-provided REST API.
+ *   Best for looking up live data from CRMs, ERPs, or other external systems.
+ *   Optionally uses LLM agent reasoning to rank candidates returned by the
+ *   endpoint.
  *
  * **Input Requirements:**
  *
- * - Must receive JSON input (typically uploaded to S3 from a previous function)
- * - Can be chained after transform or other functions that produce JSON output
+ * - Must receive JSON input (typically from a previous function's output)
  *
  * **Example Use Cases:**
  *
- * - Match product descriptions to SKU codes from a product catalog
- * - Enrich customer data with account information
- * - Link order line items to inventory records
+ * - Match product descriptions to SKU codes from a product catalog collection
+ * - Enrich customer data with account details from a CRM endpoint
+ * - Use LLM agent reasoning to fuzzy-match line item descriptions to catalog
+ *   products
  *
  * **Configuration:**
  *
- * - Define one or more enrichment steps
- * - Each step extracts values, searches a collection, and injects results
- * - Steps are executed sequentially
+ * - Define named endpoints (for endpoint-source steps)
+ * - Define one or more enrichment steps; steps are executed sequentially
  */
 export interface EnrichConfig {
   /**
-   * Array of enrichment steps to execute sequentially
+   * Array of enrichment steps to execute sequentially.
    */
   steps: Array<EnrichStep>;
+
+  /**
+   * Named HTTP endpoints available to endpoint-source steps. Each endpoint must have
+   * a unique `name` referenced by the step's `endpointName`. Required when any step
+   * uses `source: "endpoint"`.
+   */
+  endpoints?: Array<EnrichConfig.Endpoint>;
+}
+
+export namespace EnrichConfig {
+  /**
+   * A named HTTP endpoint that an enrich step can call to fetch enrichment data.
+   *
+   * The platform makes one request per extracted source value, substituting the
+   * value as a query parameter or body template placeholder. The raw response (or
+   * the sub-value selected by `responsePath`) is injected into the output, or passed
+   * to LLM agent reasoning when `matchInstructions` is set.
+   *
+   * **Request formats:**
+   *
+   * - `GET`: Appends `?{queryParam}={value}` to the URL.
+   * - `POST`: Sends `bodyTemplate` as the request body, replacing `{value}` with the
+   *   extracted value.
+   */
+  export interface Endpoint {
+    /**
+     * HTTP method to use.
+     */
+    method: 'GET' | 'POST';
+
+    /**
+     * Unique name for this endpoint, referenced by enrichStep.endpointName.
+     */
+    name: string;
+
+    /**
+     * Full URL of the endpoint (must be http:// or https://).
+     */
+    url: string;
+
+    /**
+     * JSON body template for POST requests. **Required for POST endpoints.** Must
+     * contain the `{value}` placeholder, which is replaced with the extracted source
+     * value at runtime.
+     *
+     * Example: `bodyTemplate: "{\"query\": \"{value}\", \"limit\": 10}"`
+     */
+    bodyTemplate?: string;
+
+    /**
+     * Additional HTTP headers to include in every request (e.g.
+     * `Authorization: Bearer <token>`).
+     */
+    headers?: unknown;
+
+    /**
+     * Natural-language instructions for LLM agent reasoning.
+     *
+     * When set, the candidates fetched from the endpoint are passed to an LLM with
+     * these instructions, which selects the best match(es) and returns them with
+     * confidence scores. Each injected result has the shape
+     * `{ data, confidence, reasoning? }`.
+     *
+     * When omitted, the raw fetched value is injected without any LLM involvement.
+     */
+    matchInstructions?: string;
+
+    /**
+     * Maximum number of ranked matches to return per source value when
+     * `matchInstructions` is set (default: 1). Ignored when `matchInstructions` is
+     * empty.
+     */
+    matchTopK?: number;
+
+    /**
+     * LLM batch size during agent reasoning (default: 50). All candidates — across all
+     * fetched pages — are scored in batches of this size. Smaller values reduce
+     * per-call token usage; larger values mean fewer LLM calls. Ignored when
+     * `matchInstructions` is empty.
+     */
+    maxCandidates?: number;
+
+    /**
+     * Maximum number of pages to fetch (default: 10). Acts as a safety cap against
+     * infinite pagination loops when the server never returns an empty cursor.
+     */
+    maxPages?: number;
+
+    /**
+     * Query parameter name used to pass the cursor on subsequent GET requests, or the
+     * `{placeholder}` name used in the POST `bodyTemplate` (e.g. `"cursor"`,
+     * `"pageToken"`, `"offset"`).
+     *
+     * Must be set together with `nextPagePath`.
+     */
+    nextPageParam?: string;
+
+    /**
+     * JMESPath expression applied to each raw response to extract the cursor or token
+     * for the next page (e.g. `"nextCursor"`, `"pagination.nextToken"`). An absent,
+     * null, or empty-string result stops pagination. Both string and numeric values
+     * are supported — numbers are converted to their decimal string representation
+     * before being forwarded as a query parameter.
+     *
+     * Must be set together with `nextPageParam`.
+     *
+     * **Supported pagination styles:**
+     *
+     * - **Cursor/token-based** — server returns an opaque token in the response body
+     *   (e.g. `{"nextCursor": "abc123"}`). Set `nextPagePath: "nextCursor"` and the
+     *   platform forwards it verbatim on the next request.
+     * - **Server-computed offset/page** — server echoes back the next offset or page
+     *   number in the response body (e.g. `{"nextOffset": 50}` or `{"nextPage": 2}`).
+     *   Set `nextPagePath: "nextOffset"` and the platform forwards the value as-is.
+     *
+     * **Not supported:**
+     *
+     * - **Client-computed offset** — APIs where the client must compute
+     *   `offset += limit` itself (e.g. `?offset=0&limit=50` with no next-offset in the
+     *   response). Workaround: ask the API provider to return the next offset in the
+     *   response body, or bake a fixed page size into the URL and use a server-side
+     *   cursor instead.
+     * - **Client-computed page number** — APIs where the client increments `?page=N`
+     *   itself with no next-page value in the response. Same workaround applies.
+     * - **Link header** — `Link: <url>; rel="next"` in HTTP response headers. The
+     *   platform only inspects the response body.
+     */
+    nextPagePath?: string;
+
+    /**
+     * Query parameter name used to pass the extracted source value. **Required for GET
+     * endpoints.** The value is URL-encoded and appended as
+     * `?{queryParam}={sourceValue}`.
+     *
+     * Example: `queryParam: "q"` → `GET /products?q=blue+widget`
+     */
+    queryParam?: string;
+
+    /**
+     * JMESPath expression applied to the response body to extract the enrichment
+     * value. Omit to use the entire response body as the result.
+     *
+     * **For agent reasoning:** use a wildcard projection (e.g. `items[*]` or
+     * `results[*].data`) so the endpoint's list of candidates is flattened into an
+     * array before being passed to the LLM. A non-wildcard path (e.g. `data.product`)
+     * extracts a single value treated as one candidate.
+     *
+     * **Response size:** the platform reads at most 50 MB of the response body before
+     * decoding, regardless of the Content-Length header.
+     */
+    responsePath?: string;
+  }
 }
 
 /**
  * Single enrichment step configuration.
  *
- * **Process Flow:**
+ * **Process Flow (collection source):**
  *
  * 1. Extract values from `sourceField` using JMESPath
  * 2. Perform search against the specified collection (semantic, exact, or hybrid
@@ -733,33 +899,41 @@ export interface EnrichConfig {
  * 3. Return top K matches sorted by relevance (best match first)
  * 4. Inject results into `targetField`
  *
- * **Search Modes:**
+ * **Process Flow (endpoint source):**
  *
- * - `semantic` (default): Vector similarity search - best for natural language and
+ * 1. Extract values from `sourceField` using JMESPath
+ * 2. Call the named endpoint once per extracted value, following pagination if
+ *    `nextPagePath`/`nextPageParam` are configured on the endpoint
+ * 3. Optionally apply LLM agent reasoning to rank candidates
+ *    (`matchInstructions`), batching across all fetched pages in groups of
+ *    `maxCandidates`
+ * 4. Inject results into `targetField`
+ *
+ * **Collection Search Modes** (`source: "collection"` only):
+ *
+ * - `semantic` (default): Vector similarity search — best for natural language and
  *   conceptual matching
- * - `exact`: Exact keyword matching - best for SKU numbers, IDs, routing numbers
- * - `hybrid`: Combined semantic + keyword search - best for tags and categories
+ * - `exact`: Exact keyword matching — best for SKU numbers, IDs, routing numbers
+ * - `hybrid`: Combined semantic + keyword search — best for tags and categories
  *
- * **Result Format:**
+ * **Result Format (collection source):**
  *
- * - Results are always returned as an array (list), regardless of `topK` value
- * - Array is sorted by relevance (best match first)
- * - Each result contains `data` (the collection item) and optionally
- *   `cosineDistance`
- * - With `topK=1`: Returns array with single best match:
- *   `[{data: {...}, cosineDistance: 0.15}]`
- * - With `topK>1`: Returns array with multiple matches sorted by relevance
+ * - Always an array sorted by relevance (best match first)
+ * - Each element: `{ data, cosineDistance? }` or `{ data, hybridScore? }`
+ *
+ * **Result Format (endpoint source, no matchInstructions):**
+ *
+ * - Always an array; the raw fetched value is the single element
+ *
+ * **Result Format (endpoint source, with matchInstructions):**
+ *
+ * - Array of LLM-ranked matches: `[{ data, confidence, reasoning? }, ...]`
+ * - Length capped by `enrichEndpoint.matchTopK` (default 1)
  */
 export interface EnrichStep {
   /**
-   * Name of the collection to search against. The collection must exist and contain
-   * items. Supports hierarchical paths when used with `includeSubcollections`.
-   */
-  collectionName: string;
-
-  /**
-   * JMESPath expression to extract source data for semantic search. Can extract
-   * single values or arrays. All extracted values will be used for search.
+   * JMESPath expression to extract source data. Can extract a single value or an
+   * array. Each extracted value is looked up independently.
    */
   sourceField: string;
 
@@ -769,6 +943,19 @@ export interface EnrichStep {
    * regardless of topK value.
    */
   targetField: string;
+
+  /**
+   * Name of the collection to search against. Required when `source` is
+   * `"collection"`. The collection must exist and contain items. Supports
+   * hierarchical paths when used with `includeSubcollections`.
+   */
+  collectionName?: string;
+
+  /**
+   * Name of an endpoint defined in `enrichConfig.endpoints`. Required when `source`
+   * is `"endpoint"`.
+   */
+  endpointName?: string;
 
   /**
    * Whether to include cosine distance scores in results. Cosine distance ranges
@@ -827,6 +1014,16 @@ export interface EnrichStep {
    * - Example: Balances semantic meaning with exact keyword matching
    */
   searchMode?: 'semantic' | 'exact' | 'hybrid';
+
+  /**
+   * Where to fetch enrichment data from (default: `"collection"`).
+   *
+   * - `"collection"`: Vector/keyword search against a BEM collection. Requires
+   *   `collectionName`.
+   * - `"endpoint"`: HTTP call to a named endpoint defined in
+   *   `enrichConfig.endpoints`. Requires `endpointName`.
+   */
+  source?: 'collection' | 'endpoint';
 
   /**
    * Number of top matching results to return per query (default: 1). Results are
@@ -1365,31 +1562,38 @@ export namespace Function {
 
   export interface EnrichFunction {
     /**
-     * Configuration for enrich function with semantic search steps.
+     * Configuration for an enrich function.
      *
      * **How Enrich Functions Work:**
      *
-     * Enrich functions use semantic search to augment JSON data with relevant
-     * information from collections. They take JSON input (typically from a transform
-     * function), extract specified fields, perform vector-based semantic search
-     * against collections, and inject the results back into the data.
+     * Enrich functions augment JSON input with data from external sources. They take
+     * JSON input (typically from a previous function), extract specified fields, fetch
+     * or search for matching data, and inject the results back into the JSON.
+     *
+     * **Data Sources:**
+     *
+     * - **Collections** (`source: "collection"`): Vector/keyword search against a BEM
+     *   collection. Best for semantic matching against pre-indexed documents.
+     * - **Endpoints** (`source: "endpoint"`): HTTP call to any user-provided REST API.
+     *   Best for looking up live data from CRMs, ERPs, or other external systems.
+     *   Optionally uses LLM agent reasoning to rank candidates returned by the
+     *   endpoint.
      *
      * **Input Requirements:**
      *
-     * - Must receive JSON input (typically uploaded to S3 from a previous function)
-     * - Can be chained after transform or other functions that produce JSON output
+     * - Must receive JSON input (typically from a previous function's output)
      *
      * **Example Use Cases:**
      *
-     * - Match product descriptions to SKU codes from a product catalog
-     * - Enrich customer data with account information
-     * - Link order line items to inventory records
+     * - Match product descriptions to SKU codes from a product catalog collection
+     * - Enrich customer data with account details from a CRM endpoint
+     * - Use LLM agent reasoning to fuzzy-match line item descriptions to catalog
+     *   products
      *
      * **Configuration:**
      *
-     * - Define one or more enrichment steps
-     * - Each step extracts values, searches a collection, and injects results
-     * - Steps are executed sequentially
+     * - Define named endpoints (for endpoint-source steps)
+     * - Define one or more enrichment steps; steps are executed sequentially
      */
     config: FunctionsAPI.EnrichConfig;
 
@@ -1908,31 +2112,38 @@ export namespace UpdateFunction {
     type: 'enrich';
 
     /**
-     * Configuration for enrich function with semantic search steps.
+     * Configuration for an enrich function.
      *
      * **How Enrich Functions Work:**
      *
-     * Enrich functions use semantic search to augment JSON data with relevant
-     * information from collections. They take JSON input (typically from a transform
-     * function), extract specified fields, perform vector-based semantic search
-     * against collections, and inject the results back into the data.
+     * Enrich functions augment JSON input with data from external sources. They take
+     * JSON input (typically from a previous function), extract specified fields, fetch
+     * or search for matching data, and inject the results back into the JSON.
+     *
+     * **Data Sources:**
+     *
+     * - **Collections** (`source: "collection"`): Vector/keyword search against a BEM
+     *   collection. Best for semantic matching against pre-indexed documents.
+     * - **Endpoints** (`source: "endpoint"`): HTTP call to any user-provided REST API.
+     *   Best for looking up live data from CRMs, ERPs, or other external systems.
+     *   Optionally uses LLM agent reasoning to rank candidates returned by the
+     *   endpoint.
      *
      * **Input Requirements:**
      *
-     * - Must receive JSON input (typically uploaded to S3 from a previous function)
-     * - Can be chained after transform or other functions that produce JSON output
+     * - Must receive JSON input (typically from a previous function's output)
      *
      * **Example Use Cases:**
      *
-     * - Match product descriptions to SKU codes from a product catalog
-     * - Enrich customer data with account information
-     * - Link order line items to inventory records
+     * - Match product descriptions to SKU codes from a product catalog collection
+     * - Enrich customer data with account details from a CRM endpoint
+     * - Use LLM agent reasoning to fuzzy-match line item descriptions to catalog
+     *   products
      *
      * **Configuration:**
      *
-     * - Define one or more enrichment steps
-     * - Each step extracts values, searches a collection, and injects results
-     * - Steps are executed sequentially
+     * - Define named endpoints (for endpoint-source steps)
+     * - Define one or more enrichment steps; steps are executed sequentially
      */
     config?: FunctionsAPI.EnrichConfig;
   }
@@ -3529,31 +3740,38 @@ export declare namespace FunctionCreateParams {
     type: 'enrich';
 
     /**
-     * Configuration for enrich function with semantic search steps.
+     * Configuration for an enrich function.
      *
      * **How Enrich Functions Work:**
      *
-     * Enrich functions use semantic search to augment JSON data with relevant
-     * information from collections. They take JSON input (typically from a transform
-     * function), extract specified fields, perform vector-based semantic search
-     * against collections, and inject the results back into the data.
+     * Enrich functions augment JSON input with data from external sources. They take
+     * JSON input (typically from a previous function), extract specified fields, fetch
+     * or search for matching data, and inject the results back into the JSON.
+     *
+     * **Data Sources:**
+     *
+     * - **Collections** (`source: "collection"`): Vector/keyword search against a BEM
+     *   collection. Best for semantic matching against pre-indexed documents.
+     * - **Endpoints** (`source: "endpoint"`): HTTP call to any user-provided REST API.
+     *   Best for looking up live data from CRMs, ERPs, or other external systems.
+     *   Optionally uses LLM agent reasoning to rank candidates returned by the
+     *   endpoint.
      *
      * **Input Requirements:**
      *
-     * - Must receive JSON input (typically uploaded to S3 from a previous function)
-     * - Can be chained after transform or other functions that produce JSON output
+     * - Must receive JSON input (typically from a previous function's output)
      *
      * **Example Use Cases:**
      *
-     * - Match product descriptions to SKU codes from a product catalog
-     * - Enrich customer data with account information
-     * - Link order line items to inventory records
+     * - Match product descriptions to SKU codes from a product catalog collection
+     * - Enrich customer data with account details from a CRM endpoint
+     * - Use LLM agent reasoning to fuzzy-match line item descriptions to catalog
+     *   products
      *
      * **Configuration:**
      *
-     * - Define one or more enrichment steps
-     * - Each step extracts values, searches a collection, and injects results
-     * - Steps are executed sequentially
+     * - Define named endpoints (for endpoint-source steps)
+     * - Define one or more enrichment steps; steps are executed sequentially
      */
     config?: EnrichConfig;
 
@@ -3876,31 +4094,38 @@ export declare namespace FunctionUpdateParams {
     type: 'enrich';
 
     /**
-     * Configuration for enrich function with semantic search steps.
+     * Configuration for an enrich function.
      *
      * **How Enrich Functions Work:**
      *
-     * Enrich functions use semantic search to augment JSON data with relevant
-     * information from collections. They take JSON input (typically from a transform
-     * function), extract specified fields, perform vector-based semantic search
-     * against collections, and inject the results back into the data.
+     * Enrich functions augment JSON input with data from external sources. They take
+     * JSON input (typically from a previous function), extract specified fields, fetch
+     * or search for matching data, and inject the results back into the JSON.
+     *
+     * **Data Sources:**
+     *
+     * - **Collections** (`source: "collection"`): Vector/keyword search against a BEM
+     *   collection. Best for semantic matching against pre-indexed documents.
+     * - **Endpoints** (`source: "endpoint"`): HTTP call to any user-provided REST API.
+     *   Best for looking up live data from CRMs, ERPs, or other external systems.
+     *   Optionally uses LLM agent reasoning to rank candidates returned by the
+     *   endpoint.
      *
      * **Input Requirements:**
      *
-     * - Must receive JSON input (typically uploaded to S3 from a previous function)
-     * - Can be chained after transform or other functions that produce JSON output
+     * - Must receive JSON input (typically from a previous function's output)
      *
      * **Example Use Cases:**
      *
-     * - Match product descriptions to SKU codes from a product catalog
-     * - Enrich customer data with account information
-     * - Link order line items to inventory records
+     * - Match product descriptions to SKU codes from a product catalog collection
+     * - Enrich customer data with account details from a CRM endpoint
+     * - Use LLM agent reasoning to fuzzy-match line item descriptions to catalog
+     *   products
      *
      * **Configuration:**
      *
-     * - Define one or more enrichment steps
-     * - Each step extracts values, searches a collection, and injects results
-     * - Steps are executed sequentially
+     * - Define named endpoints (for endpoint-source steps)
+     * - Define one or more enrichment steps; steps are executed sequentially
      */
     config?: EnrichConfig;
   }
