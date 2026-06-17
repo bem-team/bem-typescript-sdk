@@ -227,6 +227,13 @@ export interface FNavigateParams {
   op: FsOp;
 
   /**
+   * Request-scoping concerns that are orthogonal to the op itself. Carried on a
+   * `context` object so future scoping hints (e.g. as-of timestamps, read
+   * consistency) can slot in without reshaping the op-specific fields.
+   */
+  context?: FNavigateParams.Context;
+
+  /**
    * When true, return only the hit count without snippet payload. Cheaper than
    * fetching matches when the agent only wants a yes/no.
    */
@@ -296,6 +303,29 @@ export interface FNavigateParams {
 }
 
 export namespace FNavigateParams {
+  /**
+   * Request-scoping concerns that are orthogonal to the op itself. Carried on a
+   * `context` object so future scoping hints (e.g. as-of timestamps, read
+   * consistency) can slot in without reshaping the op-specific fields.
+   */
+  export interface Context {
+    /**
+     * Bucket KSUID (prefix `bkt_`) to scope the request to — a named partition of the
+     * knowledge graph within the caller's account+environment.
+     *
+     * **Optional.** Omitting it (or passing an empty value) leaves the request
+     * UNSCOPED: memory-level reads (`find` / `open` / `xref`) return entities across
+     * every bucket in the account+environment, so pre-bucket callers keep their
+     * original all-entities behavior unchanged. (Writes are different: a parse call
+     * with no bucket targets the account default bucket.) When a bucket IS supplied,
+     * memory-level ops return only entities in that bucket; doc-level ops
+     * (`ls`/`cat`/`head`/`stat`/`grep`) are unaffected either way — documents are not
+     * bucket-partitioned. A bucket that does not belong to the caller's
+     * account+environment is rejected.
+     */
+    bucket?: string;
+  }
+
   /**
    * Filter options for `op=ls` and `op=find`.
    */
