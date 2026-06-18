@@ -3,6 +3,14 @@
 import { APIResource } from '../../core/resource';
 import * as ResultsAPI from './results';
 import { EvaluationResults, ResultRetrieveResultsParams, Results } from './results';
+import * as ScoreAPI from './score';
+import {
+  Score,
+  ScoreCancelResponse,
+  ScoreCreateParams,
+  ScoreCreateResponse,
+  ScoreRetrieveResponse,
+} from './score';
 import { APIPromise } from '../../core/api-promise';
 import { RequestOptions } from '../../internal/request-options';
 
@@ -53,6 +61,7 @@ import { RequestOptions } from '../../internal/request-options';
  */
 export class Eval extends APIResource {
   results: ResultsAPI.Results = new ResultsAPI.Results(this._client);
+  score: ScoreAPI.Score = new ScoreAPI.Score(this._client);
 
   /**
    * **Queue evaluation jobs for a batch of transformations.**
@@ -119,6 +128,7 @@ export interface EvalTriggerEvaluationParams {
 }
 
 Eval.Results = Results;
+Eval.Score = Score;
 
 export declare namespace Eval {
   export {
@@ -130,5 +140,13 @@ export declare namespace Eval {
     Results as Results,
     type EvaluationResults as EvaluationResults,
     type ResultRetrieveResultsParams as ResultRetrieveResultsParams,
+  };
+
+  export {
+    Score as Score,
+    type ScoreCreateResponse as ScoreCreateResponse,
+    type ScoreRetrieveResponse as ScoreRetrieveResponse,
+    type ScoreCancelResponse as ScoreCancelResponse,
+    type ScoreCreateParams as ScoreCreateParams,
   };
 }
