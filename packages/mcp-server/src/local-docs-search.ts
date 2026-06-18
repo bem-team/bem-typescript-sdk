@@ -2191,6 +2191,146 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     },
   },
   {
+    name: 'create',
+    endpoint: '/v3/eval/score',
+    httpMethod: 'post',
+    summary: 'Score Function Against (input, expected) Pairs',
+    description:
+      "**Score a function against a list of (input, expected) pairs.**\n\nSubmits a batch of `(input, expected)` pairs, runs the named function\nover each input, and returns per-pair + aggregate accuracy metrics\ncomparing the function's actual output to the provided expected JSON.\n\nScoring runs asynchronously. The response carries a `scoreRunID`;\npoll `GET /v3/eval/score/{scoreRunID}` until `status` is one of\n`completed`, `error`, or `cancelled`.\n\n`matchConfig` controls comparator behavior:\n- `numericTolerance`: relative tolerance for numeric fields (0 = exact)\n- `stringMatch`: `exact` (default) or `fuzzy` (Levenshtein ratio)\n- `arrayMatch`: `by-index` (default; only mode in P0)\n- `ignorePaths`: JSON Pointer paths to skip, supports `*` wildcards",
+    stainlessPath: '(resource) eval.score > (method) create',
+    qualified: 'client.eval.score.create',
+    params: [
+      'functionName: string;',
+      'pairs: { expected: object; input: { inputContent: string; inputType: string; }; }[];',
+      'functionVersionNum?: number;',
+      "matchConfig?: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; };",
+    ],
+    response:
+      "{ scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; }",
+    markdown:
+      "## create\n\n`client.eval.score.create(functionName: string, pairs: { expected: object; input: { inputContent: string; inputType: input_type; }; }[], functionVersionNum?: number, matchConfig?: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }): { scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; }`\n\n**post** `/v3/eval/score`\n\n**Score a function against a list of (input, expected) pairs.**\n\nSubmits a batch of `(input, expected)` pairs, runs the named function\nover each input, and returns per-pair + aggregate accuracy metrics\ncomparing the function's actual output to the provided expected JSON.\n\nScoring runs asynchronously. The response carries a `scoreRunID`;\npoll `GET /v3/eval/score/{scoreRunID}` until `status` is one of\n`completed`, `error`, or `cancelled`.\n\n`matchConfig` controls comparator behavior:\n- `numericTolerance`: relative tolerance for numeric fields (0 = exact)\n- `stringMatch`: `exact` (default) or `fuzzy` (Levenshtein ratio)\n- `arrayMatch`: `by-index` (default; only mode in P0)\n- `ignorePaths`: JSON Pointer paths to skip, supports `*` wildcards\n\n### Parameters\n\n- `functionName: string`\n  Name of the function to score. Must be of type extract, transform, or analyze.\n\n- `pairs: { expected: object; input: { inputContent: string; inputType: string; }; }[]`\n  Up to 1000 pairs per request.\n\n- `functionVersionNum?: number`\n  Optional version number to score against. P0: only the function's\ncurrent version is accepted; passing a different version returns 422.\n\n- `matchConfig?: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }`\n  Comparator configuration. All fields optional; conservative defaults.\n  - `arrayMatch?: 'by-index'`\n    P0 supports only `by-index`.\n  - `fuzzyThreshold?: number`\n    Levenshtein-ratio threshold used when `stringMatch == \"fuzzy\"`.\nRange `[0, 1]`. Default `0.85`.\n  - `ignorePaths?: string[]`\n    JSON Pointer paths to skip during comparison. The asterisk character\nmatches arbitrary object keys / array indices.\n\nExample values: /metadata, /lineItems with asterisk segment, etc.\n  - `numericTolerance?: number`\n    Relative tolerance for numeric fields. `0` (default) means exact\nequality; `0.01` means ±1%.\n  - `stringMatch?: 'exact' | 'fuzzy'`\n    `exact` (default) or `fuzzy`.\n\n### Returns\n\n- `{ scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; }`\n  Returned by `POST /v3/eval/score`.\n\n  - `scoreRunID: string`\n  - `status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst score = await client.eval.score.create({ functionName: 'functionName', pairs: [{\n  expected: {},\n  input: { inputContent: 'inputContent', inputType: 'csv' },\n}] });\n\nconsole.log(score);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.eval.score.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst score = await client.eval.score.create({\n  functionName: 'functionName',\n  pairs: [\n    {\n      expected: {},\n      input: { inputContent: 'inputContent', inputType: 'csv' },\n    },\n  ],\n});\n\nconsole.log(score.scoreRunID);",
+      },
+      python: {
+        method: 'eval.score.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nscore = client.eval.score.create(\n    function_name="functionName",\n    pairs=[{\n        "expected": {},\n        "input": {\n            "input_content": "inputContent",\n            "input_type": "csv",\n        },\n    }],\n)\nprint(score.score_run_id)',
+      },
+      go: {
+        method: 'client.Eval.Score.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tscore, err := client.Eval.Score.New(context.TODO(), bem.EvalScoreNewParams{\n\t\tFunctionName: "functionName",\n\t\tPairs: []bem.EvalScoreNewParamsPair{{\n\t\t\tExpected: map[string]any{},\n\t\t\tInput: bem.EvalScoreNewParamsPairInput{\n\t\t\t\tInputContent: "inputContent",\n\t\t\t\tInputType:    bem.InputTypeCsv,\n\t\t\t},\n\t\t}},\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", score.ScoreRunID)\n}\n',
+      },
+      cli: {
+        method: 'score create',
+        example:
+          "bem eval:score create \\\n  --api-key 'My API Key' \\\n  --function-name functionName \\\n  --pair '{expected: {}, input: {inputContent: inputContent, inputType: csv}}'",
+      },
+      csharp: {
+        method: 'Eval.Score.Create',
+        example:
+          'ScoreCreateParams parameters = new()\n{\n    FunctionName = "functionName",\n    Pairs =\n    [\n        new()\n        {\n            Expected = JsonSerializer.Deserialize<JsonElement>("{}"),\n            Input = new()\n            {\n                InputContent = "inputContent",\n                InputType = InputType.Csv,\n            },\n        },\n    ],\n};\n\nvar score = await client.Eval.Score.Create(parameters);\n\nConsole.WriteLine(score);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/eval/score \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "functionName": "functionName",\n          "pairs": [\n            {\n              "expected": {},\n              "input": {\n                "inputContent": "inputContent",\n                "inputType": "csv"\n              }\n            }\n          ]\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/eval/score/{scoreRunID}',
+    httpMethod: 'get',
+    summary: 'Get Score Run',
+    description:
+      "**Get the status and per-pair results of a score run.**\n\nReturns `aggregate` only once `status` reaches `completed`. `perPair`\nis populated incrementally — each pair's `fieldResults` appears as\nits underlying function call terminates.",
+    stainlessPath: '(resource) eval.score > (method) retrieve',
+    qualified: 'client.eval.score.retrieve',
+    params: ['scoreRunID: string;'],
+    response:
+      "{ functionName: string; functionVersionNum: number; matchConfig: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }; perPair: { pairIndex: number; status: 'pending' | 'running' | 'completed' | 'failed'; callID?: string; errorMessage?: string; fieldResults?: { match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra'; path: string; actual?: object; delta?: number; expected?: object; }[]; }[]; progress: { completed: number; failed: number; total: number; }; scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; aggregate?: { exactMatches: number; extras: number; f1: number; fuzzyMatches: number; misses: number; precision: number; recall: number; totalFieldsActual: number; totalFieldsExpected: number; withinTolerance: number; }; }",
+    markdown:
+      "## retrieve\n\n`client.eval.score.retrieve(scoreRunID: string): { functionName: string; functionVersionNum: number; matchConfig: object; perPair: object[]; progress: object; scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; aggregate?: object; }`\n\n**get** `/v3/eval/score/{scoreRunID}`\n\n**Get the status and per-pair results of a score run.**\n\nReturns `aggregate` only once `status` reaches `completed`. `perPair`\nis populated incrementally — each pair's `fieldResults` appears as\nits underlying function call terminates.\n\n### Parameters\n\n- `scoreRunID: string`\n\n### Returns\n\n- `{ functionName: string; functionVersionNum: number; matchConfig: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }; perPair: { pairIndex: number; status: 'pending' | 'running' | 'completed' | 'failed'; callID?: string; errorMessage?: string; fieldResults?: { match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra'; path: string; actual?: object; delta?: number; expected?: object; }[]; }[]; progress: { completed: number; failed: number; total: number; }; scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; aggregate?: { exactMatches: number; extras: number; f1: number; fuzzyMatches: number; misses: number; precision: number; recall: number; totalFieldsActual: number; totalFieldsExpected: number; withinTolerance: number; }; }`\n  Full status payload returned by `GET /v3/eval/score/{scoreRunID}`.\n\n  - `functionName: string`\n  - `functionVersionNum: number`\n  - `matchConfig: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }`\n  - `perPair: { pairIndex: number; status: 'pending' | 'running' | 'completed' | 'failed'; callID?: string; errorMessage?: string; fieldResults?: { match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra'; path: string; actual?: object; delta?: number; expected?: object; }[]; }[]`\n  - `progress: { completed: number; failed: number; total: number; }`\n  - `scoreRunID: string`\n  - `status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'`\n  - `aggregate?: { exactMatches: number; extras: number; f1: number; fuzzyMatches: number; misses: number; precision: number; recall: number; totalFieldsActual: number; totalFieldsExpected: number; withinTolerance: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst score = await client.eval.score.retrieve('scoreRunID');\n\nconsole.log(score);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.eval.score.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst score = await client.eval.score.retrieve('scoreRunID');\n\nconsole.log(score.functionName);",
+      },
+      python: {
+        method: 'eval.score.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nscore = client.eval.score.retrieve(\n    "scoreRunID",\n)\nprint(score.function_name)',
+      },
+      go: {
+        method: 'client.Eval.Score.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tscore, err := client.Eval.Score.Get(context.TODO(), "scoreRunID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", score.FunctionName)\n}\n',
+      },
+      cli: {
+        method: 'score retrieve',
+        example: "bem eval:score retrieve \\\n  --api-key 'My API Key' \\\n  --score-run-id scoreRunID",
+      },
+      csharp: {
+        method: 'Eval.Score.Retrieve',
+        example:
+          'ScoreRetrieveParams parameters = new() { ScoreRunID = "scoreRunID" };\n\nvar score = await client.Eval.Score.Retrieve(parameters);\n\nConsole.WriteLine(score);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/eval/score/$SCORE_RUN_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'cancel',
+    endpoint: '/v3/eval/score/{scoreRunID}/cancel',
+    httpMethod: 'post',
+    summary: 'Cancel Score Run',
+    description:
+      '**Cancel an in-flight score run.**\n\nTransitions the run to `cancelled`. Function calls already in flight\nare allowed to finish (best-effort cancellation via the job queue);\nresults from completed pairs may still appear in subsequent GETs.',
+    stainlessPath: '(resource) eval.score > (method) cancel',
+    qualified: 'client.eval.score.cancel',
+    params: ['scoreRunID: string;'],
+    response:
+      "{ functionName: string; functionVersionNum: number; matchConfig: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }; perPair: { pairIndex: number; status: 'pending' | 'running' | 'completed' | 'failed'; callID?: string; errorMessage?: string; fieldResults?: { match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra'; path: string; actual?: object; delta?: number; expected?: object; }[]; }[]; progress: { completed: number; failed: number; total: number; }; scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; aggregate?: { exactMatches: number; extras: number; f1: number; fuzzyMatches: number; misses: number; precision: number; recall: number; totalFieldsActual: number; totalFieldsExpected: number; withinTolerance: number; }; }",
+    markdown:
+      "## cancel\n\n`client.eval.score.cancel(scoreRunID: string): { functionName: string; functionVersionNum: number; matchConfig: object; perPair: object[]; progress: object; scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; aggregate?: object; }`\n\n**post** `/v3/eval/score/{scoreRunID}/cancel`\n\n**Cancel an in-flight score run.**\n\nTransitions the run to `cancelled`. Function calls already in flight\nare allowed to finish (best-effort cancellation via the job queue);\nresults from completed pairs may still appear in subsequent GETs.\n\n### Parameters\n\n- `scoreRunID: string`\n\n### Returns\n\n- `{ functionName: string; functionVersionNum: number; matchConfig: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }; perPair: { pairIndex: number; status: 'pending' | 'running' | 'completed' | 'failed'; callID?: string; errorMessage?: string; fieldResults?: { match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra'; path: string; actual?: object; delta?: number; expected?: object; }[]; }[]; progress: { completed: number; failed: number; total: number; }; scoreRunID: string; status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'; aggregate?: { exactMatches: number; extras: number; f1: number; fuzzyMatches: number; misses: number; precision: number; recall: number; totalFieldsActual: number; totalFieldsExpected: number; withinTolerance: number; }; }`\n  Full status payload returned by `GET /v3/eval/score/{scoreRunID}`.\n\n  - `functionName: string`\n  - `functionVersionNum: number`\n  - `matchConfig: { arrayMatch?: 'by-index'; fuzzyThreshold?: number; ignorePaths?: string[]; numericTolerance?: number; stringMatch?: 'exact' | 'fuzzy'; }`\n  - `perPair: { pairIndex: number; status: 'pending' | 'running' | 'completed' | 'failed'; callID?: string; errorMessage?: string; fieldResults?: { match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra'; path: string; actual?: object; delta?: number; expected?: object; }[]; }[]`\n  - `progress: { completed: number; failed: number; total: number; }`\n  - `scoreRunID: string`\n  - `status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled'`\n  - `aggregate?: { exactMatches: number; extras: number; f1: number; fuzzyMatches: number; misses: number; precision: number; recall: number; totalFieldsActual: number; totalFieldsExpected: number; withinTolerance: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.eval.score.cancel('scoreRunID');\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.eval.score.cancel',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.eval.score.cancel('scoreRunID');\n\nconsole.log(response.functionName);",
+      },
+      python: {
+        method: 'eval.score.cancel',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.eval.score.cancel(\n    "scoreRunID",\n)\nprint(response.function_name)',
+      },
+      go: {
+        method: 'client.Eval.Score.Cancel',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Eval.Score.Cancel(context.TODO(), "scoreRunID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.FunctionName)\n}\n',
+      },
+      cli: {
+        method: 'score cancel',
+        example: "bem eval:score cancel \\\n  --api-key 'My API Key' \\\n  --score-run-id scoreRunID",
+      },
+      csharp: {
+        method: 'Eval.Score.Cancel',
+        example:
+          'ScoreCancelParams parameters = new() { ScoreRunID = "scoreRunID" };\n\nvar response = await client.Eval.Score.Cancel(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/eval/score/$SCORE_RUN_ID/cancel \\\n    -X POST \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
     name: 'navigate',
     endpoint: '/v3/fs',
     httpMethod: 'post',
@@ -2995,6 +3135,1056 @@ const EMBEDDED_METHODS: MethodEntry[] = [
       http: {
         example:
           'curl https://api.bem.ai/v3/views/$VIEW_ID \\\n    -X PUT \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "aggregations": [\n            {\n              "function": "count",\n              "name": "name"\n            }\n          ],\n          "columns": [\n            {\n              "displayOrderIndex": 0,\n              "name": "name",\n              "valueSchemaPath": [\n                "string"\n              ]\n            }\n          ],\n          "filters": [\n            {\n              "columnName": "columnName",\n              "filterType": "equals_string"\n            }\n          ],\n          "functions": [\n            {}\n          ],\n          "name": "name"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'create',
+    endpoint: '/v3/buckets',
+    httpMethod: 'post',
+    summary: 'Create a Bucket',
+    description: 'Create a Bucket',
+    stainlessPath: '(resource) buckets > (method) create',
+    qualified: 'client.buckets.create',
+    params: ['name: string;', 'description?: string;'],
+    response:
+      '{ bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }',
+    markdown:
+      "## create\n\n`client.buckets.create(name: string, description?: string): { bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }`\n\n**post** `/v3/buckets`\n\nCreate a Bucket\n\n### Parameters\n\n- `name: string`\n  Bucket name. Required and unique within the account+environment.\n\n- `description?: string`\n  Optional description.\n\n### Returns\n\n- `{ bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }`\n  A Bucket is a named partition of the knowledge graph within an\naccount+environment. Entities, mentions, and relations are scoped to a\nbucket so a single account+environment can host multiple isolated graphs.\n\nEvery account+environment has exactly one default bucket. The default\nbucket can be renamed but never deleted.\n\n  - `bucketID: string`\n  - `createdAt: string`\n  - `description: string`\n  - `isDefault: boolean`\n  - `name: string`\n  - `updatedAt: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst bucket = await client.buckets.create({ name: 'invoices' });\n\nconsole.log(bucket);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.buckets.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst bucket = await client.buckets.create({\n  name: 'invoices',\n  description: 'Knowledge graph for invoice documents',\n});\n\nconsole.log(bucket.bucketID);",
+      },
+      python: {
+        method: 'buckets.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nbucket = client.buckets.create(\n    name="invoices",\n    description="Knowledge graph for invoice documents",\n)\nprint(bucket.bucket_id)',
+      },
+      go: {
+        method: 'client.Buckets.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tbucket, err := client.Buckets.New(context.TODO(), bem.BucketNewParams{\n\t\tName:        "invoices",\n\t\tDescription: bem.String("Knowledge graph for invoice documents"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", bucket.BucketID)\n}\n',
+      },
+      cli: {
+        method: 'buckets create',
+        example: "bem buckets create \\\n  --api-key 'My API Key' \\\n  --name invoices",
+      },
+      csharp: {
+        method: 'Buckets.Create',
+        example:
+          'BucketCreateParams parameters = new() { Name = "invoices" };\n\nvar bucket = await client.Buckets.Create(parameters);\n\nConsole.WriteLine(bucket);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/buckets \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "name": "invoices",\n          "description": "Knowledge graph for invoice documents"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'list',
+    endpoint: '/v3/buckets',
+    httpMethod: 'get',
+    summary: 'List Buckets',
+    description: 'List Buckets',
+    stainlessPath: '(resource) buckets > (method) list',
+    qualified: 'client.buckets.list',
+    params: [
+      'endingBefore?: string;',
+      'limit?: number;',
+      'nameSubstring?: string;',
+      'startingAfter?: string;',
+    ],
+    response:
+      '{ buckets: { bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }[]; totalCount: number; }',
+    markdown:
+      "## list\n\n`client.buckets.list(endingBefore?: string, limit?: number, nameSubstring?: string, startingAfter?: string): { buckets: object[]; totalCount: number; }`\n\n**get** `/v3/buckets`\n\nList Buckets\n\n### Parameters\n\n- `endingBefore?: string`\n  Cursor: return buckets whose `bucketID` sorts before this value.\n\n- `limit?: number`\n  Maximum number of buckets to return (default 50, max 200).\n\n- `nameSubstring?: string`\n  Case-insensitive substring match on the bucket name.\n\n- `startingAfter?: string`\n  Cursor: return buckets whose `bucketID` sorts after this value.\n\n### Returns\n\n- `{ buckets: { bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }[]; totalCount: number; }`\n  Response body for listing buckets.\n\n  - `buckets: { bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }[]`\n  - `totalCount: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst buckets = await client.buckets.list();\n\nconsole.log(buckets);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.buckets.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst buckets = await client.buckets.list();\n\nconsole.log(buckets.buckets);",
+      },
+      python: {
+        method: 'buckets.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nbuckets = client.buckets.list()\nprint(buckets.buckets)',
+      },
+      go: {
+        method: 'client.Buckets.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tbuckets, err := client.Buckets.List(context.TODO(), bem.BucketListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", buckets.Buckets)\n}\n',
+      },
+      cli: {
+        method: 'buckets list',
+        example: "bem buckets list \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'Buckets.List',
+        example:
+          'BucketListParams parameters = new();\n\nvar buckets = await client.Buckets.List(parameters);\n\nConsole.WriteLine(buckets);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/buckets \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/buckets/{bucketID}',
+    httpMethod: 'get',
+    summary: 'Get a Bucket',
+    description: 'Get a Bucket',
+    stainlessPath: '(resource) buckets > (method) retrieve',
+    qualified: 'client.buckets.retrieve',
+    params: ['bucketID: string;'],
+    response:
+      '{ bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }',
+    markdown:
+      "## retrieve\n\n`client.buckets.retrieve(bucketID: string): { bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }`\n\n**get** `/v3/buckets/{bucketID}`\n\nGet a Bucket\n\n### Parameters\n\n- `bucketID: string`\n\n### Returns\n\n- `{ bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }`\n  A Bucket is a named partition of the knowledge graph within an\naccount+environment. Entities, mentions, and relations are scoped to a\nbucket so a single account+environment can host multiple isolated graphs.\n\nEvery account+environment has exactly one default bucket. The default\nbucket can be renamed but never deleted.\n\n  - `bucketID: string`\n  - `createdAt: string`\n  - `description: string`\n  - `isDefault: boolean`\n  - `name: string`\n  - `updatedAt: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst bucket = await client.buckets.retrieve('bucketID');\n\nconsole.log(bucket);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.buckets.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst bucket = await client.buckets.retrieve('bucketID');\n\nconsole.log(bucket.bucketID);",
+      },
+      python: {
+        method: 'buckets.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nbucket = client.buckets.retrieve(\n    "bucketID",\n)\nprint(bucket.bucket_id)',
+      },
+      go: {
+        method: 'client.Buckets.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tbucket, err := client.Buckets.Get(context.TODO(), "bucketID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", bucket.BucketID)\n}\n',
+      },
+      cli: {
+        method: 'buckets retrieve',
+        example: "bem buckets retrieve \\\n  --api-key 'My API Key' \\\n  --bucket-id bucketID",
+      },
+      csharp: {
+        method: 'Buckets.Retrieve',
+        example:
+          'BucketRetrieveParams parameters = new() { BucketID = "bucketID" };\n\nvar bucket = await client.Buckets.Retrieve(parameters);\n\nConsole.WriteLine(bucket);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/buckets/$BUCKET_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'update',
+    endpoint: '/v3/buckets/{bucketID}',
+    httpMethod: 'patch',
+    summary: 'Update a Bucket',
+    description: 'Update a Bucket',
+    stainlessPath: '(resource) buckets > (method) update',
+    qualified: 'client.buckets.update',
+    params: ['bucketID: string;', 'description?: string;', 'name?: string;'],
+    response:
+      '{ bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }',
+    markdown:
+      "## update\n\n`client.buckets.update(bucketID: string, description?: string, name?: string): { bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }`\n\n**patch** `/v3/buckets/{bucketID}`\n\nUpdate a Bucket\n\n### Parameters\n\n- `bucketID: string`\n\n- `description?: string`\n  New description.\n\n- `name?: string`\n  New name.\n\n### Returns\n\n- `{ bucketID: string; createdAt: string; description: string; isDefault: boolean; name: string; updatedAt: string; }`\n  A Bucket is a named partition of the knowledge graph within an\naccount+environment. Entities, mentions, and relations are scoped to a\nbucket so a single account+environment can host multiple isolated graphs.\n\nEvery account+environment has exactly one default bucket. The default\nbucket can be renamed but never deleted.\n\n  - `bucketID: string`\n  - `createdAt: string`\n  - `description: string`\n  - `isDefault: boolean`\n  - `name: string`\n  - `updatedAt: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst bucket = await client.buckets.update('bucketID');\n\nconsole.log(bucket);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.buckets.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst bucket = await client.buckets.update('bucketID');\n\nconsole.log(bucket.bucketID);",
+      },
+      python: {
+        method: 'buckets.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nbucket = client.buckets.update(\n    bucket_id="bucketID",\n)\nprint(bucket.bucket_id)',
+      },
+      go: {
+        method: 'client.Buckets.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tbucket, err := client.Buckets.Update(\n\t\tcontext.TODO(),\n\t\t"bucketID",\n\t\tbem.BucketUpdateParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", bucket.BucketID)\n}\n',
+      },
+      cli: {
+        method: 'buckets update',
+        example: "bem buckets update \\\n  --api-key 'My API Key' \\\n  --bucket-id bucketID",
+      },
+      csharp: {
+        method: 'Buckets.Update',
+        example:
+          'BucketUpdateParams parameters = new() { BucketID = "bucketID" };\n\nvar bucket = await client.Buckets.Update(parameters);\n\nConsole.WriteLine(bucket);',
+      },
+      http: {
+        example:
+          "curl https://api.bem.ai/v3/buckets/$BUCKET_ID \\\n    -X PATCH \\\n    -H 'Content-Type: application/json' \\\n    -H \"x-api-key: $BEM_API_KEY\" \\\n    -d '{}'",
+      },
+    },
+  },
+  {
+    name: 'delete',
+    endpoint: '/v3/buckets/{bucketID}',
+    httpMethod: 'delete',
+    summary: 'Delete a Bucket',
+    description: 'Delete a Bucket',
+    stainlessPath: '(resource) buckets > (method) delete',
+    qualified: 'client.buckets.delete',
+    params: ['bucketID: string;', 'cascade?: boolean;'],
+    markdown:
+      "## delete\n\n`client.buckets.delete(bucketID: string, cascade?: boolean): void`\n\n**delete** `/v3/buckets/{bucketID}`\n\nDelete a Bucket\n\n### Parameters\n\n- `bucketID: string`\n\n- `cascade?: boolean`\n  When `true`, delete the bucket even if it still contains entities\n(the entities are removed along with it). When omitted or `false`, the\nrequest is rejected with `409 Conflict` if the bucket is non-empty.\n\nThe default bucket can never be deleted regardless of this flag.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.buckets.delete('bucketID')\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.buckets.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.buckets.delete('bucketID');",
+      },
+      python: {
+        method: 'buckets.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.buckets.delete(\n    bucket_id="bucketID",\n)',
+      },
+      go: {
+        method: 'client.Buckets.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Buckets.Delete(\n\t\tcontext.TODO(),\n\t\t"bucketID",\n\t\tbem.BucketDeleteParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      cli: {
+        method: 'buckets delete',
+        example: "bem buckets delete \\\n  --api-key 'My API Key' \\\n  --bucket-id bucketID",
+      },
+      csharp: {
+        method: 'Buckets.Delete',
+        example:
+          'BucketDeleteParams parameters = new() { BucketID = "bucketID" };\n\nawait client.Buckets.Delete(parameters);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/buckets/$BUCKET_ID \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'bulk_create',
+    endpoint: '/v3/entities/bulk',
+    httpMethod: 'post',
+    summary: 'Bulk Seed Entities',
+    description: 'Bulk Seed Entities',
+    stainlessPath: '(resource) entities > (method) bulk_create',
+    qualified: 'client.entities.bulkCreate',
+    params: [
+      'entities: { canonical: string; type: string; attributes?: object; description?: string; synonyms?: string[]; }[];',
+      'bucket?: string;',
+      "onConflict?: 'merge';",
+    ],
+    response:
+      "{ results: { canonical: string; outcome: 'created' | 'merged-with' | 'rejected'; entityID?: string; reason?: string; }[]; summary: { created: number; merged: number; rejected: number; }; }",
+    markdown:
+      "## bulk_create\n\n`client.entities.bulkCreate(entities: { canonical: string; type: string; attributes?: object; description?: string; synonyms?: string[]; }[], bucket?: string, onConflict?: 'merge'): { results: object[]; summary: object; }`\n\n**post** `/v3/entities/bulk`\n\nBulk Seed Entities\n\n### Parameters\n\n- `entities: { canonical: string; type: string; attributes?: object; description?: string; synonyms?: string[]; }[]`\n  The entities to seed. Must be non-empty.\n\n- `bucket?: string`\n  Optional bucket public ID (`bkt_...`) to seed into. Omit to use the\naccount+environment default bucket.\n\n- `onConflict?: 'merge'`\n  Conflict strategy for an entity that already exists. Only `merge` is\nsupported and it is the default: synonyms are added additively, a longer\ndescription replaces the old one, and attributes are merged with new keys\nwinning.\n\n### Returns\n\n- `{ results: { canonical: string; outcome: 'created' | 'merged-with' | 'rejected'; entityID?: string; reason?: string; }[]; summary: { created: number; merged: number; rejected: number; }; }`\n  `200` response for a synchronously processed (small) batch.\n\n  - `results: { canonical: string; outcome: 'created' | 'merged-with' | 'rejected'; entityID?: string; reason?: string; }[]`\n  - `summary: { created: number; merged: number; rejected: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.entities.bulkCreate({ entities: [{ canonical: 'Acme Corporation', type: 'organization' }] });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.bulkCreate',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.entities.bulkCreate({\n  entities: [\n    {\n      canonical: 'Acme Corporation',\n      type: 'organization',\n      description: 'Industrial conglomerate',\n      synonyms: ['ACME', 'Acme Corp'],\n      attributes: { headquarters: 'Springfield' },\n    },\n  ],\n  onConflict: 'merge',\n});\n\nconsole.log(response.results);",
+      },
+      python: {
+        method: 'entities.bulk_create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.entities.bulk_create(\n    entities=[{\n        "canonical": "Acme Corporation",\n        "type": "organization",\n        "description": "Industrial conglomerate",\n        "synonyms": ["ACME", "Acme Corp"],\n        "attributes": {\n            "headquarters": "Springfield"\n        },\n    }],\n    on_conflict="merge",\n)\nprint(response.results)',
+      },
+      go: {
+        method: 'client.Entities.BulkNew',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Entities.BulkNew(context.TODO(), bem.EntityBulkNewParams{\n\t\tEntities: []bem.EntityBulkNewParamsEntity{{\n\t\t\tCanonical:   "Acme Corporation",\n\t\t\tType:        "organization",\n\t\t\tDescription: bem.String("Industrial conglomerate"),\n\t\t\tSynonyms:    []string{"ACME", "Acme Corp"},\n\t\t\tAttributes: map[string]any{\n\t\t\t\t"headquarters": "Springfield",\n\t\t\t},\n\t\t}},\n\t\tOnConflict: bem.EntityBulkNewParamsOnConflictMerge,\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Results)\n}\n',
+      },
+      cli: {
+        method: 'entities bulk_create',
+        example:
+          "bem entities bulk-create \\\n  --api-key 'My API Key' \\\n  --entity '{canonical: Acme Corporation, type: organization}'",
+      },
+      csharp: {
+        method: 'Entities.BulkCreate',
+        example:
+          'EntityBulkCreateParams parameters = new()\n{\n    Entities =\n    [\n        new()\n        {\n            Canonical = "Acme Corporation",\n            Type = "organization",\n            Attributes = JsonSerializer.Deserialize<JsonElement>(\n                """\n                {\n                  "headquarters": "Springfield"\n                }\n                """\n            ),\n            Description = "Industrial conglomerate",\n            Synonyms =\n            [\n                "ACME", "Acme Corp"\n            ],\n        },\n    ],\n};\n\nvar response = await client.Entities.BulkCreate(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entities/bulk \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "entities": [\n            {\n              "canonical": "Acme Corporation",\n              "type": "organization",\n              "attributes": {\n                "headquarters": "Springfield"\n              },\n              "description": "Industrial conglomerate",\n              "synonyms": [\n                "ACME",\n                "Acme Corp"\n              ]\n            }\n          ],\n          "onConflict": "merge"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'bulk_validate',
+    endpoint: '/v3/entities/bulk-validate',
+    httpMethod: 'post',
+    summary: 'Bulk Validate Entities',
+    description: 'Bulk Validate Entities',
+    stainlessPath: '(resource) entities > (method) bulk_validate',
+    qualified: 'client.entities.bulkValidate',
+    params: ['entityIDs: string[];', "status: 'approved' | 'rejected';"],
+    response:
+      "{ results: { entityID: string; outcome: 'validated' | 'skipped' | 'rejected-row'; reason?: string; }[]; summary: { rejectedRow: number; skipped: number; validated: number; }; }",
+    markdown:
+      "## bulk_validate\n\n`client.entities.bulkValidate(entityIDs: string[], status: 'approved' | 'rejected'): { results: object[]; summary: object; }`\n\n**post** `/v3/entities/bulk-validate`\n\nBulk Validate Entities\n\n### Parameters\n\n- `entityIDs: string[]`\n  The `ent_...` IDs to transition. Must be non-empty.\n\n- `status: 'approved' | 'rejected'`\n  Terminal status to apply to every entity.\n\n### Returns\n\n- `{ results: { entityID: string; outcome: 'validated' | 'skipped' | 'rejected-row'; reason?: string; }[]; summary: { rejectedRow: number; skipped: number; validated: number; }; }`\n  `200` response for `POST /v3/entities/bulk-validate`.\n\n  - `results: { entityID: string; outcome: 'validated' | 'skipped' | 'rejected-row'; reason?: string; }[]`\n  - `summary: { rejectedRow: number; skipped: number; validated: number; }`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.entities.bulkValidate({ entityIDs: ['ent_2abc', 'ent_2def'], status: 'approved' });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.bulkValidate',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.entities.bulkValidate({\n  entityIDs: ['ent_2abc', 'ent_2def'],\n  status: 'approved',\n});\n\nconsole.log(response.results);",
+      },
+      python: {
+        method: 'entities.bulk_validate',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.entities.bulk_validate(\n    entity_ids=["ent_2abc", "ent_2def"],\n    status="approved",\n)\nprint(response.results)',
+      },
+      go: {
+        method: 'client.Entities.BulkValidate',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Entities.BulkValidate(context.TODO(), bem.EntityBulkValidateParams{\n\t\tEntityIDs: []string{"ent_2abc", "ent_2def"},\n\t\tStatus:    bem.EntityBulkValidateParamsStatusApproved,\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Results)\n}\n',
+      },
+      cli: {
+        method: 'entities bulk_validate',
+        example:
+          "bem entities bulk-validate \\\n  --api-key 'My API Key' \\\n  --entity-id ent_2abc \\\n  --entity-id ent_2def \\\n  --status approved",
+      },
+      csharp: {
+        method: 'Entities.BulkValidate',
+        example:
+          'EntityBulkValidateParams parameters = new()\n{\n    EntityIds =\n    [\n        "ent_2abc", "ent_2def"\n    ],\n    Status = Status.Approved,\n};\n\nvar response = await client.Entities.BulkValidate(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entities/bulk-validate \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "entityIDs": [\n            "ent_2abc",\n            "ent_2def"\n          ],\n          "status": "approved"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'retrieve_seed_status',
+    endpoint: '/v3/entities/seed/{id}',
+    httpMethod: 'get',
+    summary: 'Get Seed Job Status',
+    description: 'Get Seed Job Status',
+    stainlessPath: '(resource) entities > (method) retrieve_seed_status',
+    qualified: 'client.entities.retrieveSeedStatus',
+    params: ['id: string;'],
+    response:
+      "{ createdCount: number; mergedCount: number; rejectedCount: number; seedJobID: string; status: 'pending' | 'processing' | 'completed' | 'failed'; totalRows: number; error?: string; results?: { canonical: string; outcome: 'created' | 'merged-with' | 'rejected'; entityID?: string; reason?: string; }[]; }",
+    markdown:
+      "## retrieve_seed_status\n\n`client.entities.retrieveSeedStatus(id: string): { createdCount: number; mergedCount: number; rejectedCount: number; seedJobID: string; status: 'pending' | 'processing' | 'completed' | 'failed'; totalRows: number; error?: string; results?: object[]; }`\n\n**get** `/v3/entities/seed/{id}`\n\nGet Seed Job Status\n\n### Parameters\n\n- `id: string`\n\n### Returns\n\n- `{ createdCount: number; mergedCount: number; rejectedCount: number; seedJobID: string; status: 'pending' | 'processing' | 'completed' | 'failed'; totalRows: number; error?: string; results?: { canonical: string; outcome: 'created' | 'merged-with' | 'rejected'; entityID?: string; reason?: string; }[]; }`\n  `GET /v3/entities/seed/{id}` response.\n\n  - `createdCount: number`\n  - `mergedCount: number`\n  - `rejectedCount: number`\n  - `seedJobID: string`\n  - `status: 'pending' | 'processing' | 'completed' | 'failed'`\n  - `totalRows: number`\n  - `error?: string`\n  - `results?: { canonical: string; outcome: 'created' | 'merged-with' | 'rejected'; entityID?: string; reason?: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.entities.retrieveSeedStatus('id');\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.retrieveSeedStatus',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.entities.retrieveSeedStatus('id');\n\nconsole.log(response.createdCount);",
+      },
+      python: {
+        method: 'entities.retrieve_seed_status',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.entities.retrieve_seed_status(\n    "id",\n)\nprint(response.created_count)',
+      },
+      go: {
+        method: 'client.Entities.GetSeedStatus',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Entities.GetSeedStatus(context.TODO(), "id")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.CreatedCount)\n}\n',
+      },
+      cli: {
+        method: 'entities retrieve_seed_status',
+        example: "bem entities retrieve-seed-status \\\n  --api-key 'My API Key' \\\n  --id id",
+      },
+      csharp: {
+        method: 'Entities.RetrieveSeedStatus',
+        example:
+          'EntityRetrieveSeedStatusParams parameters = new() { ID = "id" };\n\nvar response = await client.Entities.RetrieveSeedStatus(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/entities/seed/$ID \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'update',
+    endpoint: '/v3/entities/{id}',
+    httpMethod: 'patch',
+    summary: 'Update Entity',
+    description: 'Update Entity',
+    stainlessPath: '(resource) entities > (method) update',
+    qualified: 'client.entities.update',
+    params: [
+      'id: string;',
+      'addSynonyms?: string[];',
+      'assignedTypeID?: string;',
+      'canonical?: string;',
+      'locale?: string;',
+      'removeSynonymIDs?: string[];',
+      "status?: 'approved' | 'rejected';",
+    ],
+    response:
+      "{ canonical: string; createdAt: string; entityID: string; mentionCount: number; status: 'extracted' | 'proposed' | 'approved' | 'rejected'; surfaceForms: string[]; type: string; updatedAt: string; description?: string; typeID?: string; validatedAt?: string; validatedByUserID?: string; }",
+    markdown:
+      "## update\n\n`client.entities.update(id: string, addSynonyms?: string[], assignedTypeID?: string, canonical?: string, locale?: string, removeSynonymIDs?: string[], status?: 'approved' | 'rejected'): { canonical: string; createdAt: string; entityID: string; mentionCount: number; status: 'extracted' | 'proposed' | 'approved' | 'rejected'; surfaceForms: string[]; type: string; updatedAt: string; description?: string; typeID?: string; validatedAt?: string; validatedByUserID?: string; }`\n\n**patch** `/v3/entities/{id}`\n\nUpdate Entity\n\n### Parameters\n\n- `id: string`\n\n- `addSynonyms?: string[]`\n  Surface forms to attach as `customer_defined` synonyms.\n\n- `assignedTypeID?: string`\n  The `ety_...` public ID of the type to assign (overriding the bem-inferred\ntype). The empty string clears the assignment. Omit to leave unchanged.\n\n- `canonical?: string`\n  Replace the entity's canonical surface form (re-derives its normalized form).\n\n- `locale?: string`\n  Optional BCP 47 locale tag stamped on any added synonyms.\n\n- `removeSynonymIDs?: string[]`\n  `esn_...` synonym IDs to soft-delete. Only `customer_defined` /\n`sme_approved` synonyms may be removed; an `extracted` synonym is rejected\nwith `409`.\n\n- `status?: 'approved' | 'rejected'`\n  Transition the entity's curation status. Only `approved` or `rejected` are\naccepted, and only from `extracted` or `proposed` (any other transition is\nrejected with `409`).\n\n### Returns\n\n- `{ canonical: string; createdAt: string; entityID: string; mentionCount: number; status: 'extracted' | 'proposed' | 'approved' | 'rejected'; surfaceForms: string[]; type: string; updatedAt: string; description?: string; typeID?: string; validatedAt?: string; validatedByUserID?: string; }`\n  An entity record, including its curation status and assigned type.\n\n  - `canonical: string`\n  - `createdAt: string`\n  - `entityID: string`\n  - `mentionCount: number`\n  - `status: 'extracted' | 'proposed' | 'approved' | 'rejected'`\n  - `surfaceForms: string[]`\n  - `type: string`\n  - `updatedAt: string`\n  - `description?: string`\n  - `typeID?: string`\n  - `validatedAt?: string`\n  - `validatedByUserID?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst entity = await client.entities.update('id');\n\nconsole.log(entity);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst entity = await client.entities.update('id', { status: 'approved' });\n\nconsole.log(entity.validatedAt);",
+      },
+      python: {
+        method: 'entities.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nentity = client.entities.update(\n    id="id",\n    status="approved",\n)\nprint(entity.validated_at)',
+      },
+      go: {
+        method: 'client.Entities.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tentity, err := client.Entities.Update(\n\t\tcontext.TODO(),\n\t\t"id",\n\t\tbem.EntityUpdateParams{\n\t\t\tStatus: bem.EntityUpdateParamsStatusApproved,\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", entity.ValidatedAt)\n}\n',
+      },
+      cli: {
+        method: 'entities update',
+        example: "bem entities update \\\n  --api-key 'My API Key' \\\n  --id id",
+      },
+      csharp: {
+        method: 'Entities.Update',
+        example:
+          'EntityUpdateParams parameters = new() { ID = "id" };\n\nvar entity = await client.Entities.Update(parameters);\n\nConsole.WriteLine(entity);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entities/$ID \\\n    -X PATCH \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "status": "approved"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'retrieve_relations',
+    endpoint: '/v3/entities/{id}/relations',
+    httpMethod: 'get',
+    summary: "Get an Entity's Relations",
+    description: "Get an Entity's Relations",
+    stainlessPath: '(resource) entities > (method) retrieve_relations',
+    qualified: 'client.entities.retrieveRelations',
+    params: [
+      'id: string;',
+      'bucket?: string;',
+      'cursor?: string;',
+      "direction?: 'inbound' | 'outbound' | 'both';",
+      'limit?: number;',
+      'relationType?: string;',
+    ],
+    response:
+      '{ inbound: { firstSeenAt: string; mentionCount: number; relationType: string; sourceEntity: { id: string; canonical: string; type: string; }; }[]; outbound: { firstSeenAt: string; mentionCount: number; relationType: string; targetEntity: { id: string; canonical: string; type: string; }; }[]; nextCursor?: string; }',
+    markdown:
+      "## retrieve_relations\n\n`client.entities.retrieveRelations(id: string, bucket?: string, cursor?: string, direction?: 'inbound' | 'outbound' | 'both', limit?: number, relationType?: string): { inbound: object[]; outbound: object[]; nextCursor?: string; }`\n\n**get** `/v3/entities/{id}/relations`\n\nGet an Entity's Relations\n\n### Parameters\n\n- `id: string`\n\n- `bucket?: string`\n  Optional bucket public ID (`bkt_...`) to scope the read to one bucket.\nOmit for the unscoped (all account+environment) view.\n\n- `cursor?: string`\n  Cursor: return edges whose KSUID sorts after this value.\n\n- `direction?: 'inbound' | 'outbound' | 'both'`\n  Which edges to return relative to the entity. Defaults to `both`.\n\n- `limit?: number`\n  Maximum number of edges to return (default 50, max 200).\n\n- `relationType?: string`\n  Exact-match filter on the relation label.\n\n### Returns\n\n- `{ inbound: { firstSeenAt: string; mentionCount: number; relationType: string; sourceEntity: { id: string; canonical: string; type: string; }; }[]; outbound: { firstSeenAt: string; mentionCount: number; relationType: string; targetEntity: { id: string; canonical: string; type: string; }; }[]; nextCursor?: string; }`\n  Response body for `GET /v3/entities/{id}/relations`.\n\n  - `inbound: { firstSeenAt: string; mentionCount: number; relationType: string; sourceEntity: { id: string; canonical: string; type: string; }; }[]`\n  - `outbound: { firstSeenAt: string; mentionCount: number; relationType: string; targetEntity: { id: string; canonical: string; type: string; }; }[]`\n  - `nextCursor?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.entities.retrieveRelations('id');\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.retrieveRelations',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.entities.retrieveRelations('id');\n\nconsole.log(response.inbound);",
+      },
+      python: {
+        method: 'entities.retrieve_relations',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.entities.retrieve_relations(\n    id="id",\n)\nprint(response.inbound)',
+      },
+      go: {
+        method: 'client.Entities.GetRelations',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Entities.GetRelations(\n\t\tcontext.TODO(),\n\t\t"id",\n\t\tbem.EntityGetRelationsParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Inbound)\n}\n',
+      },
+      cli: {
+        method: 'entities retrieve_relations',
+        example: "bem entities retrieve-relations \\\n  --api-key 'My API Key' \\\n  --id id",
+      },
+      csharp: {
+        method: 'Entities.RetrieveRelations',
+        example:
+          'EntityRetrieveRelationsParams parameters = new() { ID = "id" };\n\nvar response = await client.Entities.RetrieveRelations(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/entities/$ID/relations \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'add',
+    endpoint: '/v3/entities/{id}/synonyms',
+    httpMethod: 'post',
+    summary: 'Add a Synonym to an Entity',
+    description: 'Add a Synonym to an Entity',
+    stainlessPath: '(resource) entities.synonyms > (method) add',
+    qualified: 'client.entities.synonyms.add',
+    params: ['id: string;', 'text: string;', 'bucket?: string;', 'locale?: string;'],
+    response:
+      "{ createdAt: string; normalizedText: string; source: 'extracted' | 'customer_defined' | 'sme_approved'; synonymID: string; text: string; locale?: string; }",
+    markdown:
+      "## add\n\n`client.entities.synonyms.add(id: string, text: string, bucket?: string, locale?: string): { createdAt: string; normalizedText: string; source: 'extracted' | 'customer_defined' | 'sme_approved'; synonymID: string; text: string; locale?: string; }`\n\n**post** `/v3/entities/{id}/synonyms`\n\nAdd a Synonym to an Entity\n\n### Parameters\n\n- `id: string`\n\n- `text: string`\n  The human-readable synonym surface form to attach (e.g. `Acme Corp`,\n`ACME`). It is normalized (lowercased, whitespace-folded) for the\nuniqueness key and the matcher's exact-match path.\n\n- `bucket?: string`\n  Optional bucket public ID (`bkt_...`) to scope the entity lookup to one\nbucket. Omit for the unscoped (all account+environment) view.\n\n- `locale?: string`\n  Optional BCP 47 locale tag (e.g. `en-US`) for language-specific synonyms.\n\n### Returns\n\n- `{ createdAt: string; normalizedText: string; source: 'extracted' | 'customer_defined' | 'sme_approved'; synonymID: string; text: string; locale?: string; }`\n  One synonym attached to an entity.\n\n  - `createdAt: string`\n  - `normalizedText: string`\n  - `source: 'extracted' | 'customer_defined' | 'sme_approved'`\n  - `synonymID: string`\n  - `text: string`\n  - `locale?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.entities.synonyms.add('id', { text: 'ACME Corporation' });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.synonyms.add',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.entities.synonyms.add('id', {\n  text: 'ACME Corporation',\n  locale: 'en-US',\n});\n\nconsole.log(response.createdAt);",
+      },
+      python: {
+        method: 'entities.synonyms.add',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.entities.synonyms.add(\n    id="id",\n    text="ACME Corporation",\n    locale="en-US",\n)\nprint(response.created_at)',
+      },
+      go: {
+        method: 'client.Entities.Synonyms.Add',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Entities.Synonyms.Add(\n\t\tcontext.TODO(),\n\t\t"id",\n\t\tbem.EntitySynonymAddParams{\n\t\t\tText:   "ACME Corporation",\n\t\t\tLocale: bem.String("en-US"),\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.CreatedAt)\n}\n',
+      },
+      cli: {
+        method: 'synonyms add',
+        example:
+          "bem entities:synonyms add \\\n  --api-key 'My API Key' \\\n  --id id \\\n  --text 'ACME Corporation'",
+      },
+      csharp: {
+        method: 'Entities.Synonyms.Add',
+        example:
+          'SynonymAddParams parameters = new()\n{\n    ID = "id",\n    Text = "ACME Corporation",\n};\n\nvar response = await client.Entities.Synonyms.Add(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entities/$ID/synonyms \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "text": "ACME Corporation",\n          "locale": "en-US"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'remove',
+    endpoint: '/v3/entities/{id}/synonyms/{synonymID}',
+    httpMethod: 'delete',
+    summary: 'Remove a Synonym from an Entity',
+    description: 'Remove a Synonym from an Entity',
+    stainlessPath: '(resource) entities.synonyms > (method) remove',
+    qualified: 'client.entities.synonyms.remove',
+    params: ['id: string;', 'synonymID: string;', 'bucket?: string;'],
+    markdown:
+      "## remove\n\n`client.entities.synonyms.remove(id: string, synonymID: string, bucket?: string): void`\n\n**delete** `/v3/entities/{id}/synonyms/{synonymID}`\n\nRemove a Synonym from an Entity\n\n### Parameters\n\n- `id: string`\n\n- `synonymID: string`\n\n- `bucket?: string`\n  Optional bucket public ID (`bkt_...`) to scope the entity lookup to one\nbucket. Omit for the unscoped (all account+environment) view.\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.entities.synonyms.remove('synonymID', { id: 'id' })\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entities.synonyms.remove',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.entities.synonyms.remove('synonymID', { id: 'id' });",
+      },
+      python: {
+        method: 'entities.synonyms.remove',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.entities.synonyms.remove(\n    synonym_id="synonymID",\n    id="id",\n)',
+      },
+      go: {
+        method: 'client.Entities.Synonyms.Remove',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.Entities.Synonyms.Remove(\n\t\tcontext.TODO(),\n\t\t"synonymID",\n\t\tbem.EntitySynonymRemoveParams{\n\t\t\tID: "id",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      cli: {
+        method: 'synonyms remove',
+        example:
+          "bem entities:synonyms remove \\\n  --api-key 'My API Key' \\\n  --id id \\\n  --synonym-id synonymID",
+      },
+      csharp: {
+        method: 'Entities.Synonyms.Remove',
+        example:
+          'SynonymRemoveParams parameters = new()\n{\n    ID = "id",\n    SynonymID = "synonymID",\n};\n\nawait client.Entities.Synonyms.Remove(parameters);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entities/$ID/synonyms/$SYNONYM_ID \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'create',
+    endpoint: '/v3/entity-types',
+    httpMethod: 'post',
+    summary: 'Create an Entity Type',
+    description: 'Create an Entity Type',
+    stainlessPath: '(resource) entity_types > (method) create',
+    qualified: 'client.entityTypes.create',
+    params: ['name: string;', 'attributeSchema?: object;', 'description?: string;', 'parentTypeID?: string;'],
+    response:
+      '{ createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }',
+    markdown:
+      '## create\n\n`client.entityTypes.create(name: string, attributeSchema?: object, description?: string, parentTypeID?: string): { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }`\n\n**post** `/v3/entity-types`\n\nCreate an Entity Type\n\n### Parameters\n\n- `name: string`\n  Type name. Required and unique within the account+environment.\n\n- `attributeSchema?: object`\n  Optional per-type structured attribute metadata.\n\n- `description?: string`\n  Optional description.\n\n- `parentTypeID?: string`\n  Optional public ID (`ety_...`) of the parent type. Must belong to the\nsame account+environment.\n\n### Returns\n\n- `{ createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }`\n  An EntityType is a customer-defined type in the knowledge-graph taxonomy,\nscoped to an account+environment. Types may be organised into hierarchies\nvia `parentTypeID`, and may carry per-type structured attribute metadata in\n`attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).\n\n  - `createdAt: string`\n  - `description: string`\n  - `name: string`\n  - `parentTypeID: string`\n  - `typeID: string`\n  - `updatedAt: string`\n  - `attributeSchema?: object`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst entityType = await client.entityTypes.create({ name: \'Drug\' });\n\nconsole.log(entityType);\n```',
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.create',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst entityType = await client.entityTypes.create({\n  name: 'Drug',\n  description: 'A pharmaceutical compound',\n});\n\nconsole.log(entityType.createdAt);",
+      },
+      python: {
+        method: 'entity_types.create',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nentity_type = client.entity_types.create(\n    name="Drug",\n    description="A pharmaceutical compound",\n)\nprint(entity_type.created_at)',
+      },
+      go: {
+        method: 'client.EntityTypes.New',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tentityType, err := client.EntityTypes.New(context.TODO(), bem.EntityTypeNewParams{\n\t\tName:        "Drug",\n\t\tDescription: bem.String("A pharmaceutical compound"),\n\t})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", entityType.CreatedAt)\n}\n',
+      },
+      cli: {
+        method: 'entity_types create',
+        example: "bem entity-types create \\\n  --api-key 'My API Key' \\\n  --name Drug",
+      },
+      csharp: {
+        method: 'EntityTypes.Create',
+        example:
+          'EntityTypeCreateParams parameters = new() { Name = "Drug" };\n\nvar entityType = await client.EntityTypes.Create(parameters);\n\nConsole.WriteLine(entityType);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entity-types \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "name": "Drug",\n          "description": "A pharmaceutical compound"\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'list',
+    endpoint: '/v3/entity-types',
+    httpMethod: 'get',
+    summary: 'List Entity Types',
+    description: 'List Entity Types',
+    stainlessPath: '(resource) entity_types > (method) list',
+    qualified: 'client.entityTypes.list',
+    params: [
+      'endingBefore?: string;',
+      'limit?: number;',
+      'parentTypeId?: string;',
+      'startingAfter?: string;',
+    ],
+    response:
+      '{ entityTypes: { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }[]; totalCount: number; }',
+    markdown:
+      "## list\n\n`client.entityTypes.list(endingBefore?: string, limit?: number, parentTypeId?: string, startingAfter?: string): { entityTypes: object[]; totalCount: number; }`\n\n**get** `/v3/entity-types`\n\nList Entity Types\n\n### Parameters\n\n- `endingBefore?: string`\n  Cursor: return types whose `typeID` sorts before this value.\n\n- `limit?: number`\n  Maximum number of entity types to return (default 50, max 200).\n\n- `parentTypeId?: string`\n  Filter to the direct children of this parent type (`ety_...`).\n\n- `startingAfter?: string`\n  Cursor: return types whose `typeID` sorts after this value.\n\n### Returns\n\n- `{ entityTypes: { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }[]; totalCount: number; }`\n  Response body for listing entity types.\n\n  - `entityTypes: { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }[]`\n  - `totalCount: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst entityTypes = await client.entityTypes.list();\n\nconsole.log(entityTypes);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst entityTypes = await client.entityTypes.list();\n\nconsole.log(entityTypes.entityTypes);",
+      },
+      python: {
+        method: 'entity_types.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nentity_types = client.entity_types.list()\nprint(entity_types.entity_types)',
+      },
+      go: {
+        method: 'client.EntityTypes.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tentityTypes, err := client.EntityTypes.List(context.TODO(), bem.EntityTypeListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", entityTypes.EntityTypes)\n}\n',
+      },
+      cli: {
+        method: 'entity_types list',
+        example: "bem entity-types list \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'EntityTypes.List',
+        example:
+          'EntityTypeListParams parameters = new();\n\nvar entityTypes = await client.EntityTypes.List(parameters);\n\nConsole.WriteLine(entityTypes);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/entity-types \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/entity-types/{typeID}',
+    httpMethod: 'get',
+    summary: 'Get an Entity Type',
+    description: 'Get an Entity Type',
+    stainlessPath: '(resource) entity_types > (method) retrieve',
+    qualified: 'client.entityTypes.retrieve',
+    params: ['typeID: string;'],
+    response:
+      '{ createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }',
+    markdown:
+      '## retrieve\n\n`client.entityTypes.retrieve(typeID: string): { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }`\n\n**get** `/v3/entity-types/{typeID}`\n\nGet an Entity Type\n\n### Parameters\n\n- `typeID: string`\n\n### Returns\n\n- `{ createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }`\n  An EntityType is a customer-defined type in the knowledge-graph taxonomy,\nscoped to an account+environment. Types may be organised into hierarchies\nvia `parentTypeID`, and may carry per-type structured attribute metadata in\n`attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).\n\n  - `createdAt: string`\n  - `description: string`\n  - `name: string`\n  - `parentTypeID: string`\n  - `typeID: string`\n  - `updatedAt: string`\n  - `attributeSchema?: object`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst entityType = await client.entityTypes.retrieve(\'typeID\');\n\nconsole.log(entityType);\n```',
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst entityType = await client.entityTypes.retrieve('typeID');\n\nconsole.log(entityType.createdAt);",
+      },
+      python: {
+        method: 'entity_types.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nentity_type = client.entity_types.retrieve(\n    "typeID",\n)\nprint(entity_type.created_at)',
+      },
+      go: {
+        method: 'client.EntityTypes.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tentityType, err := client.EntityTypes.Get(context.TODO(), "typeID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", entityType.CreatedAt)\n}\n',
+      },
+      cli: {
+        method: 'entity_types retrieve',
+        example: "bem entity-types retrieve \\\n  --api-key 'My API Key' \\\n  --type-id typeID",
+      },
+      csharp: {
+        method: 'EntityTypes.Retrieve',
+        example:
+          'EntityTypeRetrieveParams parameters = new() { TypeID = "typeID" };\n\nvar entityType = await client.EntityTypes.Retrieve(parameters);\n\nConsole.WriteLine(entityType);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/entity-types/$TYPE_ID \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'update',
+    endpoint: '/v3/entity-types/{typeID}',
+    httpMethod: 'patch',
+    summary: 'Update an Entity Type',
+    description: 'Update an Entity Type',
+    stainlessPath: '(resource) entity_types > (method) update',
+    qualified: 'client.entityTypes.update',
+    params: [
+      'typeID: string;',
+      'attributeSchema?: object;',
+      'description?: string;',
+      'parentTypeID?: string;',
+    ],
+    response:
+      '{ createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }',
+    markdown:
+      '## update\n\n`client.entityTypes.update(typeID: string, attributeSchema?: object, description?: string, parentTypeID?: string): { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }`\n\n**patch** `/v3/entity-types/{typeID}`\n\nUpdate an Entity Type\n\n### Parameters\n\n- `typeID: string`\n\n- `attributeSchema?: object`\n  New per-type structured attribute metadata.\n\n- `description?: string`\n  New description.\n\n- `parentTypeID?: string`\n  New parent type public ID (`ety_...`), or an empty string to clear the\nparent (promote to top-level). Must belong to the same\naccount+environment and may not be the type itself.\n\n### Returns\n\n- `{ createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }`\n  An EntityType is a customer-defined type in the knowledge-graph taxonomy,\nscoped to an account+environment. Types may be organised into hierarchies\nvia `parentTypeID`, and may carry per-type structured attribute metadata in\n`attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).\n\n  - `createdAt: string`\n  - `description: string`\n  - `name: string`\n  - `parentTypeID: string`\n  - `typeID: string`\n  - `updatedAt: string`\n  - `attributeSchema?: object`\n\n### Example\n\n```typescript\nimport Bem from \'bem-ai-sdk\';\n\nconst client = new Bem();\n\nconst entityType = await client.entityTypes.update(\'typeID\');\n\nconsole.log(entityType);\n```',
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.update',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst entityType = await client.entityTypes.update('typeID');\n\nconsole.log(entityType.createdAt);",
+      },
+      python: {
+        method: 'entity_types.update',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nentity_type = client.entity_types.update(\n    type_id="typeID",\n)\nprint(entity_type.created_at)',
+      },
+      go: {
+        method: 'client.EntityTypes.Update',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tentityType, err := client.EntityTypes.Update(\n\t\tcontext.TODO(),\n\t\t"typeID",\n\t\tbem.EntityTypeUpdateParams{},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", entityType.CreatedAt)\n}\n',
+      },
+      cli: {
+        method: 'entity_types update',
+        example: "bem entity-types update \\\n  --api-key 'My API Key' \\\n  --type-id typeID",
+      },
+      csharp: {
+        method: 'EntityTypes.Update',
+        example:
+          'EntityTypeUpdateParams parameters = new() { TypeID = "typeID" };\n\nvar entityType = await client.EntityTypes.Update(parameters);\n\nConsole.WriteLine(entityType);',
+      },
+      http: {
+        example:
+          "curl https://api.bem.ai/v3/entity-types/$TYPE_ID \\\n    -X PATCH \\\n    -H 'Content-Type: application/json' \\\n    -H \"x-api-key: $BEM_API_KEY\" \\\n    -d '{}'",
+      },
+    },
+  },
+  {
+    name: 'delete',
+    endpoint: '/v3/entity-types/{typeID}',
+    httpMethod: 'delete',
+    summary: 'Delete an Entity Type',
+    description: 'Delete an Entity Type',
+    stainlessPath: '(resource) entity_types > (method) delete',
+    qualified: 'client.entityTypes.delete',
+    params: ['typeID: string;'],
+    markdown:
+      "## delete\n\n`client.entityTypes.delete(typeID: string): void`\n\n**delete** `/v3/entity-types/{typeID}`\n\nDelete an Entity Type\n\n### Parameters\n\n- `typeID: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.entityTypes.delete('typeID')\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.delete',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.entityTypes.delete('typeID');",
+      },
+      python: {
+        method: 'entity_types.delete',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.entity_types.delete(\n    "typeID",\n)',
+      },
+      go: {
+        method: 'client.EntityTypes.Delete',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.EntityTypes.Delete(context.TODO(), "typeID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      cli: {
+        method: 'entity_types delete',
+        example: "bem entity-types delete \\\n  --api-key 'My API Key' \\\n  --type-id typeID",
+      },
+      csharp: {
+        method: 'EntityTypes.Delete',
+        example:
+          'EntityTypeDeleteParams parameters = new() { TypeID = "typeID" };\n\nawait client.EntityTypes.Delete(parameters);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entity-types/$TYPE_ID \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'assign',
+    endpoint: '/v3/entity-types/{typeID}/reviewers',
+    httpMethod: 'post',
+    summary: 'Assign a Reviewer',
+    description: 'Assign a Reviewer',
+    stainlessPath: '(resource) entity_types.reviewers > (method) assign',
+    qualified: 'client.entityTypes.reviewers.assign',
+    params: ['typeID: string;', 'userID: string;'],
+    response: '{ createdAt: string; email: string; reviewerID: string; role: string; userID: string; }',
+    markdown:
+      "## assign\n\n`client.entityTypes.reviewers.assign(typeID: string, userID: string): { createdAt: string; email: string; reviewerID: string; role: string; userID: string; }`\n\n**post** `/v3/entity-types/{typeID}/reviewers`\n\nAssign a Reviewer\n\n### Parameters\n\n- `typeID: string`\n\n- `userID: string`\n  Public ID (`usr_...`) of the user to assign. Must belong to the account.\n\n### Returns\n\n- `{ createdAt: string; email: string; reviewerID: string; role: string; userID: string; }`\n  A reviewer assignment links a user to an entity type they are responsible\nfor reviewing. The assignment is scoped to an account+environment and is\nunique per (entity type, user).\n\n  - `createdAt: string`\n  - `email: string`\n  - `reviewerID: string`\n  - `role: string`\n  - `userID: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.entityTypes.reviewers.assign('typeID', { userID: 'usr_2xyz...' });\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.reviewers.assign',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.entityTypes.reviewers.assign('typeID', { userID: 'usr_2xyz...' });\n\nconsole.log(response.createdAt);",
+      },
+      python: {
+        method: 'entity_types.reviewers.assign',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.entity_types.reviewers.assign(\n    type_id="typeID",\n    user_id="usr_2xyz...",\n)\nprint(response.created_at)',
+      },
+      go: {
+        method: 'client.EntityTypes.Reviewers.Assign',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.EntityTypes.Reviewers.Assign(\n\t\tcontext.TODO(),\n\t\t"typeID",\n\t\tbem.EntityTypeReviewerAssignParams{\n\t\t\tUserID: "usr_2xyz...",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.CreatedAt)\n}\n',
+      },
+      cli: {
+        method: 'reviewers assign',
+        example:
+          "bem entity-types:reviewers assign \\\n  --api-key 'My API Key' \\\n  --type-id typeID \\\n  --user-id usr_2xyz...",
+      },
+      csharp: {
+        method: 'EntityTypes.Reviewers.Assign',
+        example:
+          'ReviewerAssignParams parameters = new()\n{\n    TypeID = "typeID",\n    UserID = "usr_2xyz...",\n};\n\nvar response = await client.EntityTypes.Reviewers.Assign(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entity-types/$TYPE_ID/reviewers \\\n    -H \'Content-Type: application/json\' \\\n    -H "x-api-key: $BEM_API_KEY" \\\n    -d \'{\n          "userID": "usr_2xyz..."\n        }\'',
+      },
+    },
+  },
+  {
+    name: 'list',
+    endpoint: '/v3/entity-types/{typeID}/reviewers',
+    httpMethod: 'get',
+    summary: 'List Reviewers',
+    description: 'List Reviewers',
+    stainlessPath: '(resource) entity_types.reviewers > (method) list',
+    qualified: 'client.entityTypes.reviewers.list',
+    params: ['typeID: string;'],
+    response:
+      '{ reviewers: { createdAt: string; email: string; reviewerID: string; role: string; userID: string; }[]; }',
+    markdown:
+      "## list\n\n`client.entityTypes.reviewers.list(typeID: string): { reviewers: object[]; }`\n\n**get** `/v3/entity-types/{typeID}/reviewers`\n\nList Reviewers\n\n### Parameters\n\n- `typeID: string`\n\n### Returns\n\n- `{ reviewers: { createdAt: string; email: string; reviewerID: string; role: string; userID: string; }[]; }`\n  Response body for listing the reviewers of an entity type.\n\n  - `reviewers: { createdAt: string; email: string; reviewerID: string; role: string; userID: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst reviewers = await client.entityTypes.reviewers.list('typeID');\n\nconsole.log(reviewers);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.reviewers.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst reviewers = await client.entityTypes.reviewers.list('typeID');\n\nconsole.log(reviewers.reviewers);",
+      },
+      python: {
+        method: 'entity_types.reviewers.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nreviewers = client.entity_types.reviewers.list(\n    "typeID",\n)\nprint(reviewers.reviewers)',
+      },
+      go: {
+        method: 'client.EntityTypes.Reviewers.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\treviewers, err := client.EntityTypes.Reviewers.List(context.TODO(), "typeID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", reviewers.Reviewers)\n}\n',
+      },
+      cli: {
+        method: 'reviewers list',
+        example: "bem entity-types:reviewers list \\\n  --api-key 'My API Key' \\\n  --type-id typeID",
+      },
+      csharp: {
+        method: 'EntityTypes.Reviewers.List',
+        example:
+          'ReviewerListParams parameters = new() { TypeID = "typeID" };\n\nvar reviewers = await client.EntityTypes.Reviewers.List(parameters);\n\nConsole.WriteLine(reviewers);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entity-types/$TYPE_ID/reviewers \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'remove',
+    endpoint: '/v3/entity-types/{typeID}/reviewers/{userID}',
+    httpMethod: 'delete',
+    summary: 'Remove a Reviewer',
+    description: 'Remove a Reviewer',
+    stainlessPath: '(resource) entity_types.reviewers > (method) remove',
+    qualified: 'client.entityTypes.reviewers.remove',
+    params: ['typeID: string;', 'userID: string;'],
+    markdown:
+      "## remove\n\n`client.entityTypes.reviewers.remove(typeID: string, userID: string): void`\n\n**delete** `/v3/entity-types/{typeID}/reviewers/{userID}`\n\nRemove a Reviewer\n\n### Parameters\n\n- `typeID: string`\n\n- `userID: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nawait client.entityTypes.reviewers.remove('userID', { typeID: 'typeID' })\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.entityTypes.reviewers.remove',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nawait client.entityTypes.reviewers.remove('userID', { typeID: 'typeID' });",
+      },
+      python: {
+        method: 'entity_types.reviewers.remove',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nclient.entity_types.reviewers.remove(\n    user_id="userID",\n    type_id="typeID",\n)',
+      },
+      go: {
+        method: 'client.EntityTypes.Reviewers.Remove',
+        example:
+          'package main\n\nimport (\n\t"context"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\terr := client.EntityTypes.Reviewers.Remove(\n\t\tcontext.TODO(),\n\t\t"userID",\n\t\tbem.EntityTypeReviewerRemoveParams{\n\t\t\tTypeID: "typeID",\n\t\t},\n\t)\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n}\n',
+      },
+      cli: {
+        method: 'reviewers remove',
+        example:
+          "bem entity-types:reviewers remove \\\n  --api-key 'My API Key' \\\n  --type-id typeID \\\n  --user-id userID",
+      },
+      csharp: {
+        method: 'EntityTypes.Reviewers.Remove',
+        example:
+          'ReviewerRemoveParams parameters = new()\n{\n    TypeID = "typeID",\n    UserID = "userID",\n};\n\nawait client.EntityTypes.Reviewers.Remove(parameters);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/entity-types/$TYPE_ID/reviewers/$USER_ID \\\n    -X DELETE \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'retrieve',
+    endpoint: '/v3/knowledge-graph',
+    httpMethod: 'get',
+    summary: 'Retrieve the Knowledge Graph',
+    description: 'Retrieve the Knowledge Graph',
+    stainlessPath: '(resource) knowledge_graph > (method) retrieve',
+    qualified: 'client.knowledgeGraph.retrieve',
+    params: [
+      'bucket?: string;',
+      'cursor?: string;',
+      'limit?: number;',
+      'search?: string;',
+      'since?: string;',
+      'type?: string[];',
+    ],
+    response:
+      '{ edges: { mentionCount: number; relationType: string; sourceId: string; targetId: string; }[]; nodes: { id: string; canonical: string; mentionCount: number; type: string; }[]; nextCursor?: string; }',
+    markdown:
+      "## retrieve\n\n`client.knowledgeGraph.retrieve(bucket?: string, cursor?: string, limit?: number, search?: string, since?: string, type?: string[]): { edges: object[]; nodes: object[]; nextCursor?: string; }`\n\n**get** `/v3/knowledge-graph`\n\nRetrieve the Knowledge Graph\n\n### Parameters\n\n- `bucket?: string`\n  Optional bucket public ID (`bkt_...`) to scope the read to one bucket.\nOmit for the unscoped (all account+environment) view.\n\n- `cursor?: string`\n  Cursor: return edges whose KSUID sorts after this value.\n\n- `limit?: number`\n  Maximum number of edges per page (default 50, max 200).\n\n- `search?: string`\n  Case-insensitive substring match on canonical names. Both endpoints of an\nedge must match for the edge (and its nodes) to be returned.\n\n- `since?: string`\n  Only edges created at/after this RFC 3339 timestamp.\n\n- `type?: string[]`\n  Restrict to entities of these types. An edge is returned only when BOTH\nof its endpoints survive the type filter.\n\n### Returns\n\n- `{ edges: { mentionCount: number; relationType: string; sourceId: string; targetId: string; }[]; nodes: { id: string; canonical: string; mentionCount: number; type: string; }[]; nextCursor?: string; }`\n  Response body for `GET /v3/knowledge-graph`. Pagination is over edges;\n`nodes` are the distinct endpoint entities of the returned edge page (both\nendpoints of every edge are included).\n\n  - `edges: { mentionCount: number; relationType: string; sourceId: string; targetId: string; }[]`\n  - `nodes: { id: string; canonical: string; mentionCount: number; type: string; }[]`\n  - `nextCursor?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst knowledgeGraph = await client.knowledgeGraph.retrieve();\n\nconsole.log(knowledgeGraph);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.knowledgeGraph.retrieve',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst knowledgeGraph = await client.knowledgeGraph.retrieve();\n\nconsole.log(knowledgeGraph.edges);",
+      },
+      python: {
+        method: 'knowledge_graph.retrieve',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nknowledge_graph = client.knowledge_graph.retrieve()\nprint(knowledge_graph.edges)',
+      },
+      go: {
+        method: 'client.KnowledgeGraph.Get',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tknowledgeGraph, err := client.KnowledgeGraph.Get(context.TODO(), bem.KnowledgeGraphGetParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", knowledgeGraph.Edges)\n}\n',
+      },
+      cli: {
+        method: 'knowledge_graph retrieve',
+        example: "bem knowledge-graph retrieve \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'KnowledgeGraph.Retrieve',
+        example:
+          'KnowledgeGraphRetrieveParams parameters = new();\n\nvar knowledgeGraph = await client.KnowledgeGraph.Retrieve(parameters);\n\nConsole.WriteLine(knowledgeGraph);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/knowledge-graph \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'list',
+    endpoint: '/v3/review-queue',
+    httpMethod: 'get',
+    summary: 'List Review Queue',
+    description:
+      "**List entities awaiting curation, for a human reviewer's queue.**\n\nReturns a cursor-paginated set of entities scoped to your\naccount+environment (and optional `bucket`), each carrying a small preview\nof its first mentions so a reviewer can triage without opening every\nentity. All filters AND together.\n\n- **`status`** (repeatable) restricts to the given lifecycle states.\nOmitting it defaults to the pre-terminal states `extracted` and\n`proposed`.\n- **`type`** (repeatable, `ety_...` IDs) matches the entity's *effective*\ntype: an entity matches when its assigned type is one of these IDs, or it\nhas no assigned type and its bem-inferred type name matches one of them.\n- **`assignedTo`** (`me` or a `usr_...` ID) restricts to entities whose\neffective type the given user reviews. `me` resolves to the calling user.\n- **`since`** (RFC3339) restricts to entities created at or after the time.\n\nPagination is cursor-based on `entityID` ascending; default limit is 50,\nmaximum 200.",
+    stainlessPath: '(resource) review_queue > (method) list',
+    qualified: 'client.reviewQueue.list',
+    params: [
+      'assignedTo?: string;',
+      'bucket?: string;',
+      'cursor?: string;',
+      'limit?: number;',
+      'since?: string;',
+      'status?: string[];',
+      'type?: string[];',
+    ],
+    response:
+      '{ entities: { canonical: string; createdAt: string; entityID: string; mentionCount: number; previewMentions: { createdAt: string; entityID: string; mentionID: string; page: number; referenceID: string; surface: string; sectionLabel?: string; transformationID?: string; }[]; status: string; surfaceForms: string[]; type: string; updatedAt: string; description?: string; typeID?: string; validatedAt?: string; validatedByUserID?: string; }[]; hasMore: boolean; nextCursor?: string; }',
+    markdown:
+      "## list\n\n`client.reviewQueue.list(assignedTo?: string, bucket?: string, cursor?: string, limit?: number, since?: string, status?: string[], type?: string[]): { entities: object[]; hasMore: boolean; nextCursor?: string; }`\n\n**get** `/v3/review-queue`\n\n**List entities awaiting curation, for a human reviewer's queue.**\n\nReturns a cursor-paginated set of entities scoped to your\naccount+environment (and optional `bucket`), each carrying a small preview\nof its first mentions so a reviewer can triage without opening every\nentity. All filters AND together.\n\n- **`status`** (repeatable) restricts to the given lifecycle states.\nOmitting it defaults to the pre-terminal states `extracted` and\n`proposed`.\n- **`type`** (repeatable, `ety_...` IDs) matches the entity's *effective*\ntype: an entity matches when its assigned type is one of these IDs, or it\nhas no assigned type and its bem-inferred type name matches one of them.\n- **`assignedTo`** (`me` or a `usr_...` ID) restricts to entities whose\neffective type the given user reviews. `me` resolves to the calling user.\n- **`since`** (RFC3339) restricts to entities created at or after the time.\n\nPagination is cursor-based on `entityID` ascending; default limit is 50,\nmaximum 200.\n\n### Parameters\n\n- `assignedTo?: string`\n  `me` or a `usr_...` ID — restrict to entities whose effective type that user reviews.\n\n- `bucket?: string`\n  Optional bucket public ID (`bkt_...`) to scope to. Omit for all buckets.\n\n- `cursor?: string`\n  Cursor — an `entityID` defining your place in the list.\n\n- `limit?: number`\n\n- `since?: string`\n  RFC3339 timestamp — restrict to entities created at or after this time.\n\n- `status?: string[]`\n  Restrict to these lifecycle states. Defaults to `extracted` + `proposed`.\n\n- `type?: string[]`\n  Restrict to entities whose effective type is one of these `ety_...` IDs.\n\n### Returns\n\n- `{ entities: { canonical: string; createdAt: string; entityID: string; mentionCount: number; previewMentions: { createdAt: string; entityID: string; mentionID: string; page: number; referenceID: string; surface: string; sectionLabel?: string; transformationID?: string; }[]; status: string; surfaceForms: string[]; type: string; updatedAt: string; description?: string; typeID?: string; validatedAt?: string; validatedByUserID?: string; }[]; hasMore: boolean; nextCursor?: string; }`\n  `GET /v3/review-queue` response. Cursor-paginated by `entityID` ascending.\n\n  - `entities: { canonical: string; createdAt: string; entityID: string; mentionCount: number; previewMentions: { createdAt: string; entityID: string; mentionID: string; page: number; referenceID: string; surface: string; sectionLabel?: string; transformationID?: string; }[]; status: string; surfaceForms: string[]; type: string; updatedAt: string; description?: string; typeID?: string; validatedAt?: string; validatedByUserID?: string; }[]`\n  - `hasMore: boolean`\n  - `nextCursor?: string`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst reviewQueues = await client.reviewQueue.list();\n\nconsole.log(reviewQueues);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.reviewQueue.list',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst reviewQueues = await client.reviewQueue.list();\n\nconsole.log(reviewQueues.entities);",
+      },
+      python: {
+        method: 'review_queue.list',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nreview_queues = client.review_queue.list()\nprint(review_queues.entities)',
+      },
+      go: {
+        method: 'client.ReviewQueue.List',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\treviewQueues, err := client.ReviewQueue.List(context.TODO(), bem.ReviewQueueListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", reviewQueues.Entities)\n}\n',
+      },
+      cli: {
+        method: 'review_queue list',
+        example: "bem review-queue list \\\n  --api-key 'My API Key'",
+      },
+      csharp: {
+        method: 'ReviewQueue.List',
+        example:
+          'ReviewQueueListParams parameters = new();\n\nvar reviewQueues = await client.ReviewQueue.List(parameters);\n\nConsole.WriteLine(reviewQueues);',
+      },
+      http: {
+        example: 'curl https://api.bem.ai/v3/review-queue \\\n    -H "x-api-key: $BEM_API_KEY"',
+      },
+    },
+  },
+  {
+    name: 'list_reviewer_assignments',
+    endpoint: '/v3/users/{userID}/reviewer-assignments',
+    httpMethod: 'get',
+    summary: "List a User's Reviewer Assignments",
+    description: "List a User's Reviewer Assignments",
+    stainlessPath: '(resource) users > (method) list_reviewer_assignments',
+    qualified: 'client.users.listReviewerAssignments',
+    params: ['userID: string;'],
+    response: '{ assignments: { createdAt: string; description: string; name: string; typeID: string; }[]; }',
+    markdown:
+      "## list_reviewer_assignments\n\n`client.users.listReviewerAssignments(userID: string): { assignments: object[]; }`\n\n**get** `/v3/users/{userID}/reviewer-assignments`\n\nList a User's Reviewer Assignments\n\n### Parameters\n\n- `userID: string`\n\n### Returns\n\n- `{ assignments: { createdAt: string; description: string; name: string; typeID: string; }[]; }`\n  Response body for the reverse lookup of a user's reviewer assignments.\n\n  - `assignments: { createdAt: string; description: string; name: string; typeID: string; }[]`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst response = await client.users.listReviewerAssignments('userID');\n\nconsole.log(response);\n```",
+    perLanguage: {
+      typescript: {
+        method: 'client.users.listReviewerAssignments',
+        example:
+          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst response = await client.users.listReviewerAssignments('userID');\n\nconsole.log(response.assignments);",
+      },
+      python: {
+        method: 'users.list_reviewer_assignments',
+        example:
+          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nresponse = client.users.list_reviewer_assignments(\n    "userID",\n)\nprint(response.assignments)',
+      },
+      go: {
+        method: 'client.Users.ListReviewerAssignments',
+        example:
+          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tresponse, err := client.Users.ListReviewerAssignments(context.TODO(), "userID")\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", response.Assignments)\n}\n',
+      },
+      cli: {
+        method: 'users list_reviewer_assignments',
+        example: "bem users list-reviewer-assignments \\\n  --api-key 'My API Key' \\\n  --user-id userID",
+      },
+      csharp: {
+        method: 'Users.ListReviewerAssignments',
+        example:
+          'UserListReviewerAssignmentsParams parameters = new() { UserID = "userID" };\n\nvar response = await client.Users.ListReviewerAssignments(parameters);\n\nConsole.WriteLine(response);',
+      },
+      http: {
+        example:
+          'curl https://api.bem.ai/v3/users/$USER_ID/reviewer-assignments \\\n    -H "x-api-key: $BEM_API_KEY"',
       },
     },
   },

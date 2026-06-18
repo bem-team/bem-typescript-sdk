@@ -34,6 +34,17 @@ import * as Uploads from './core/uploads';
 import * as API from './resources/index';
 import { APIPromise } from './core/api-promise';
 import {
+  BucketCreateParams,
+  BucketCreateResponse,
+  BucketDeleteParams,
+  BucketListParams,
+  BucketListResponse,
+  BucketRetrieveResponse,
+  BucketUpdateParams,
+  BucketUpdateResponse,
+  Buckets,
+} from './resources/buckets';
+import {
   Call,
   CallGetResponse,
   CallListParams,
@@ -62,6 +73,11 @@ import { EventSubmitFeedbackParams, EventSubmitFeedbackResponse, Events } from '
 import { FNavigateParams, FNavigateResponse, Fs, FsOp } from './resources/fs';
 import { InferSchema, InferSchemaCreateParams, InferSchemaCreateResponse } from './resources/infer-schema';
 import {
+  KnowledgeGraph,
+  KnowledgeGraphRetrieveParams,
+  KnowledgeGraphRetrieveResponse,
+} from './resources/knowledge-graph';
+import {
   AnyType,
   Event,
   EventsOutputsPage,
@@ -70,6 +86,7 @@ import {
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
+import { ReviewQueue, ReviewQueueListParams, ReviewQueueListResponse } from './resources/review-queue';
 import {
   SubscriptionCreateParams,
   SubscriptionListParams,
@@ -78,6 +95,7 @@ import {
   SubscriptionV3,
   Subscriptions,
 } from './resources/subscriptions';
+import { UserListReviewerAssignmentsResponse, Users } from './resources/users';
 import {
   ViewCreateParams,
   ViewCreateResponse,
@@ -119,6 +137,28 @@ import {
   CollectionListResponse,
   Collections,
 } from './resources/collections/collections';
+import {
+  Entities,
+  EntityBulkCreateParams,
+  EntityBulkCreateResponse,
+  EntityBulkValidateParams,
+  EntityBulkValidateResponse,
+  EntityRetrieveRelationsParams,
+  EntityRetrieveRelationsResponse,
+  EntityRetrieveSeedStatusResponse,
+  EntityUpdateParams,
+  EntityUpdateResponse,
+} from './resources/entities/entities';
+import {
+  EntityTypeCreateParams,
+  EntityTypeCreateResponse,
+  EntityTypeListParams,
+  EntityTypeListResponse,
+  EntityTypeRetrieveResponse,
+  EntityTypeUpdateParams,
+  EntityTypeUpdateResponse,
+  EntityTypes,
+} from './resources/entity-types/entity-types';
 import { Eval, EvalTriggerEvaluationParams, EvalTriggerEvaluationResponse } from './resources/eval/eval';
 import {
   ClassificationListItem,
@@ -1219,6 +1259,107 @@ export class Bem {
    * and require at least one `function` to read from.
    */
   views: API.Views = new API.Views(this);
+  /**
+   * Buckets are named partitions of the knowledge graph within an
+   * account+environment. Entities, mentions, and relations are scoped to a
+   * bucket so a single account+environment can host multiple isolated graphs
+   * — for example one per data source or workspace.
+   *
+   * Every account+environment has exactly one **default** bucket, used by
+   * unscoped flows. The default bucket can be renamed but never deleted.
+   *
+   * Use these endpoints to create, list, fetch, rename, and delete buckets:
+   *
+   * - **`POST /v3/buckets`** creates a non-default bucket.
+   * - **`GET /v3/buckets`** lists buckets with cursor pagination
+   *   (`startingAfter` / `endingBefore` over `bucketID`).
+   * - **`PATCH /v3/buckets/{bucketID}`** updates `name` and/or `description`.
+   * - **`DELETE /v3/buckets/{bucketID}`** soft-deletes a bucket. A non-empty
+   *   bucket is rejected with `409 Conflict` unless `?cascade=true` is
+   *   passed; the default bucket can never be deleted.
+   */
+  buckets: API.Buckets = new API.Buckets(this);
+  entities: API.Entities = new API.Entities(this);
+  /**
+   * Entity Types are the customer-defined taxonomy for the knowledge graph,
+   * scoped to an account+environment. Each type has a unique, immutable name
+   * and can be organised into hierarchies via `parentTypeID`. A type may
+   * carry per-type structured attribute metadata in `attributeSchema` (for
+   * example `{"unit": "mg", "range": [0, 100]}`).
+   *
+   * Use these endpoints to create, list, fetch, update, and delete entity
+   * types:
+   *
+   * - **`POST /v3/entity-types`** creates a type, optionally under a parent.
+   * - **`GET /v3/entity-types`** lists types with cursor pagination
+   *   (`startingAfter` / `endingBefore` over `typeID`) and an optional
+   *   `parentTypeId` filter for direct children.
+   * - **`PATCH /v3/entity-types/{typeID}`** updates `description`,
+   *   `parentTypeID`, and/or `attributeSchema`. The `name` is immutable.
+   * - **`DELETE /v3/entity-types/{typeID}`** soft-deletes a type. The request
+   *   is rejected with `409 Conflict` while any live entity is assigned to
+   *   the type or any live child type points at it.
+   */
+  entityTypes: API.EntityTypes = new API.EntityTypes(this);
+  /**
+   * Read the cross-document knowledge graph — the canonical entities and the
+   * directed relations between them that the Parse pipeline populates when
+   * `linkAcrossDocuments` is enabled.
+   *
+   * - **`GET /v3/entities/{id}/relations`** returns the inbound and outbound
+   *   edges incident to one entity, split by direction. Supports
+   *   `direction`, an exact `relationType` filter, and cursor pagination over
+   *   edges. A merged-away entity id transparently resolves to its surviving
+   *   canonical entity.
+   * - **`GET /v3/knowledge-graph`** returns the graph as `{ nodes, edges }`,
+   *   paginating over edges. The `nodes` for a page are the distinct endpoint
+   *   entities of that page's edges (both endpoints of every edge are
+   *   included). Filter with `type[]`, `since`, and `search`; an edge is
+   *   returned only when both of its endpoints survive the entity filters.
+   *
+   * Both endpoints take an optional `bucket` (`bkt_...`) to scope the read to
+   * a single bucket; omit it for the unscoped account+environment view.
+   */
+  knowledgeGraph: API.KnowledgeGraph = new API.KnowledgeGraph(this);
+  /**
+   * The reviewer-facing read surface for entity curation, available on the
+   * dashboard (JWT) only.
+   *
+   * - **`GET /v3/review-queue`** returns a cursor-paginated set of entities
+   *   awaiting curation, scoped to your account+environment (and optional
+   *   `bucket`). Each row is a full entity plus a small preview (up to 2) of
+   *   its first mentions, so a reviewer can triage without opening every
+   *   entity.
+   *
+   * Filters AND together. `status` (repeatable) defaults to the pre-terminal
+   * states `extracted` + `proposed` when omitted. `type` (repeatable `ety_…`
+   * IDs) matches the entity's *effective* type — its assigned type id, or, for
+   * entities with no assigned type, its bem-inferred type name. `assignedTo`
+   * (`me` or a `usr_…` ID) restricts to entities whose effective type the user
+   * reviews. `since` (RFC3339) filters by creation time. Pagination is
+   * cursor-based on `entityID` ascending; default limit 50, maximum 200.
+   */
+  reviewQueue: API.ReviewQueue = new API.ReviewQueue(this);
+  /**
+   * Reviewer assignments link users to the entity types they are responsible
+   * for reviewing, scoped to an account+environment. These are dashboard-only
+   * endpoints: an assignment needs a user identity, which only the dashboard
+   * (JWT) surface carries.
+   *
+   * - **`POST /v3/entity-types/{typeID}/reviewers`** assigns a user as a
+   *   reviewer of the type. The assignment is idempotent: re-assigning an
+   *   existing reviewer returns the existing assignment. Requires the `admin`
+   *   role.
+   * - **`GET /v3/entity-types/{typeID}/reviewers`** lists the users assigned
+   *   to review the type, with each user's email and role. Requires the
+   *   `operator` role.
+   * - **`DELETE /v3/entity-types/{typeID}/reviewers/{userID}`** removes an
+   *   assignment. Requires the `admin` role.
+   * - **`GET /v3/users/{userID}/reviewer-assignments`** is the reverse lookup:
+   *   the entity types a user reviews. A user may read their own assignments;
+   *   reading another user's assignments requires the `admin` role.
+   */
+  users: API.Users = new API.Users(this);
 }
 
 Bem.Functions = Functions;
@@ -1236,6 +1377,12 @@ Bem.Fs = Fs;
 Bem.Connectors = Connectors;
 Bem.Subscriptions = Subscriptions;
 Bem.Views = Views;
+Bem.Buckets = Buckets;
+Bem.Entities = Entities;
+Bem.EntityTypes = EntityTypes;
+Bem.KnowledgeGraph = KnowledgeGraph;
+Bem.ReviewQueue = ReviewQueue;
+Bem.Users = Users;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -1435,4 +1582,54 @@ export declare namespace Bem {
     type ViewGenerateAggregationDataParams as ViewGenerateAggregationDataParams,
     type ViewGenerateTableDataParams as ViewGenerateTableDataParams,
   };
+
+  export {
+    Buckets as Buckets,
+    type BucketCreateResponse as BucketCreateResponse,
+    type BucketRetrieveResponse as BucketRetrieveResponse,
+    type BucketUpdateResponse as BucketUpdateResponse,
+    type BucketListResponse as BucketListResponse,
+    type BucketCreateParams as BucketCreateParams,
+    type BucketUpdateParams as BucketUpdateParams,
+    type BucketListParams as BucketListParams,
+    type BucketDeleteParams as BucketDeleteParams,
+  };
+
+  export {
+    Entities as Entities,
+    type EntityUpdateResponse as EntityUpdateResponse,
+    type EntityBulkCreateResponse as EntityBulkCreateResponse,
+    type EntityBulkValidateResponse as EntityBulkValidateResponse,
+    type EntityRetrieveRelationsResponse as EntityRetrieveRelationsResponse,
+    type EntityRetrieveSeedStatusResponse as EntityRetrieveSeedStatusResponse,
+    type EntityUpdateParams as EntityUpdateParams,
+    type EntityBulkCreateParams as EntityBulkCreateParams,
+    type EntityBulkValidateParams as EntityBulkValidateParams,
+    type EntityRetrieveRelationsParams as EntityRetrieveRelationsParams,
+  };
+
+  export {
+    EntityTypes as EntityTypes,
+    type EntityTypeCreateResponse as EntityTypeCreateResponse,
+    type EntityTypeRetrieveResponse as EntityTypeRetrieveResponse,
+    type EntityTypeUpdateResponse as EntityTypeUpdateResponse,
+    type EntityTypeListResponse as EntityTypeListResponse,
+    type EntityTypeCreateParams as EntityTypeCreateParams,
+    type EntityTypeUpdateParams as EntityTypeUpdateParams,
+    type EntityTypeListParams as EntityTypeListParams,
+  };
+
+  export {
+    KnowledgeGraph as KnowledgeGraph,
+    type KnowledgeGraphRetrieveResponse as KnowledgeGraphRetrieveResponse,
+    type KnowledgeGraphRetrieveParams as KnowledgeGraphRetrieveParams,
+  };
+
+  export {
+    ReviewQueue as ReviewQueue,
+    type ReviewQueueListResponse as ReviewQueueListResponse,
+    type ReviewQueueListParams as ReviewQueueListParams,
+  };
+
+  export { Users as Users, type UserListReviewerAssignmentsResponse as UserListReviewerAssignmentsResponse };
 }
