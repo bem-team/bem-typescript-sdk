@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.27.0 (2026-06-18)
+
+Full Changelog: [v0.26.0...v0.27.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.26.0...v0.27.0)
+
+### Features
+
+* **api:** api update ([9cc47fa](https://github.com/bem-team/bem-typescript-sdk/commit/9cc47fa660a06457cdfa4ed72bba81a9774b0180))
+* **api:** memory v1 and bulk scoring updates ([ad91de4](https://github.com/bem-team/bem-typescript-sdk/commit/ad91de4927cd6cb4296955e003fcf16347f945e3))
+
+
+### Bug Fixes
+
+* **client:** send content-type header for requests with an omitted optional body ([54bf74c](https://github.com/bem-team/bem-typescript-sdk/commit/54bf74c341d8a53232c9fe918fb83989a79effd1))
+
 ## 0.26.0 (2026-06-09)
 
 Full Changelog: [v0.25.0...v0.26.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.25.0...v0.26.0)
