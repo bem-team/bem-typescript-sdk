@@ -24,6 +24,7 @@ describe('resource fs', () => {
   test.skip('navigate: required and optional params', async () => {
     const response = await client.fs.navigate({
       op: 'ls',
+      context: { bucket: 'bucket' },
       countOnly: true,
       cursor: 'cursor',
       filter: {

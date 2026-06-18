@@ -1,6 +1,17 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 export {
+  Buckets,
+  type BucketCreateResponse,
+  type BucketRetrieveResponse,
+  type BucketUpdateResponse,
+  type BucketListResponse,
+  type BucketCreateParams,
+  type BucketUpdateParams,
+  type BucketListParams,
+  type BucketDeleteParams,
+} from './buckets';
+export {
   Calls,
   type Call,
   type CallGetResponse,
@@ -28,6 +39,28 @@ export {
   type ConnectorCreateParams,
   type ConnectorListParams,
 } from './connectors';
+export {
+  Entities,
+  type EntityUpdateResponse,
+  type EntityBulkCreateResponse,
+  type EntityBulkValidateResponse,
+  type EntityRetrieveRelationsResponse,
+  type EntityRetrieveSeedStatusResponse,
+  type EntityUpdateParams,
+  type EntityBulkCreateParams,
+  type EntityBulkValidateParams,
+  type EntityRetrieveRelationsParams,
+} from './entities/entities';
+export {
+  EntityTypes,
+  type EntityTypeCreateResponse,
+  type EntityTypeRetrieveResponse,
+  type EntityTypeUpdateResponse,
+  type EntityTypeListResponse,
+  type EntityTypeCreateParams,
+  type EntityTypeUpdateParams,
+  type EntityTypeListParams,
+} from './entity-types/entity-types';
 export {
   Errors,
   type ErrorEvent,
@@ -69,6 +102,11 @@ export {
 } from './functions/functions';
 export { InferSchema, type InferSchemaCreateResponse, type InferSchemaCreateParams } from './infer-schema';
 export {
+  KnowledgeGraph,
+  type KnowledgeGraphRetrieveResponse,
+  type KnowledgeGraphRetrieveParams,
+} from './knowledge-graph';
+export {
   Outputs,
   type AnyType,
   type Event,
@@ -77,6 +115,7 @@ export {
   type OutputListParams,
   type EventsOutputsPage,
 } from './outputs';
+export { ReviewQueue, type ReviewQueueListResponse, type ReviewQueueListParams } from './review-queue';
 export {
   Subscriptions,
   type SubscriptionV3,
@@ -85,6 +124,7 @@ export {
   type SubscriptionUpdateParams,
   type SubscriptionListParams,
 } from './subscriptions';
+export { Users, type UserListReviewerAssignmentsResponse } from './users';
 export {
   Views,
   type ViewCreateResponse,
