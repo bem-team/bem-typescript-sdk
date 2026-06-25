@@ -162,6 +162,7 @@ describe('resource workflows', () => {
         singleFile: { inputContent: 'inputContent', inputType: 'csv' },
       },
       wait: true,
+      bucket: 'bucket',
       callReferenceID: 'callReferenceID',
       metadata: {},
     });
