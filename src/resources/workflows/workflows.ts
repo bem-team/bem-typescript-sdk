@@ -804,6 +804,15 @@ export interface WorkflowCallParams {
   wait?: boolean;
 
   /**
+   * Body param: Optional bucket NAME that entities extracted by the workflow's parse
+   * function(s) land in. Resolution precedence: this call-level bucket > the parse
+   * function's configured `defaultBucket` > the account+environment default bucket.
+   * A non-existent bucket name returns 400, but only when the workflow contains a
+   * parse function; on a parse-free workflow it is ignored.
+   */
+  bucket?: string;
+
+  /**
    * Body param: Your reference ID for tracking this call.
    */
   callReferenceID?: string;

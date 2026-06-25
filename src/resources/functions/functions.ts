@@ -1776,6 +1776,13 @@ export interface ListFunctionsResponse {
  */
 export interface ParseConfig {
   /**
+   * Optional bucket NAME that parse-extracted entities land in when no call-level
+   * bucket is supplied. Lower precedence than a call-level bucket, higher than the
+   * account+environment default.
+   */
+  defaultBucket?: string;
+
+  /**
    * When true, extract named entities (people, organizations, products, studies,
    * identifiers, etc.) and the relationships between them, and dedupe by canonical
    * name within the document. When false, only `sections[]` is extracted;
