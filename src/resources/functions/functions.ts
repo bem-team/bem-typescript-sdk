@@ -34,8 +34,8 @@ export class Functions extends APIResource {
   /**
    * **Create a function.**
    *
-   * The function type (`extract`, `classify`, `split`, `join`, `enrich`, or
-   * `payload_shaping`) determines which configuration fields are required — see
+   * The function `type` determines which configuration fields are required — see the
+   * `CreateFunctionV3` discriminated union and
    * [Function types overview](/guide/function-types/overview) for the per-type
    * contract.
    *
@@ -341,7 +341,8 @@ export type CreateFunction =
   | CreateFunction.JoinFunction
   | CreateFunction.PayloadShapingFunction
   | CreateFunction.EnrichFunction
-  | CreateFunction.ParseFunction;
+  | CreateFunction.ParseFunction
+  | CreateFunction.RenderFunction;
 
 export namespace CreateFunction {
   export interface ExtractFunction {
@@ -691,6 +692,63 @@ export namespace CreateFunction {
        * (no native bbox support). Defaults to false.
        */
       enableBoundingBoxes?: boolean;
+    }
+  }
+
+  export interface RenderFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    renderConfig: RenderFunction.RenderConfig;
+
+    type: 'render';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace RenderFunction {
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    export interface RenderConfig {
+      template: RenderConfig.Template;
+    }
+
+    export namespace RenderConfig {
+      export interface Template {
+        /**
+         * Base64-encoded `.docx` bytes. In the Bem CLI, use `@path/to/file` to embed it
+         * automatically.
+         */
+        base64: string;
+
+        /**
+         * Original upload filename (e.g. `contract.docx`), stored for display only. Does
+         * not affect where the template is stored.
+         */
+        name?: string;
+      }
     }
   }
 }
@@ -1051,7 +1109,8 @@ export type Function =
   | Function.JoinFunction
   | Function.PayloadShapingFunction
   | Function.EnrichFunction
-  | Function.ParseFunction;
+  | Function.ParseFunction
+  | Function.RenderFunction;
 
 export namespace Function {
   export interface TransformFunction {
@@ -1709,6 +1768,152 @@ export namespace Function {
       enableBoundingBoxes?: boolean;
     }
   }
+
+  export interface RenderFunction {
+    /**
+     * Unique identifier of function.
+     */
+    functionID: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    type: 'render';
+
+    /**
+     * Version number of function.
+     */
+    versionNum: number;
+
+    /**
+     * Audit trail information for the function.
+     */
+    audit?: FunctionsAPI.FunctionAudit;
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Per-version configuration for a Render function.
+     *
+     * Render emits a `.docx` from schema-typed JSON by composing the JSON into a
+     * `.docx` template. The template document is stored server-side; this response
+     * exposes only the contract derived from it. Schema validation runs internally in
+     * the ML service against the bundled core schema; no customer-supplied schema
+     * rides this surface.
+     */
+    renderConfig?: RenderFunction.RenderConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+
+    /**
+     * List of workflows that use this function.
+     */
+    usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
+  }
+
+  export namespace RenderFunction {
+    /**
+     * Per-version configuration for a Render function.
+     *
+     * Render emits a `.docx` from schema-typed JSON by composing the JSON into a
+     * `.docx` template. The template document is stored server-side; this response
+     * exposes only the contract derived from it. Schema validation runs internally in
+     * the ML service against the bundled core schema; no customer-supplied schema
+     * rides this surface.
+     */
+    export interface RenderConfig {
+      /**
+       * The uploaded template: its filename, a short-lived presigned download URL, and
+       * the placeholder/style contract derived from it. Absent on configs created before
+       * template capture existed.
+       */
+      template?: RenderConfig.Template;
+    }
+
+    export namespace RenderConfig {
+      /**
+       * The uploaded template: its filename, a short-lived presigned download URL, and
+       * the placeholder/style contract derived from it. Absent on configs created before
+       * template capture existed.
+       */
+      export interface Template {
+        /**
+         * Short-lived presigned URL to download the stored `.docx`. The private storage
+         * location is never exposed.
+         */
+        downloadURL?: string;
+
+        /**
+         * Supported list kinds (`decimal`, `bullet`) the template's `numbering.xml`
+         * defines an `abstractNum` for. Empty means the template can hold no list, so any
+         * list primitive will fail at render.
+         */
+        listKinds?: Array<'decimal' | 'bullet'>;
+
+        /**
+         * Original filename of the uploaded template (e.g. `contract.docx`), echoed back
+         * for display. Absent on templates uploaded before the filename was captured.
+         */
+        name?: string;
+
+        /**
+         * The placeholder contract a Render template declares, grouped by how each
+         * placeholder is filled. Derived from the template at create/update time by
+         * scanning its `docxtpl` tags; not user-supplied.
+         *
+         * - `stringKeys`: bare string placeholders (`{{ key }}`) filled with a single
+         *   value.
+         * - `blockKeys`: wrapped-primitive placeholders (`{{p key }}`) — bind one core
+         *   primitive (paragraph, table, image, or list). The placeholder's own paragraph
+         *   dissolves and is replaced by the rendered subdocument's blocks, rather than
+         *   substituting text inline.
+         */
+        placeholders?: Template.Placeholders;
+
+        /**
+         * Paragraph/character style IDs the uploaded template defines and the rendered
+         * output can reference. Derived from the template's `styles.xml` at create/update
+         * time.
+         */
+        styleIds?: Array<string>;
+
+        /**
+         * Style IDs whose type is table — the styles a `table` primitive's required
+         * `styleId` can name. Empty means the template defines no table style, so any
+         * table primitive will fail at render.
+         */
+        tableStyleIds?: Array<string>;
+      }
+
+      export namespace Template {
+        /**
+         * The placeholder contract a Render template declares, grouped by how each
+         * placeholder is filled. Derived from the template at create/update time by
+         * scanning its `docxtpl` tags; not user-supplied.
+         *
+         * - `stringKeys`: bare string placeholders (`{{ key }}`) filled with a single
+         *   value.
+         * - `blockKeys`: wrapped-primitive placeholders (`{{p key }}`) — bind one core
+         *   primitive (paragraph, table, image, or list). The placeholder's own paragraph
+         *   dissolves and is replaced by the rendered subdocument's blocks, rather than
+         *   substituting text inline.
+         */
+        export interface Placeholders {
+          blockKeys: Array<string>;
+
+          stringKeys: Array<string>;
+        }
+      }
+    }
+  }
 }
 
 export interface FunctionAudit {
@@ -1756,7 +1961,8 @@ export type FunctionType =
   | 'analyze'
   | 'payload_shaping'
   | 'enrich'
-  | 'parse';
+  | 'parse'
+  | 'render';
 
 export interface ListFunctionsResponse {
   functions?: Array<Function>;
@@ -1853,7 +2059,8 @@ export type UpdateFunction =
   | UpdateFunction.JoinFunction
   | UpdateFunction.PayloadShapingFunction
   | UpdateFunction.UpsertEnrichFunction
-  | UpdateFunction.ParseFunction;
+  | UpdateFunction.ParseFunction
+  | UpdateFunction.RenderFunction;
 
 export namespace UpdateFunction {
   export interface ExtractFunction {
@@ -2207,6 +2414,63 @@ export namespace UpdateFunction {
        * (no native bbox support). Defaults to false.
        */
       enableBoundingBoxes?: boolean;
+    }
+  }
+
+  export interface RenderFunction {
+    type: 'render';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    renderConfig?: RenderFunction.RenderConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace RenderFunction {
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    export interface RenderConfig {
+      template: RenderConfig.Template;
+    }
+
+    export namespace RenderConfig {
+      export interface Template {
+        /**
+         * Base64-encoded `.docx` bytes. In the Bem CLI, use `@path/to/file` to embed it
+         * automatically.
+         */
+        base64: string;
+
+        /**
+         * Original upload filename (e.g. `contract.docx`), stored for display only. Does
+         * not affect where the template is stored.
+         */
+        name?: string;
+      }
     }
   }
 }
@@ -3498,7 +3762,8 @@ export type FunctionCreateParams =
   | FunctionCreateParams.CreateJoinFunction
   | FunctionCreateParams.CreatePayloadShapingFunction
   | FunctionCreateParams.CreateEnrichFunction
-  | FunctionCreateParams.CreateParseFunction;
+  | FunctionCreateParams.CreateParseFunction
+  | FunctionCreateParams.CreateRenderFunction;
 
 export declare namespace FunctionCreateParams {
   export interface CreateExtractFunction {
@@ -3847,6 +4112,63 @@ export declare namespace FunctionCreateParams {
       enableBoundingBoxes?: boolean;
     }
   }
+
+  export interface CreateRenderFunction {
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName: string;
+
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    renderConfig: CreateRenderFunction.RenderConfig;
+
+    type: 'render';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace CreateRenderFunction {
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    export interface RenderConfig {
+      template: RenderConfig.Template;
+    }
+
+    export namespace RenderConfig {
+      export interface Template {
+        /**
+         * Base64-encoded `.docx` bytes. In the Bem CLI, use `@path/to/file` to embed it
+         * automatically.
+         */
+        base64: string;
+
+        /**
+         * Original upload filename (e.g. `contract.docx`), stored for display only. Does
+         * not affect where the template is stored.
+         */
+        name?: string;
+      }
+    }
+  }
 }
 
 export type FunctionUpdateParams =
@@ -3857,7 +4179,8 @@ export type FunctionUpdateParams =
   | FunctionUpdateParams.UpsertJoinFunction
   | FunctionUpdateParams.UpsertPayloadShapingFunction
   | FunctionUpdateParams.UpsertEnrichFunction
-  | FunctionUpdateParams.UpsertParseFunction;
+  | FunctionUpdateParams.UpsertParseFunction
+  | FunctionUpdateParams.UpsertRenderFunction;
 
 export declare namespace FunctionUpdateParams {
   export interface UpsertExtractFunction {
@@ -4189,6 +4512,63 @@ export declare namespace FunctionUpdateParams {
        * (no native bbox support). Defaults to false.
        */
       enableBoundingBoxes?: boolean;
+    }
+  }
+
+  export interface UpsertRenderFunction {
+    type: 'render';
+
+    /**
+     * Display name of function. Human-readable name to help you identify the function.
+     */
+    displayName?: string;
+
+    /**
+     * Name of function. Must be UNIQUE on a per-environment basis.
+     */
+    functionName?: string;
+
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    renderConfig?: UpsertRenderFunction.RenderConfig;
+
+    /**
+     * Array of tags to categorize and organize functions.
+     */
+    tags?: Array<string>;
+  }
+
+  export namespace UpsertRenderFunction {
+    /**
+     * Request-side render configuration. Carries the template document as
+     * base64-encoded `.docx` bytes: the server validates them, stores the template,
+     * and derives the placeholder/style-id contract at create/update time, so clients
+     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
+     * returns the derived contract.
+     */
+    export interface RenderConfig {
+      template: RenderConfig.Template;
+    }
+
+    export namespace RenderConfig {
+      export interface Template {
+        /**
+         * Base64-encoded `.docx` bytes. In the Bem CLI, use `@path/to/file` to embed it
+         * automatically.
+         */
+        base64: string;
+
+        /**
+         * Original upload filename (e.g. `contract.docx`), stored for display only. Does
+         * not affect where the template is stored.
+         */
+        name?: string;
+      }
     }
   }
 }
