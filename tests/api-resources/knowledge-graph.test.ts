@@ -29,6 +29,8 @@ describe('resource knowledgeGraph', () => {
           bucket: 'bucket',
           cursor: 'cursor',
           limit: 0,
+          maxDepth: 0,
+          nodeID: 'nodeID',
           search: 'search',
           since: '2019-12-27T18:11:19.117Z',
           type: ['string'],

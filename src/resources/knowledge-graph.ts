@@ -99,6 +99,13 @@ export namespace KnowledgeGraphRetrieveResponse {
     canonical: string;
 
     /**
+     * Hops from the center node when the request centers the graph on one entity
+     * (`nodeID`). The center is depth 0. When the request is uncentered (no `nodeID`),
+     * this is 0 for every node.
+     */
+    depth: number;
+
+    /**
      * Total mentions of this entity across all parsed documents.
      */
     mentionCount: number;
@@ -126,6 +133,20 @@ export interface KnowledgeGraphRetrieveParams {
    * Maximum number of edges per page (default 50, max 200).
    */
   limit?: number;
+
+  /**
+   * Maximum hops from the center node. Only meaningful with `nodeID`. Defaults to 2
+   * and is clamped down to a system maximum (5).
+   */
+  maxDepth?: number;
+
+  /**
+   * Center the graph on this entity (`ent_...`) and only return the subgraph within
+   * `maxDepth` hops of it; every node then carries its `depth` (hops from the
+   * center, center = 0). Omit for the uncentered whole-graph view. `rootNodeID` and
+   * `focusNodeID` are accepted as aliases.
+   */
+  nodeID?: string;
 
   /**
    * Case-insensitive substring match on canonical names. Both endpoints of an edge

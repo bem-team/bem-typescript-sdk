@@ -351,6 +351,12 @@ export namespace EntityRetrieveRelationsResponse {
       canonical: string;
 
       /**
+       * Hops from the queried entity. This endpoint returns direct relations, so this is
+       * 1 (a self-loop's far end is the queried entity itself, 0).
+       */
+      depth: number;
+
+      /**
        * Effective entity type.
        */
       type: string;
@@ -400,6 +406,12 @@ export namespace EntityRetrieveRelationsResponse {
        * Canonical (most descriptive) surface form of the entity.
        */
       canonical: string;
+
+      /**
+       * Hops from the queried entity. This endpoint returns direct relations, so this is
+       * 1 (a self-loop's far end is the queried entity itself, 0).
+       */
+      depth: number;
 
       /**
        * Effective entity type.
