@@ -2,9 +2,7 @@
 
 export {
   EntityTypes,
-  type EntityTypeCreateResponse,
-  type EntityTypeRetrieveResponse,
-  type EntityTypeUpdateResponse,
+  type EntityType,
   type EntityTypeListResponse,
   type EntityTypeCreateParams,
   type EntityTypeUpdateParams,
@@ -12,8 +10,8 @@ export {
 } from './entity-types';
 export {
   Reviewers,
+  type Reviewer,
   type ReviewerListResponse,
-  type ReviewerAssignResponse,
   type ReviewerAssignParams,
   type ReviewerRemoveParams,
 } from './reviewers';

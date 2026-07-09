@@ -4,6 +4,7 @@ import { APIResource } from '../../core/resource';
 import * as WorkflowsAPI from './workflows';
 import * as CallsAPI from '../calls';
 import * as OutputsAPI from '../outputs';
+import * as ScoreAPI from '../eval/score';
 import * as FunctionsAPI from '../functions/functions';
 import * as VersionsAPI from './versions';
 import { VersionListParams, VersionRetrieveParams, VersionRetrieveResponse, Versions } from './versions';
@@ -847,7 +848,7 @@ export namespace WorkflowCallParams {
      * automatically read and base64-encode the file:
      * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
      */
-    singleFile?: Input.SingleFile;
+    singleFile?: ScoreAPI.FileInput;
   }
 
   export namespace Input {
@@ -874,26 +875,6 @@ export namespace WorkflowCallParams {
 
         itemReferenceID?: string;
       }
-    }
-
-    /**
-     * A single file input with base64-encoded content.
-     *
-     * When using the Bem CLI, use `@path/to/file` in the `inputContent` field to
-     * automatically read and base64-encode the file:
-     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
-     */
-    export interface SingleFile {
-      /**
-       * Base64-encoded file content. In the Bem CLI, use `@path/to/file` to embed file
-       * contents automatically.
-       */
-      inputContent: string;
-
-      /**
-       * The input type of the content you're sending for transformation.
-       */
-      inputType: OutputsAPI.InputType;
     }
   }
 }

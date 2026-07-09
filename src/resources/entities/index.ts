@@ -2,6 +2,8 @@
 
 export {
   Entities,
+  type RelatedEntity,
+  type SeedRowResult,
   type EntityUpdateResponse,
   type EntityBulkCreateResponse,
   type EntityBulkValidateResponse,

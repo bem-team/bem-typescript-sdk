@@ -1,6 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../core/resource';
+import * as ScoreAPI from './score';
 import * as OutputsAPI from '../outputs';
 import { APIPromise } from '../../core/api-promise';
 import { RequestOptions } from '../../internal/request-options';
@@ -99,12 +100,12 @@ export class Score extends APIResource {
    *
    * @example
    * ```ts
-   * const score = await client.eval.score.retrieve(
+   * const evalScoreRun = await client.eval.score.retrieve(
    *   'scoreRunID',
    * );
    * ```
    */
-  retrieve(scoreRunID: string, options?: RequestOptions): APIPromise<ScoreRetrieveResponse> {
+  retrieve(scoreRunID: string, options?: RequestOptions): APIPromise<EvalScoreRun> {
     return this._client.get(path`/v3/eval/score/${scoreRunID}`, options);
   }
 
@@ -117,14 +118,207 @@ export class Score extends APIResource {
    *
    * @example
    * ```ts
-   * const response = await client.eval.score.cancel(
+   * const evalScoreRun = await client.eval.score.cancel(
    *   'scoreRunID',
    * );
    * ```
    */
-  cancel(scoreRunID: string, options?: RequestOptions): APIPromise<ScoreCancelResponse> {
+  cancel(scoreRunID: string, options?: RequestOptions): APIPromise<EvalScoreRun> {
     return this._client.post(path`/v3/eval/score/${scoreRunID}/cancel`, options);
   }
+}
+
+/**
+ * Comparator configuration. All fields optional; conservative defaults.
+ */
+export interface EvalMatchConfig {
+  /**
+   * P0 supports only `by-index`.
+   */
+  arrayMatch?: 'by-index';
+
+  /**
+   * Levenshtein-ratio threshold used when `stringMatch == "fuzzy"`. Range `[0, 1]`.
+   * Default `0.85`.
+   */
+  fuzzyThreshold?: number;
+
+  /**
+   * JSON Pointer paths to skip during comparison. The asterisk character matches
+   * arbitrary object keys / array indices.
+   *
+   * Example values: /metadata, /lineItems with asterisk segment, etc.
+   */
+  ignorePaths?: Array<string>;
+
+  /**
+   * Relative tolerance for numeric fields. `0` (default) means exact equality;
+   * `0.01` means ±1%.
+   */
+  numericTolerance?: number;
+
+  /**
+   * `exact` (default) or `fuzzy`.
+   */
+  stringMatch?: 'exact' | 'fuzzy';
+}
+
+/**
+ * Full status payload returned by `GET /v3/eval/score/{scoreRunID}`.
+ */
+export interface EvalScoreRun {
+  functionName: string;
+
+  functionVersionNum: number;
+
+  /**
+   * Comparator configuration. All fields optional; conservative defaults.
+   */
+  matchConfig: EvalMatchConfig;
+
+  /**
+   * Per-pair results. `fieldResults` appears once a pair has been compared.
+   */
+  perPair: Array<EvalScoreRun.PerPair>;
+
+  /**
+   * Counts across all pairs.
+   */
+  progress: EvalScoreRun.Progress;
+
+  scoreRunID: string;
+
+  /**
+   * Status values for an eval-score run.
+   */
+  status: EvalScoreRunStatus;
+
+  /**
+   * Aggregate accuracy metrics.
+   */
+  aggregate?: EvalScoreRun.Aggregate;
+}
+
+export namespace EvalScoreRun {
+  /**
+   * Per-pair result.
+   */
+  export interface PerPair {
+    pairIndex: number;
+
+    /**
+     * Per-pair status.
+     */
+    status: 'pending' | 'running' | 'completed' | 'failed';
+
+    /**
+     * The function call that produced the actual output, if any.
+     */
+    callID?: string;
+
+    /**
+     * Error message if the underlying function call failed.
+     */
+    errorMessage?: string;
+
+    /**
+     * Per-leaf comparator output. Present only after the pair has been compared.
+     */
+    fieldResults?: Array<PerPair.FieldResult>;
+  }
+
+  export namespace PerPair {
+    /**
+     * One leaf in `expected ∪ actual`.
+     */
+    export interface FieldResult {
+      /**
+       * Classification:
+       *
+       * - `exact`: both present and deep-equal
+       * - `within_tolerance`: both numbers, within configured tolerance
+       * - `fuzzy_match`: both strings, Levenshtein ratio above threshold
+       * - `miss`: expected present, actual absent or different
+       * - `extra`: actual present, expected absent
+       */
+      match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra';
+
+      /**
+       * JSON Pointer to the leaf.
+       */
+      path: string;
+
+      actual?: unknown;
+
+      /**
+       * Populated for numeric comparisons; `actual - expected`.
+       */
+      delta?: number;
+
+      expected?: unknown;
+    }
+  }
+
+  /**
+   * Counts across all pairs.
+   */
+  export interface Progress {
+    completed: number;
+
+    failed: number;
+
+    total: number;
+  }
+
+  /**
+   * Aggregate accuracy metrics.
+   */
+  export interface Aggregate {
+    exactMatches: number;
+
+    extras: number;
+
+    f1: number;
+
+    fuzzyMatches: number;
+
+    misses: number;
+
+    precision: number;
+
+    recall: number;
+
+    totalFieldsActual: number;
+
+    totalFieldsExpected: number;
+
+    withinTolerance: number;
+  }
+}
+
+/**
+ * Status values for an eval-score run.
+ */
+export type EvalScoreRunStatus = 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled';
+
+/**
+ * A single file input with base64-encoded content.
+ *
+ * When using the Bem CLI, use `@path/to/file` in the `inputContent` field to
+ * automatically read and base64-encode the file:
+ * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
+ */
+export interface FileInput {
+  /**
+   * Base64-encoded file content. In the Bem CLI, use `@path/to/file` to embed file
+   * contents automatically.
+   */
+  inputContent: string;
+
+  /**
+   * The input type of the content you're sending for transformation.
+   */
+  inputType: OutputsAPI.InputType;
 }
 
 /**
@@ -139,343 +333,7 @@ export interface ScoreCreateResponse {
   /**
    * Status values for an eval-score run.
    */
-  status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled';
-}
-
-/**
- * Full status payload returned by `GET /v3/eval/score/{scoreRunID}`.
- */
-export interface ScoreRetrieveResponse {
-  functionName: string;
-
-  functionVersionNum: number;
-
-  /**
-   * Comparator configuration. All fields optional; conservative defaults.
-   */
-  matchConfig: ScoreRetrieveResponse.MatchConfig;
-
-  /**
-   * Per-pair results. `fieldResults` appears once a pair has been compared.
-   */
-  perPair: Array<ScoreRetrieveResponse.PerPair>;
-
-  /**
-   * Counts across all pairs.
-   */
-  progress: ScoreRetrieveResponse.Progress;
-
-  scoreRunID: string;
-
-  /**
-   * Status values for an eval-score run.
-   */
-  status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled';
-
-  /**
-   * Aggregate accuracy metrics.
-   */
-  aggregate?: ScoreRetrieveResponse.Aggregate;
-}
-
-export namespace ScoreRetrieveResponse {
-  /**
-   * Comparator configuration. All fields optional; conservative defaults.
-   */
-  export interface MatchConfig {
-    /**
-     * P0 supports only `by-index`.
-     */
-    arrayMatch?: 'by-index';
-
-    /**
-     * Levenshtein-ratio threshold used when `stringMatch == "fuzzy"`. Range `[0, 1]`.
-     * Default `0.85`.
-     */
-    fuzzyThreshold?: number;
-
-    /**
-     * JSON Pointer paths to skip during comparison. The asterisk character matches
-     * arbitrary object keys / array indices.
-     *
-     * Example values: /metadata, /lineItems with asterisk segment, etc.
-     */
-    ignorePaths?: Array<string>;
-
-    /**
-     * Relative tolerance for numeric fields. `0` (default) means exact equality;
-     * `0.01` means ±1%.
-     */
-    numericTolerance?: number;
-
-    /**
-     * `exact` (default) or `fuzzy`.
-     */
-    stringMatch?: 'exact' | 'fuzzy';
-  }
-
-  /**
-   * Per-pair result.
-   */
-  export interface PerPair {
-    pairIndex: number;
-
-    /**
-     * Per-pair status.
-     */
-    status: 'pending' | 'running' | 'completed' | 'failed';
-
-    /**
-     * The function call that produced the actual output, if any.
-     */
-    callID?: string;
-
-    /**
-     * Error message if the underlying function call failed.
-     */
-    errorMessage?: string;
-
-    /**
-     * Per-leaf comparator output. Present only after the pair has been compared.
-     */
-    fieldResults?: Array<PerPair.FieldResult>;
-  }
-
-  export namespace PerPair {
-    /**
-     * One leaf in `expected ∪ actual`.
-     */
-    export interface FieldResult {
-      /**
-       * Classification:
-       *
-       * - `exact`: both present and deep-equal
-       * - `within_tolerance`: both numbers, within configured tolerance
-       * - `fuzzy_match`: both strings, Levenshtein ratio above threshold
-       * - `miss`: expected present, actual absent or different
-       * - `extra`: actual present, expected absent
-       */
-      match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra';
-
-      /**
-       * JSON Pointer to the leaf.
-       */
-      path: string;
-
-      actual?: unknown;
-
-      /**
-       * Populated for numeric comparisons; `actual - expected`.
-       */
-      delta?: number;
-
-      expected?: unknown;
-    }
-  }
-
-  /**
-   * Counts across all pairs.
-   */
-  export interface Progress {
-    completed: number;
-
-    failed: number;
-
-    total: number;
-  }
-
-  /**
-   * Aggregate accuracy metrics.
-   */
-  export interface Aggregate {
-    exactMatches: number;
-
-    extras: number;
-
-    f1: number;
-
-    fuzzyMatches: number;
-
-    misses: number;
-
-    precision: number;
-
-    recall: number;
-
-    totalFieldsActual: number;
-
-    totalFieldsExpected: number;
-
-    withinTolerance: number;
-  }
-}
-
-/**
- * Full status payload returned by `GET /v3/eval/score/{scoreRunID}`.
- */
-export interface ScoreCancelResponse {
-  functionName: string;
-
-  functionVersionNum: number;
-
-  /**
-   * Comparator configuration. All fields optional; conservative defaults.
-   */
-  matchConfig: ScoreCancelResponse.MatchConfig;
-
-  /**
-   * Per-pair results. `fieldResults` appears once a pair has been compared.
-   */
-  perPair: Array<ScoreCancelResponse.PerPair>;
-
-  /**
-   * Counts across all pairs.
-   */
-  progress: ScoreCancelResponse.Progress;
-
-  scoreRunID: string;
-
-  /**
-   * Status values for an eval-score run.
-   */
-  status: 'pending' | 'initializing' | 'running' | 'completed' | 'error' | 'cancelled';
-
-  /**
-   * Aggregate accuracy metrics.
-   */
-  aggregate?: ScoreCancelResponse.Aggregate;
-}
-
-export namespace ScoreCancelResponse {
-  /**
-   * Comparator configuration. All fields optional; conservative defaults.
-   */
-  export interface MatchConfig {
-    /**
-     * P0 supports only `by-index`.
-     */
-    arrayMatch?: 'by-index';
-
-    /**
-     * Levenshtein-ratio threshold used when `stringMatch == "fuzzy"`. Range `[0, 1]`.
-     * Default `0.85`.
-     */
-    fuzzyThreshold?: number;
-
-    /**
-     * JSON Pointer paths to skip during comparison. The asterisk character matches
-     * arbitrary object keys / array indices.
-     *
-     * Example values: /metadata, /lineItems with asterisk segment, etc.
-     */
-    ignorePaths?: Array<string>;
-
-    /**
-     * Relative tolerance for numeric fields. `0` (default) means exact equality;
-     * `0.01` means ±1%.
-     */
-    numericTolerance?: number;
-
-    /**
-     * `exact` (default) or `fuzzy`.
-     */
-    stringMatch?: 'exact' | 'fuzzy';
-  }
-
-  /**
-   * Per-pair result.
-   */
-  export interface PerPair {
-    pairIndex: number;
-
-    /**
-     * Per-pair status.
-     */
-    status: 'pending' | 'running' | 'completed' | 'failed';
-
-    /**
-     * The function call that produced the actual output, if any.
-     */
-    callID?: string;
-
-    /**
-     * Error message if the underlying function call failed.
-     */
-    errorMessage?: string;
-
-    /**
-     * Per-leaf comparator output. Present only after the pair has been compared.
-     */
-    fieldResults?: Array<PerPair.FieldResult>;
-  }
-
-  export namespace PerPair {
-    /**
-     * One leaf in `expected ∪ actual`.
-     */
-    export interface FieldResult {
-      /**
-       * Classification:
-       *
-       * - `exact`: both present and deep-equal
-       * - `within_tolerance`: both numbers, within configured tolerance
-       * - `fuzzy_match`: both strings, Levenshtein ratio above threshold
-       * - `miss`: expected present, actual absent or different
-       * - `extra`: actual present, expected absent
-       */
-      match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra';
-
-      /**
-       * JSON Pointer to the leaf.
-       */
-      path: string;
-
-      actual?: unknown;
-
-      /**
-       * Populated for numeric comparisons; `actual - expected`.
-       */
-      delta?: number;
-
-      expected?: unknown;
-    }
-  }
-
-  /**
-   * Counts across all pairs.
-   */
-  export interface Progress {
-    completed: number;
-
-    failed: number;
-
-    total: number;
-  }
-
-  /**
-   * Aggregate accuracy metrics.
-   */
-  export interface Aggregate {
-    exactMatches: number;
-
-    extras: number;
-
-    f1: number;
-
-    fuzzyMatches: number;
-
-    misses: number;
-
-    precision: number;
-
-    recall: number;
-
-    totalFieldsActual: number;
-
-    totalFieldsExpected: number;
-
-    withinTolerance: number;
-  }
+  status: EvalScoreRunStatus;
 }
 
 export interface ScoreCreateParams {
@@ -498,7 +356,7 @@ export interface ScoreCreateParams {
   /**
    * Comparator configuration. All fields optional; conservative defaults.
    */
-  matchConfig?: ScoreCreateParams.MatchConfig;
+  matchConfig?: EvalMatchConfig;
 }
 
 export namespace ScoreCreateParams {
@@ -519,72 +377,17 @@ export namespace ScoreCreateParams {
      * automatically read and base64-encode the file:
      * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
      */
-    input: Pair.Input;
-  }
-
-  export namespace Pair {
-    /**
-     * A single file input with base64-encoded content.
-     *
-     * When using the Bem CLI, use `@path/to/file` in the `inputContent` field to
-     * automatically read and base64-encode the file:
-     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
-     */
-    export interface Input {
-      /**
-       * Base64-encoded file content. In the Bem CLI, use `@path/to/file` to embed file
-       * contents automatically.
-       */
-      inputContent: string;
-
-      /**
-       * The input type of the content you're sending for transformation.
-       */
-      inputType: OutputsAPI.InputType;
-    }
-  }
-
-  /**
-   * Comparator configuration. All fields optional; conservative defaults.
-   */
-  export interface MatchConfig {
-    /**
-     * P0 supports only `by-index`.
-     */
-    arrayMatch?: 'by-index';
-
-    /**
-     * Levenshtein-ratio threshold used when `stringMatch == "fuzzy"`. Range `[0, 1]`.
-     * Default `0.85`.
-     */
-    fuzzyThreshold?: number;
-
-    /**
-     * JSON Pointer paths to skip during comparison. The asterisk character matches
-     * arbitrary object keys / array indices.
-     *
-     * Example values: /metadata, /lineItems with asterisk segment, etc.
-     */
-    ignorePaths?: Array<string>;
-
-    /**
-     * Relative tolerance for numeric fields. `0` (default) means exact equality;
-     * `0.01` means ±1%.
-     */
-    numericTolerance?: number;
-
-    /**
-     * `exact` (default) or `fuzzy`.
-     */
-    stringMatch?: 'exact' | 'fuzzy';
+    input: ScoreAPI.FileInput;
   }
 }
 
 export declare namespace Score {
   export {
+    type EvalMatchConfig as EvalMatchConfig,
+    type EvalScoreRun as EvalScoreRun,
+    type EvalScoreRunStatus as EvalScoreRunStatus,
+    type FileInput as FileInput,
     type ScoreCreateResponse as ScoreCreateResponse,
-    type ScoreRetrieveResponse as ScoreRetrieveResponse,
-    type ScoreCancelResponse as ScoreCancelResponse,
     type ScoreCreateParams as ScoreCreateParams,
   };
 }

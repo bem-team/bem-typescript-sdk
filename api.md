@@ -11,7 +11,15 @@ Types:
 - <code><a href="./src/resources/functions/functions.ts">FunctionResponse</a></code>
 - <code><a href="./src/resources/functions/functions.ts">FunctionType</a></code>
 - <code><a href="./src/resources/functions/functions.ts">ListFunctionsResponse</a></code>
+- <code><a href="./src/resources/functions/functions.ts">MetricComparison</a></code>
+- <code><a href="./src/resources/functions/functions.ts">Metrics</a></code>
+- <code><a href="./src/resources/functions/functions.ts">MetricsComparison</a></code>
+- <code><a href="./src/resources/functions/functions.ts">MetricsDetails</a></code>
 - <code><a href="./src/resources/functions/functions.ts">ParseConfig</a></code>
+- <code><a href="./src/resources/functions/functions.ts">ParseExtraFunctionConfig</a></code>
+- <code><a href="./src/resources/functions/functions.ts">RateConfidenceInterval</a></code>
+- <code><a href="./src/resources/functions/functions.ts">RenderConfig</a></code>
+- <code><a href="./src/resources/functions/functions.ts">RenderConfigInput</a></code>
 - <code><a href="./src/resources/functions/functions.ts">SendDestinationType</a></code>
 - <code><a href="./src/resources/functions/functions.ts">SplitFunctionSemanticPageItemClass</a></code>
 - <code><a href="./src/resources/functions/functions.ts">UpdateFunction</a></code>
@@ -254,15 +262,17 @@ Methods:
 
 Types:
 
+- <code><a href="./src/resources/eval/score.ts">EvalMatchConfig</a></code>
+- <code><a href="./src/resources/eval/score.ts">EvalScoreRun</a></code>
+- <code><a href="./src/resources/eval/score.ts">EvalScoreRunStatus</a></code>
+- <code><a href="./src/resources/eval/score.ts">FileInput</a></code>
 - <code><a href="./src/resources/eval/score.ts">ScoreCreateResponse</a></code>
-- <code><a href="./src/resources/eval/score.ts">ScoreRetrieveResponse</a></code>
-- <code><a href="./src/resources/eval/score.ts">ScoreCancelResponse</a></code>
 
 Methods:
 
 - <code title="post /v3/eval/score">client.eval.score.<a href="./src/resources/eval/score.ts">create</a>({ ...params }) -> ScoreCreateResponse</code>
-- <code title="get /v3/eval/score/{scoreRunID}">client.eval.score.<a href="./src/resources/eval/score.ts">retrieve</a>(scoreRunID) -> ScoreRetrieveResponse</code>
-- <code title="post /v3/eval/score/{scoreRunID}/cancel">client.eval.score.<a href="./src/resources/eval/score.ts">cancel</a>(scoreRunID) -> ScoreCancelResponse</code>
+- <code title="get /v3/eval/score/{scoreRunID}">client.eval.score.<a href="./src/resources/eval/score.ts">retrieve</a>(scoreRunID) -> EvalScoreRun</code>
+- <code title="post /v3/eval/score/{scoreRunID}/cancel">client.eval.score.<a href="./src/resources/eval/score.ts">cancel</a>(scoreRunID) -> EvalScoreRun</code>
 
 # Fs
 
@@ -309,18 +319,22 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/views.ts">ViewCreateResponse</a></code>
-- <code><a href="./src/resources/views.ts">ViewRetrieveResponse</a></code>
-- <code><a href="./src/resources/views.ts">ViewUpdateResponse</a></code>
+- <code><a href="./src/resources/views.ts">FunctionIdentifier</a></code>
+- <code><a href="./src/resources/views.ts">TimeWindow</a></code>
+- <code><a href="./src/resources/views.ts">View</a></code>
+- <code><a href="./src/resources/views.ts">ViewAggregation</a></code>
+- <code><a href="./src/resources/views.ts">ViewColumn</a></code>
+- <code><a href="./src/resources/views.ts">ViewCreate</a></code>
+- <code><a href="./src/resources/views.ts">ViewFilter</a></code>
 - <code><a href="./src/resources/views.ts">ViewListResponse</a></code>
 - <code><a href="./src/resources/views.ts">ViewGenerateAggregationDataResponse</a></code>
 - <code><a href="./src/resources/views.ts">ViewGenerateTableDataResponse</a></code>
 
 Methods:
 
-- <code title="post /v3/views">client.views.<a href="./src/resources/views.ts">create</a>({ ...params }) -> ViewCreateResponse</code>
-- <code title="get /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">retrieve</a>(viewID) -> ViewRetrieveResponse</code>
-- <code title="put /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">update</a>(viewID, { ...params }) -> ViewUpdateResponse</code>
+- <code title="post /v3/views">client.views.<a href="./src/resources/views.ts">create</a>({ ...params }) -> View</code>
+- <code title="get /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">retrieve</a>(viewID) -> View</code>
+- <code title="put /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">update</a>(viewID, { ...params }) -> View</code>
 - <code title="get /v3/views">client.views.<a href="./src/resources/views.ts">list</a>({ ...params }) -> ViewListResponse</code>
 - <code title="delete /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">delete</a>(viewID) -> void</code>
 - <code title="post /v3/views/aggregation-data">client.views.<a href="./src/resources/views.ts">generateAggregationData</a>({ ...params }) -> ViewGenerateAggregationDataResponse</code>
@@ -330,16 +344,14 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/buckets.ts">BucketCreateResponse</a></code>
-- <code><a href="./src/resources/buckets.ts">BucketRetrieveResponse</a></code>
-- <code><a href="./src/resources/buckets.ts">BucketUpdateResponse</a></code>
+- <code><a href="./src/resources/buckets.ts">BucketV3</a></code>
 - <code><a href="./src/resources/buckets.ts">BucketListResponse</a></code>
 
 Methods:
 
-- <code title="post /v3/buckets">client.buckets.<a href="./src/resources/buckets.ts">create</a>({ ...params }) -> BucketCreateResponse</code>
-- <code title="get /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">retrieve</a>(bucketID) -> BucketRetrieveResponse</code>
-- <code title="patch /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">update</a>(bucketID, { ...params }) -> BucketUpdateResponse</code>
+- <code title="post /v3/buckets">client.buckets.<a href="./src/resources/buckets.ts">create</a>({ ...params }) -> BucketV3</code>
+- <code title="get /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">retrieve</a>(bucketID) -> BucketV3</code>
+- <code title="patch /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">update</a>(bucketID, { ...params }) -> BucketV3</code>
 - <code title="get /v3/buckets">client.buckets.<a href="./src/resources/buckets.ts">list</a>({ ...params }) -> BucketListResponse</code>
 - <code title="delete /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">delete</a>(bucketID, { ...params }) -> void</code>
 
@@ -347,6 +359,8 @@ Methods:
 
 Types:
 
+- <code><a href="./src/resources/entities/entities.ts">RelatedEntity</a></code>
+- <code><a href="./src/resources/entities/entities.ts">SeedRowResult</a></code>
 - <code><a href="./src/resources/entities/entities.ts">EntityUpdateResponse</a></code>
 - <code><a href="./src/resources/entities/entities.ts">EntityBulkCreateResponse</a></code>
 - <code><a href="./src/resources/entities/entities.ts">EntityBulkValidateResponse</a></code>
@@ -376,16 +390,14 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityTypeCreateResponse</a></code>
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityTypeRetrieveResponse</a></code>
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityTypeUpdateResponse</a></code>
+- <code><a href="./src/resources/entity-types/entity-types.ts">EntityType</a></code>
 - <code><a href="./src/resources/entity-types/entity-types.ts">EntityTypeListResponse</a></code>
 
 Methods:
 
-- <code title="post /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">create</a>({ ...params }) -> EntityTypeCreateResponse</code>
-- <code title="get /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">retrieve</a>(typeID) -> EntityTypeRetrieveResponse</code>
-- <code title="patch /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">update</a>(typeID, { ...params }) -> EntityTypeUpdateResponse</code>
+- <code title="post /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">create</a>({ ...params }) -> EntityType</code>
+- <code title="get /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">retrieve</a>(typeID) -> EntityType</code>
+- <code title="patch /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">update</a>(typeID, { ...params }) -> EntityType</code>
 - <code title="get /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">list</a>({ ...params }) -> EntityTypeListResponse</code>
 - <code title="delete /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">delete</a>(typeID) -> void</code>
 
@@ -393,13 +405,13 @@ Methods:
 
 Types:
 
+- <code><a href="./src/resources/entity-types/reviewers.ts">Reviewer</a></code>
 - <code><a href="./src/resources/entity-types/reviewers.ts">ReviewerListResponse</a></code>
-- <code><a href="./src/resources/entity-types/reviewers.ts">ReviewerAssignResponse</a></code>
 
 Methods:
 
 - <code title="get /v3/entity-types/{typeID}/reviewers">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">list</a>(typeID) -> ReviewerListResponse</code>
-- <code title="post /v3/entity-types/{typeID}/reviewers">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">assign</a>(typeID, { ...params }) -> ReviewerAssignResponse</code>
+- <code title="post /v3/entity-types/{typeID}/reviewers">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">assign</a>(typeID, { ...params }) -> Reviewer</code>
 - <code title="delete /v3/entity-types/{typeID}/reviewers/{userID}">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">remove</a>(userID, { ...params }) -> void</code>
 
 # KnowledgeGraph

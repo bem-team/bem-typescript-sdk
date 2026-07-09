@@ -56,7 +56,7 @@ export class Views extends APIResource {
    * The new view is created at `versionNum: 1`. Subsequent updates produce new
    * versions; the version-1 configuration remains addressable.
    */
-  create(body: ViewCreateParams, options?: RequestOptions): APIPromise<ViewCreateResponse> {
+  create(body: ViewCreateParams, options?: RequestOptions): APIPromise<View> {
     return this._client.post('/v3/views', { body, ...options });
   }
 
@@ -67,7 +67,7 @@ export class Views extends APIResource {
    * list of versions on the View object and re-request with the desired version
    * pinned (versions are immutable once created).
    */
-  retrieve(viewID: string, options?: RequestOptions): APIPromise<ViewRetrieveResponse> {
+  retrieve(viewID: string, options?: RequestOptions): APIPromise<View> {
     return this._client.get(path`/v3/views/${viewID}`, options);
   }
 
@@ -78,7 +78,7 @@ export class Views extends APIResource {
    * fully replacing — pass the complete view body, not a patch. The version number
    * is auto-incremented.
    */
-  update(viewID: string, body: ViewUpdateParams, options?: RequestOptions): APIPromise<ViewUpdateResponse> {
+  update(viewID: string, body: ViewUpdateParams, options?: RequestOptions): APIPromise<View> {
     return this._client.put(path`/v3/views/${viewID}`, { body, ...options });
   }
 
@@ -155,20 +155,48 @@ export class Views extends APIResource {
   }
 }
 
+export interface FunctionIdentifier {
+  /**
+   * Unique identifier of function. Provide either id or name, not both.
+   */
+  id?: string;
+
+  /**
+   * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
+   * or name, not both.
+   */
+  name?: string;
+}
+
+/**
+ * Time window for filtering transformations in a view
+ */
+export interface TimeWindow {
+  /**
+   * End of the time window in ISO 8601 (RFC 3339) format in UTC
+   */
+  end: string;
+
+  /**
+   * Start of the time window in ISO 8601 (RFC 3339) format in UTC
+   */
+  start: string;
+}
+
 /**
  * A view is a table visualization of transformations that allows customers to have
  * insight into their transformations
  */
-export interface ViewCreateResponse {
+export interface View {
   /**
    * List of aggregations defined for the view
    */
-  aggregations: Array<ViewCreateResponse.Aggregation>;
+  aggregations: Array<ViewAggregation>;
 
   /**
    * List of columns in the view
    */
-  columns: Array<ViewCreateResponse.Column>;
+  columns: Array<ViewColumn>;
 
   /**
    * Current version number of the view
@@ -178,12 +206,12 @@ export interface ViewCreateResponse {
   /**
    * List of filters applied to the view
    */
-  filters: Array<ViewCreateResponse.Filter>;
+  filters: Array<ViewFilter>;
 
   /**
    * List of functions that this view queries transformations from
    */
-  functions: Array<ViewCreateResponse.Function>;
+  functions: Array<FunctionIdentifier>;
 
   /**
    * Name of the view
@@ -201,135 +229,81 @@ export interface ViewCreateResponse {
   description?: string | null;
 }
 
-export namespace ViewCreateResponse {
+/**
+ * An aggregation definition for a view
+ */
+export interface ViewAggregation {
   /**
-   * An aggregation definition for a view
+   * Aggregation function to apply to a view column
    */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
+  function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
 
   /**
-   * A column definition in a view
+   * Name of the aggregation
    */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
+  name: string;
 
   /**
-   * A filter to apply to a view column
+   * Name of the column to aggregate (required for count_distinct, sum, average, min,
+   * max functions)
    */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
+  aggregateColumnName?: string | null;
 
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
+  /**
+   * How to display the aggregation results
+   */
+  displayType?: 'table' | 'bar_chart' | 'pie_chart';
 
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
+  /**
+   * Name of the column to group by (optional, for grouped aggregations)
+   */
+  groupByColumnName?: string | null;
 }
 
 /**
- * A view is a table visualization of transformations that allows customers to have
- * insight into their transformations
+ * A column definition in a view
  */
-export interface ViewRetrieveResponse {
+export interface ViewColumn {
+  /**
+   * Order in which this column should be displayed (0-based index)
+   */
+  displayOrderIndex: number;
+
+  /**
+   * Name of the column
+   */
+  name: string;
+
+  /**
+   * JSON path to the value in the transformation output schema (e.g.,
+   * ["invoiceDetails", "invoiceNumber"])
+   */
+  valueSchemaPath: Array<string>;
+}
+
+/**
+ * Request to create a new view or update an existing view
+ */
+export interface ViewCreate {
   /**
    * List of aggregations defined for the view
    */
-  aggregations: Array<ViewRetrieveResponse.Aggregation>;
+  aggregations: Array<ViewAggregation>;
 
   /**
    * List of columns in the view
    */
-  columns: Array<ViewRetrieveResponse.Column>;
-
-  /**
-   * Current version number of the view
-   */
-  currentVersionNum: number;
+  columns: Array<ViewColumn>;
 
   /**
    * List of filters applied to the view
    */
-  filters: Array<ViewRetrieveResponse.Filter>;
+  filters: Array<ViewFilter>;
 
   /**
    * List of functions that this view queries transformations from
    */
-  functions: Array<ViewRetrieveResponse.Function>;
+  functions: Array<FunctionIdentifier>;
 
   /**
    * Name of the view
@@ -337,260 +311,42 @@ export interface ViewRetrieveResponse {
   name: string;
 
   /**
-   * Unique identifier of the view
-   */
-  viewID: string;
-
-  /**
    * Description of the view
    */
-  description?: string | null;
-}
-
-export namespace ViewRetrieveResponse {
-  /**
-   * An aggregation definition for a view
-   */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
-
-  /**
-   * A column definition in a view
-   */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
-
-  /**
-   * A filter to apply to a view column
-   */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
-
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
-
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
+  description?: string;
 }
 
 /**
- * A view is a table visualization of transformations that allows customers to have
- * insight into their transformations
+ * A filter to apply to a view column
  */
-export interface ViewUpdateResponse {
+export interface ViewFilter {
   /**
-   * List of aggregations defined for the view
+   * Name of the column to filter on
    */
-  aggregations: Array<ViewUpdateResponse.Aggregation>;
-
-  /**
-   * List of columns in the view
-   */
-  columns: Array<ViewUpdateResponse.Column>;
+  columnName: string;
 
   /**
-   * Current version number of the view
+   * Type of filter to apply to a view column
    */
-  currentVersionNum: number;
+  filterType:
+    | 'equals_string'
+    | 'equals_number'
+    | 'less_than_number'
+    | 'less_than_equal_number'
+    | 'greater_than_number'
+    | 'greater_than_equal_number'
+    | 'is_null'
+    | 'is_not_null';
 
   /**
-   * List of filters applied to the view
+   * Numeric value for the filter (required for number filter types)
    */
-  filters: Array<ViewUpdateResponse.Filter>;
+  number?: number | null;
 
   /**
-   * List of functions that this view queries transformations from
+   * String value for the filter (required for string filter types)
    */
-  functions: Array<ViewUpdateResponse.Function>;
-
-  /**
-   * Name of the view
-   */
-  name: string;
-
-  /**
-   * Unique identifier of the view
-   */
-  viewID: string;
-
-  /**
-   * Description of the view
-   */
-  description?: string | null;
-}
-
-export namespace ViewUpdateResponse {
-  /**
-   * An aggregation definition for a view
-   */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
-
-  /**
-   * A column definition in a view
-   */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
-
-  /**
-   * A filter to apply to a view column
-   */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
-
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
-
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
+  string?: string | null;
 }
 
 /**
@@ -605,155 +361,7 @@ export interface ViewListResponse {
   /**
    * Array of views
    */
-  views: Array<ViewListResponse.View>;
-}
-
-export namespace ViewListResponse {
-  /**
-   * A view is a table visualization of transformations that allows customers to have
-   * insight into their transformations
-   */
-  export interface View {
-    /**
-     * List of aggregations defined for the view
-     */
-    aggregations: Array<View.Aggregation>;
-
-    /**
-     * List of columns in the view
-     */
-    columns: Array<View.Column>;
-
-    /**
-     * Current version number of the view
-     */
-    currentVersionNum: number;
-
-    /**
-     * List of filters applied to the view
-     */
-    filters: Array<View.Filter>;
-
-    /**
-     * List of functions that this view queries transformations from
-     */
-    functions: Array<View.Function>;
-
-    /**
-     * Name of the view
-     */
-    name: string;
-
-    /**
-     * Unique identifier of the view
-     */
-    viewID: string;
-
-    /**
-     * Description of the view
-     */
-    description?: string | null;
-  }
-
-  export namespace View {
-    /**
-     * An aggregation definition for a view
-     */
-    export interface Aggregation {
-      /**
-       * Aggregation function to apply to a view column
-       */
-      function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-      /**
-       * Name of the aggregation
-       */
-      name: string;
-
-      /**
-       * Name of the column to aggregate (required for count_distinct, sum, average, min,
-       * max functions)
-       */
-      aggregateColumnName?: string | null;
-
-      /**
-       * How to display the aggregation results
-       */
-      displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-      /**
-       * Name of the column to group by (optional, for grouped aggregations)
-       */
-      groupByColumnName?: string | null;
-    }
-
-    /**
-     * A column definition in a view
-     */
-    export interface Column {
-      /**
-       * Order in which this column should be displayed (0-based index)
-       */
-      displayOrderIndex: number;
-
-      /**
-       * Name of the column
-       */
-      name: string;
-
-      /**
-       * JSON path to the value in the transformation output schema (e.g.,
-       * ["invoiceDetails", "invoiceNumber"])
-       */
-      valueSchemaPath: Array<string>;
-    }
-
-    /**
-     * A filter to apply to a view column
-     */
-    export interface Filter {
-      /**
-       * Name of the column to filter on
-       */
-      columnName: string;
-
-      /**
-       * Type of filter to apply to a view column
-       */
-      filterType:
-        | 'equals_string'
-        | 'equals_number'
-        | 'less_than_number'
-        | 'less_than_equal_number'
-        | 'greater_than_number'
-        | 'greater_than_equal_number'
-        | 'is_null'
-        | 'is_not_null';
-
-      /**
-       * Numeric value for the filter (required for number filter types)
-       */
-      number?: number | null;
-
-      /**
-       * String value for the filter (required for string filter types)
-       */
-      string?: string | null;
-    }
-
-    export interface Function {
-      /**
-       * Unique identifier of function. Provide either id or name, not both.
-       */
-      id?: string;
-
-      /**
-       * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-       * or name, not both.
-       */
-      name?: string;
-    }
-  }
+  views: Array<View>;
 }
 
 /**
@@ -854,22 +462,22 @@ export interface ViewCreateParams {
   /**
    * List of aggregations defined for the view
    */
-  aggregations: Array<ViewCreateParams.Aggregation>;
+  aggregations: Array<ViewAggregation>;
 
   /**
    * List of columns in the view
    */
-  columns: Array<ViewCreateParams.Column>;
+  columns: Array<ViewColumn>;
 
   /**
    * List of filters applied to the view
    */
-  filters: Array<ViewCreateParams.Filter>;
+  filters: Array<ViewFilter>;
 
   /**
    * List of functions that this view queries transformations from
    */
-  functions: Array<ViewCreateParams.Function>;
+  functions: Array<FunctionIdentifier>;
 
   /**
    * Name of the view
@@ -880,128 +488,28 @@ export interface ViewCreateParams {
    * Description of the view
    */
   description?: string;
-}
-
-export namespace ViewCreateParams {
-  /**
-   * An aggregation definition for a view
-   */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
-
-  /**
-   * A column definition in a view
-   */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
-
-  /**
-   * A filter to apply to a view column
-   */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
-
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
-
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
 }
 
 export interface ViewUpdateParams {
   /**
    * List of aggregations defined for the view
    */
-  aggregations: Array<ViewUpdateParams.Aggregation>;
+  aggregations: Array<ViewAggregation>;
 
   /**
    * List of columns in the view
    */
-  columns: Array<ViewUpdateParams.Column>;
+  columns: Array<ViewColumn>;
 
   /**
    * List of filters applied to the view
    */
-  filters: Array<ViewUpdateParams.Filter>;
+  filters: Array<ViewFilter>;
 
   /**
    * List of functions that this view queries transformations from
    */
-  functions: Array<ViewUpdateParams.Function>;
+  functions: Array<FunctionIdentifier>;
 
   /**
    * Name of the view
@@ -1012,106 +520,6 @@ export interface ViewUpdateParams {
    * Description of the view
    */
   description?: string;
-}
-
-export namespace ViewUpdateParams {
-  /**
-   * An aggregation definition for a view
-   */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
-
-  /**
-   * A column definition in a view
-   */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
-
-  /**
-   * A filter to apply to a view column
-   */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
-
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
-
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
 }
 
 export interface ViewListParams {
@@ -1157,22 +565,22 @@ export interface ViewGenerateAggregationDataParams {
   /**
    * List of aggregations defined for the view
    */
-  aggregations: Array<ViewGenerateAggregationDataParams.Aggregation>;
+  aggregations: Array<ViewAggregation>;
 
   /**
    * List of columns in the view
    */
-  columns: Array<ViewGenerateAggregationDataParams.Column>;
+  columns: Array<ViewColumn>;
 
   /**
    * List of filters applied to the view
    */
-  filters: Array<ViewGenerateAggregationDataParams.Filter>;
+  filters: Array<ViewFilter>;
 
   /**
    * List of functions that this view queries transformations from
    */
-  functions: Array<ViewGenerateAggregationDataParams.Function>;
+  functions: Array<FunctionIdentifier>;
 
   /**
    * Name of the view
@@ -1182,7 +590,7 @@ export interface ViewGenerateAggregationDataParams {
   /**
    * Time window for filtering transformations in a view
    */
-  timeWindow: ViewGenerateAggregationDataParams.TimeWindow;
+  timeWindow: TimeWindow;
 
   /**
    * Description of the view
@@ -1190,141 +598,26 @@ export interface ViewGenerateAggregationDataParams {
   description?: string;
 }
 
-export namespace ViewGenerateAggregationDataParams {
-  /**
-   * An aggregation definition for a view
-   */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
-
-  /**
-   * A column definition in a view
-   */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
-
-  /**
-   * A filter to apply to a view column
-   */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
-
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
-
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
-
-  /**
-   * Time window for filtering transformations in a view
-   */
-  export interface TimeWindow {
-    /**
-     * End of the time window in ISO 8601 (RFC 3339) format in UTC
-     */
-    end: string;
-
-    /**
-     * Start of the time window in ISO 8601 (RFC 3339) format in UTC
-     */
-    start: string;
-  }
-}
-
 export interface ViewGenerateTableDataParams {
   /**
    * List of aggregations defined for the view
    */
-  aggregations: Array<ViewGenerateTableDataParams.Aggregation>;
+  aggregations: Array<ViewAggregation>;
 
   /**
    * List of columns in the view
    */
-  columns: Array<ViewGenerateTableDataParams.Column>;
+  columns: Array<ViewColumn>;
 
   /**
    * List of filters applied to the view
    */
-  filters: Array<ViewGenerateTableDataParams.Filter>;
+  filters: Array<ViewFilter>;
 
   /**
    * List of functions that this view queries transformations from
    */
-  functions: Array<ViewGenerateTableDataParams.Function>;
+  functions: Array<FunctionIdentifier>;
 
   /**
    * Name of the view
@@ -1334,7 +627,7 @@ export interface ViewGenerateTableDataParams {
   /**
    * Time window for filtering transformations in a view
    */
-  timeWindow: ViewGenerateTableDataParams.TimeWindow;
+  timeWindow: TimeWindow;
 
   /**
    * Description of the view
@@ -1352,126 +645,15 @@ export interface ViewGenerateTableDataParams {
   offset?: number | null;
 }
 
-export namespace ViewGenerateTableDataParams {
-  /**
-   * An aggregation definition for a view
-   */
-  export interface Aggregation {
-    /**
-     * Aggregation function to apply to a view column
-     */
-    function: 'count' | 'count_distinct' | 'sum' | 'average' | 'min' | 'max';
-
-    /**
-     * Name of the aggregation
-     */
-    name: string;
-
-    /**
-     * Name of the column to aggregate (required for count_distinct, sum, average, min,
-     * max functions)
-     */
-    aggregateColumnName?: string | null;
-
-    /**
-     * How to display the aggregation results
-     */
-    displayType?: 'table' | 'bar_chart' | 'pie_chart';
-
-    /**
-     * Name of the column to group by (optional, for grouped aggregations)
-     */
-    groupByColumnName?: string | null;
-  }
-
-  /**
-   * A column definition in a view
-   */
-  export interface Column {
-    /**
-     * Order in which this column should be displayed (0-based index)
-     */
-    displayOrderIndex: number;
-
-    /**
-     * Name of the column
-     */
-    name: string;
-
-    /**
-     * JSON path to the value in the transformation output schema (e.g.,
-     * ["invoiceDetails", "invoiceNumber"])
-     */
-    valueSchemaPath: Array<string>;
-  }
-
-  /**
-   * A filter to apply to a view column
-   */
-  export interface Filter {
-    /**
-     * Name of the column to filter on
-     */
-    columnName: string;
-
-    /**
-     * Type of filter to apply to a view column
-     */
-    filterType:
-      | 'equals_string'
-      | 'equals_number'
-      | 'less_than_number'
-      | 'less_than_equal_number'
-      | 'greater_than_number'
-      | 'greater_than_equal_number'
-      | 'is_null'
-      | 'is_not_null';
-
-    /**
-     * Numeric value for the filter (required for number filter types)
-     */
-    number?: number | null;
-
-    /**
-     * String value for the filter (required for string filter types)
-     */
-    string?: string | null;
-  }
-
-  export interface Function {
-    /**
-     * Unique identifier of function. Provide either id or name, not both.
-     */
-    id?: string;
-
-    /**
-     * Name of function. Must be UNIQUE on a per-environment basis. Provide either id
-     * or name, not both.
-     */
-    name?: string;
-  }
-
-  /**
-   * Time window for filtering transformations in a view
-   */
-  export interface TimeWindow {
-    /**
-     * End of the time window in ISO 8601 (RFC 3339) format in UTC
-     */
-    end: string;
-
-    /**
-     * Start of the time window in ISO 8601 (RFC 3339) format in UTC
-     */
-    start: string;
-  }
-}
-
 export declare namespace Views {
   export {
-    type ViewCreateResponse as ViewCreateResponse,
-    type ViewRetrieveResponse as ViewRetrieveResponse,
-    type ViewUpdateResponse as ViewUpdateResponse,
+    type FunctionIdentifier as FunctionIdentifier,
+    type TimeWindow as TimeWindow,
+    type View as View,
+    type ViewAggregation as ViewAggregation,
+    type ViewColumn as ViewColumn,
+    type ViewCreate as ViewCreate,
+    type ViewFilter as ViewFilter,
     type ViewListResponse as ViewListResponse,
     type ViewGenerateAggregationDataResponse as ViewGenerateAggregationDataResponse,
     type ViewGenerateTableDataResponse as ViewGenerateTableDataResponse,

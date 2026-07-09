@@ -3,8 +3,8 @@
 import { APIResource } from '../../core/resource';
 import * as ReviewersAPI from './reviewers';
 import {
+  Reviewer,
   ReviewerAssignParams,
-  ReviewerAssignResponse,
   ReviewerListResponse,
   ReviewerRemoveParams,
   Reviewers,
@@ -48,7 +48,7 @@ export class EntityTypes extends APIResource {
    * });
    * ```
    */
-  create(body: EntityTypeCreateParams, options?: RequestOptions): APIPromise<EntityTypeCreateResponse> {
+  create(body: EntityTypeCreateParams, options?: RequestOptions): APIPromise<EntityType> {
     return this._client.post('/v3/entity-types', { body, ...options });
   }
 
@@ -62,7 +62,7 @@ export class EntityTypes extends APIResource {
    * );
    * ```
    */
-  retrieve(typeID: string, options?: RequestOptions): APIPromise<EntityTypeRetrieveResponse> {
+  retrieve(typeID: string, options?: RequestOptions): APIPromise<EntityType> {
     return this._client.get(path`/v3/entity-types/${typeID}`, options);
   }
 
@@ -76,11 +76,7 @@ export class EntityTypes extends APIResource {
    * );
    * ```
    */
-  update(
-    typeID: string,
-    body: EntityTypeUpdateParams,
-    options?: RequestOptions,
-  ): APIPromise<EntityTypeUpdateResponse> {
+  update(typeID: string, body: EntityTypeUpdateParams, options?: RequestOptions): APIPromise<EntityType> {
     return this._client.patch(path`/v3/entity-types/${typeID}`, { body, ...options });
   }
 
@@ -121,97 +117,7 @@ export class EntityTypes extends APIResource {
  * `parentTypeID`, and may carry per-type structured attribute metadata in
  * `attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).
  */
-export interface EntityTypeCreateResponse {
-  /**
-   * Creation timestamp (RFC 3339).
-   */
-  createdAt: string;
-
-  /**
-   * Optional human-facing note about the type.
-   */
-  description: string;
-
-  /**
-   * Human-facing type name. Unique within an account+environment, and immutable once
-   * set.
-   */
-  name: string;
-
-  /**
-   * Public ID (`ety_...`) of the parent type, or an empty string when the type is
-   * top-level.
-   */
-  parentTypeID: string;
-
-  /**
-   * Stable public identifier for the entity type (`ety_...`).
-   */
-  typeID: string;
-
-  /**
-   * Last-update timestamp (RFC 3339).
-   */
-  updatedAt: string;
-
-  /**
-   * Optional per-type structured attribute metadata.
-   */
-  attributeSchema?: unknown;
-}
-
-/**
- * An EntityType is a customer-defined type in the knowledge-graph taxonomy, scoped
- * to an account+environment. Types may be organised into hierarchies via
- * `parentTypeID`, and may carry per-type structured attribute metadata in
- * `attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).
- */
-export interface EntityTypeRetrieveResponse {
-  /**
-   * Creation timestamp (RFC 3339).
-   */
-  createdAt: string;
-
-  /**
-   * Optional human-facing note about the type.
-   */
-  description: string;
-
-  /**
-   * Human-facing type name. Unique within an account+environment, and immutable once
-   * set.
-   */
-  name: string;
-
-  /**
-   * Public ID (`ety_...`) of the parent type, or an empty string when the type is
-   * top-level.
-   */
-  parentTypeID: string;
-
-  /**
-   * Stable public identifier for the entity type (`ety_...`).
-   */
-  typeID: string;
-
-  /**
-   * Last-update timestamp (RFC 3339).
-   */
-  updatedAt: string;
-
-  /**
-   * Optional per-type structured attribute metadata.
-   */
-  attributeSchema?: unknown;
-}
-
-/**
- * An EntityType is a customer-defined type in the knowledge-graph taxonomy, scoped
- * to an account+environment. Types may be organised into hierarchies via
- * `parentTypeID`, and may carry per-type structured attribute metadata in
- * `attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).
- */
-export interface EntityTypeUpdateResponse {
+export interface EntityType {
   /**
    * Creation timestamp (RFC 3339).
    */
@@ -254,59 +160,12 @@ export interface EntityTypeUpdateResponse {
  * Response body for listing entity types.
  */
 export interface EntityTypeListResponse {
-  entityTypes: Array<EntityTypeListResponse.EntityType>;
+  entityTypes: Array<EntityType>;
 
   /**
    * Total number of entity types matching the query, ignoring pagination.
    */
   totalCount: number;
-}
-
-export namespace EntityTypeListResponse {
-  /**
-   * An EntityType is a customer-defined type in the knowledge-graph taxonomy, scoped
-   * to an account+environment. Types may be organised into hierarchies via
-   * `parentTypeID`, and may carry per-type structured attribute metadata in
-   * `attributeSchema` (for example `{"unit": "mg", "range": [0, 100]}`).
-   */
-  export interface EntityType {
-    /**
-     * Creation timestamp (RFC 3339).
-     */
-    createdAt: string;
-
-    /**
-     * Optional human-facing note about the type.
-     */
-    description: string;
-
-    /**
-     * Human-facing type name. Unique within an account+environment, and immutable once
-     * set.
-     */
-    name: string;
-
-    /**
-     * Public ID (`ety_...`) of the parent type, or an empty string when the type is
-     * top-level.
-     */
-    parentTypeID: string;
-
-    /**
-     * Stable public identifier for the entity type (`ety_...`).
-     */
-    typeID: string;
-
-    /**
-     * Last-update timestamp (RFC 3339).
-     */
-    updatedAt: string;
-
-    /**
-     * Optional per-type structured attribute metadata.
-     */
-    attributeSchema?: unknown;
-  }
 }
 
 export interface EntityTypeCreateParams {
@@ -377,9 +236,7 @@ EntityTypes.Reviewers = Reviewers;
 
 export declare namespace EntityTypes {
   export {
-    type EntityTypeCreateResponse as EntityTypeCreateResponse,
-    type EntityTypeRetrieveResponse as EntityTypeRetrieveResponse,
-    type EntityTypeUpdateResponse as EntityTypeUpdateResponse,
+    type EntityType as EntityType,
     type EntityTypeListResponse as EntityTypeListResponse,
     type EntityTypeCreateParams as EntityTypeCreateParams,
     type EntityTypeUpdateParams as EntityTypeUpdateParams,
@@ -388,8 +245,8 @@ export declare namespace EntityTypes {
 
   export {
     Reviewers as Reviewers,
+    type Reviewer as Reviewer,
     type ReviewerListResponse as ReviewerListResponse,
-    type ReviewerAssignResponse as ReviewerAssignResponse,
     type ReviewerAssignParams as ReviewerAssignParams,
     type ReviewerRemoveParams as ReviewerRemoveParams,
   };
