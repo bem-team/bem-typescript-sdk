@@ -716,7 +716,7 @@ export namespace FunctionVersion {
      * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
      * stays distinct from operator-level execution flags.
      */
-    extraConfig?: ParseFunctionVersion.ExtraConfig;
+    extraConfig?: FunctionsAPI.ParseExtraFunctionConfig;
 
     /**
      * Per-version configuration for a Parse function.
@@ -736,26 +736,6 @@ export namespace FunctionVersion {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
-  }
-
-  export namespace ParseFunctionVersion {
-    /**
-     * Cross-cutting toggles for Parse functions. Mirrors the `extraConfig` surface on
-     * Extract / Join — separated from `parseConfig` so the per-call Parse output shape
-     * stays distinct from operator-level execution flags.
-     */
-    export interface ExtraConfig {
-      /**
-       * When true, return per-section and per-entity-mention coordinates in the parse
-       * event's `fieldBoundingBoxes` map (same shape as Extract: JSON Pointer key →
-       * array of `{page, left, top, width, height}` with coordinates normalized to [0,
-       * 1]). Keys are `/sections/{N}` and `/entities/{N}/occurrences/{M}` into the parse
-       * output. Only applies to the open-ended discovery path (no `schema`) and to
-       * vision input types. Bedrock-backed parse functions silently return an empty map
-       * (no native bbox support). Defaults to false.
-       */
-      enableBoundingBoxes?: boolean;
-    }
   }
 
   export interface RenderFunctionVersion {
@@ -800,7 +780,7 @@ export namespace FunctionVersion {
      * the ML service against the bundled core schema; no customer-supplied schema
      * rides this surface.
      */
-    renderConfig?: RenderFunctionVersion.RenderConfig;
+    renderConfig?: FunctionsAPI.RenderConfig;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -811,102 +791,6 @@ export namespace FunctionVersion {
      * List of workflows that use this function.
      */
     usedInWorkflows?: Array<FunctionsAPI.WorkflowUsageInfo>;
-  }
-
-  export namespace RenderFunctionVersion {
-    /**
-     * Per-version configuration for a Render function.
-     *
-     * Render emits a `.docx` from schema-typed JSON by composing the JSON into a
-     * `.docx` template. The template document is stored server-side; this response
-     * exposes only the contract derived from it. Schema validation runs internally in
-     * the ML service against the bundled core schema; no customer-supplied schema
-     * rides this surface.
-     */
-    export interface RenderConfig {
-      /**
-       * The uploaded template: its filename, a short-lived presigned download URL, and
-       * the placeholder/style contract derived from it. Absent on configs created before
-       * template capture existed.
-       */
-      template?: RenderConfig.Template;
-    }
-
-    export namespace RenderConfig {
-      /**
-       * The uploaded template: its filename, a short-lived presigned download URL, and
-       * the placeholder/style contract derived from it. Absent on configs created before
-       * template capture existed.
-       */
-      export interface Template {
-        /**
-         * Short-lived presigned URL to download the stored `.docx`. The private storage
-         * location is never exposed.
-         */
-        downloadURL?: string;
-
-        /**
-         * Supported list kinds (`decimal`, `bullet`) the template's `numbering.xml`
-         * defines an `abstractNum` for. Empty means the template can hold no list, so any
-         * list primitive will fail at render.
-         */
-        listKinds?: Array<'decimal' | 'bullet'>;
-
-        /**
-         * Original filename of the uploaded template (e.g. `contract.docx`), echoed back
-         * for display. Absent on templates uploaded before the filename was captured.
-         */
-        name?: string;
-
-        /**
-         * The placeholder contract a Render template declares, grouped by how each
-         * placeholder is filled. Derived from the template at create/update time by
-         * scanning its `docxtpl` tags; not user-supplied.
-         *
-         * - `stringKeys`: bare string placeholders (`{{ key }}`) filled with a single
-         *   value.
-         * - `blockKeys`: wrapped-primitive placeholders (`{{p key }}`) — bind one core
-         *   primitive (paragraph, table, image, or list). The placeholder's own paragraph
-         *   dissolves and is replaced by the rendered subdocument's blocks, rather than
-         *   substituting text inline.
-         */
-        placeholders?: Template.Placeholders;
-
-        /**
-         * Paragraph/character style IDs the uploaded template defines and the rendered
-         * output can reference. Derived from the template's `styles.xml` at create/update
-         * time.
-         */
-        styleIds?: Array<string>;
-
-        /**
-         * Style IDs whose type is table — the styles a `table` primitive's required
-         * `styleId` can name. Empty means the template defines no table style, so any
-         * table primitive will fail at render.
-         */
-        tableStyleIds?: Array<string>;
-      }
-
-      export namespace Template {
-        /**
-         * The placeholder contract a Render template declares, grouped by how each
-         * placeholder is filled. Derived from the template at create/update time by
-         * scanning its `docxtpl` tags; not user-supplied.
-         *
-         * - `stringKeys`: bare string placeholders (`{{ key }}`) filled with a single
-         *   value.
-         * - `blockKeys`: wrapped-primitive placeholders (`{{p key }}`) — bind one core
-         *   primitive (paragraph, table, image, or list). The placeholder's own paragraph
-         *   dissolves and is replaced by the rendered subdocument's blocks, rather than
-         *   substituting text inline.
-         */
-        export interface Placeholders {
-          blockKeys: Array<string>;
-
-          stringKeys: Array<string>;
-        }
-      }
-    }
   }
 }
 

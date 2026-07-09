@@ -45,17 +45,13 @@ export class Reviewers extends APIResource {
    *
    * @example
    * ```ts
-   * const response = await client.entityTypes.reviewers.assign(
+   * const reviewer = await client.entityTypes.reviewers.assign(
    *   'typeID',
    *   { userID: 'usr_2xyz...' },
    * );
    * ```
    */
-  assign(
-    typeID: string,
-    body: ReviewerAssignParams,
-    options?: RequestOptions,
-  ): APIPromise<ReviewerAssignResponse> {
+  assign(typeID: string, body: ReviewerAssignParams, options?: RequestOptions): APIPromise<Reviewer> {
     return this._client.post(path`/v3/entity-types/${typeID}/reviewers`, { body, ...options });
   }
 
@@ -79,52 +75,11 @@ export class Reviewers extends APIResource {
 }
 
 /**
- * Response body for listing the reviewers of an entity type.
- */
-export interface ReviewerListResponse {
-  reviewers: Array<ReviewerListResponse.Reviewer>;
-}
-
-export namespace ReviewerListResponse {
-  /**
-   * A reviewer assignment links a user to an entity type they are responsible for
-   * reviewing. The assignment is scoped to an account+environment and is unique per
-   * (entity type, user).
-   */
-  export interface Reviewer {
-    /**
-     * When the assignment was created (RFC 3339).
-     */
-    createdAt: string;
-
-    /**
-     * The assigned user's email.
-     */
-    email: string;
-
-    /**
-     * Stable public identifier for the assignment (`etr_...`).
-     */
-    reviewerID: string;
-
-    /**
-     * The assigned user's account role (for example `operator`, `admin`).
-     */
-    role: string;
-
-    /**
-     * Public identifier of the assigned user (`usr_...`).
-     */
-    userID: string;
-  }
-}
-
-/**
  * A reviewer assignment links a user to an entity type they are responsible for
  * reviewing. The assignment is scoped to an account+environment and is unique per
  * (entity type, user).
  */
-export interface ReviewerAssignResponse {
+export interface Reviewer {
   /**
    * When the assignment was created (RFC 3339).
    */
@@ -151,6 +106,13 @@ export interface ReviewerAssignResponse {
   userID: string;
 }
 
+/**
+ * Response body for listing the reviewers of an entity type.
+ */
+export interface ReviewerListResponse {
+  reviewers: Array<Reviewer>;
+}
+
 export interface ReviewerAssignParams {
   /**
    * Public ID (`usr_...`) of the user to assign. Must belong to the account.
@@ -167,8 +129,8 @@ export interface ReviewerRemoveParams {
 
 export declare namespace Reviewers {
   export {
+    type Reviewer as Reviewer,
     type ReviewerListResponse as ReviewerListResponse,
-    type ReviewerAssignResponse as ReviewerAssignResponse,
     type ReviewerAssignParams as ReviewerAssignParams,
     type ReviewerRemoveParams as ReviewerRemoveParams,
   };

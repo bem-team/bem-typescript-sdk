@@ -2,9 +2,7 @@
 
 export {
   Buckets,
-  type BucketCreateResponse,
-  type BucketRetrieveResponse,
-  type BucketUpdateResponse,
+  type BucketV3,
   type BucketListResponse,
   type BucketCreateParams,
   type BucketUpdateParams,
@@ -41,6 +39,8 @@ export {
 } from './connectors';
 export {
   Entities,
+  type RelatedEntity,
+  type SeedRowResult,
   type EntityUpdateResponse,
   type EntityBulkCreateResponse,
   type EntityBulkValidateResponse,
@@ -53,9 +53,7 @@ export {
 } from './entities/entities';
 export {
   EntityTypes,
-  type EntityTypeCreateResponse,
-  type EntityTypeRetrieveResponse,
-  type EntityTypeUpdateResponse,
+  type EntityType,
   type EntityTypeListResponse,
   type EntityTypeCreateParams,
   type EntityTypeUpdateParams,
@@ -83,7 +81,15 @@ export {
   type FunctionResponse,
   type FunctionType,
   type ListFunctionsResponse,
+  type MetricComparison,
+  type Metrics,
+  type MetricsComparison,
+  type MetricsDetails,
   type ParseConfig,
+  type ParseExtraFunctionConfig,
+  type RateConfidenceInterval,
+  type RenderConfig,
+  type RenderConfigInput,
   type SendDestinationType,
   type SplitFunctionSemanticPageItemClass,
   type UpdateFunction,
@@ -127,9 +133,13 @@ export {
 export { Users, type UserListReviewerAssignmentsResponse } from './users';
 export {
   Views,
-  type ViewCreateResponse,
-  type ViewRetrieveResponse,
-  type ViewUpdateResponse,
+  type FunctionIdentifier,
+  type TimeWindow,
+  type View,
+  type ViewAggregation,
+  type ViewColumn,
+  type ViewCreate,
+  type ViewFilter,
   type ViewListResponse,
   type ViewGenerateAggregationDataResponse,
   type ViewGenerateTableDataResponse,

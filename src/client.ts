@@ -35,13 +35,11 @@ import * as API from './resources/index';
 import { APIPromise } from './core/api-promise';
 import {
   BucketCreateParams,
-  BucketCreateResponse,
   BucketDeleteParams,
   BucketListParams,
   BucketListResponse,
-  BucketRetrieveResponse,
   BucketUpdateParams,
-  BucketUpdateResponse,
+  BucketV3,
   Buckets,
 } from './resources/buckets';
 import {
@@ -97,17 +95,21 @@ import {
 } from './resources/subscriptions';
 import { UserListReviewerAssignmentsResponse, Users } from './resources/users';
 import {
+  FunctionIdentifier,
+  TimeWindow,
+  View,
+  ViewAggregation,
+  ViewColumn,
+  ViewCreate,
   ViewCreateParams,
-  ViewCreateResponse,
+  ViewFilter,
   ViewGenerateAggregationDataParams,
   ViewGenerateAggregationDataResponse,
   ViewGenerateTableDataParams,
   ViewGenerateTableDataResponse,
   ViewListParams,
   ViewListResponse,
-  ViewRetrieveResponse,
   ViewUpdateParams,
-  ViewUpdateResponse,
   Views,
 } from './resources/views';
 import { WebhookSecret, WebhookSecretResource } from './resources/webhook-secret';
@@ -148,15 +150,15 @@ import {
   EntityRetrieveSeedStatusResponse,
   EntityUpdateParams,
   EntityUpdateResponse,
+  RelatedEntity,
+  SeedRowResult,
 } from './resources/entities/entities';
 import {
+  EntityType,
   EntityTypeCreateParams,
-  EntityTypeCreateResponse,
   EntityTypeListParams,
   EntityTypeListResponse,
-  EntityTypeRetrieveResponse,
   EntityTypeUpdateParams,
-  EntityTypeUpdateResponse,
   EntityTypes,
 } from './resources/entity-types/entity-types';
 import { Eval, EvalTriggerEvaluationParams, EvalTriggerEvaluationResponse } from './resources/eval/eval';
@@ -181,7 +183,15 @@ import {
   Functions,
   FunctionsFunctionsPage,
   ListFunctionsResponse,
+  MetricComparison,
+  Metrics,
+  MetricsComparison,
+  MetricsDetails,
   ParseConfig,
+  ParseExtraFunctionConfig,
+  RateConfidenceInterval,
+  RenderConfig,
+  RenderConfigInput,
   SendDestinationType,
   SplitFunctionSemanticPageItemClass,
   UpdateFunction,
@@ -1425,7 +1435,15 @@ export declare namespace Bem {
     type FunctionResponse as FunctionResponse,
     type FunctionType as FunctionType,
     type ListFunctionsResponse as ListFunctionsResponse,
+    type MetricComparison as MetricComparison,
+    type Metrics as Metrics,
+    type MetricsComparison as MetricsComparison,
+    type MetricsDetails as MetricsDetails,
     type ParseConfig as ParseConfig,
+    type ParseExtraFunctionConfig as ParseExtraFunctionConfig,
+    type RateConfidenceInterval as RateConfidenceInterval,
+    type RenderConfig as RenderConfig,
+    type RenderConfigInput as RenderConfigInput,
     type SendDestinationType as SendDestinationType,
     type SplitFunctionSemanticPageItemClass as SplitFunctionSemanticPageItemClass,
     type UpdateFunction as UpdateFunction,
@@ -1570,9 +1588,13 @@ export declare namespace Bem {
 
   export {
     Views as Views,
-    type ViewCreateResponse as ViewCreateResponse,
-    type ViewRetrieveResponse as ViewRetrieveResponse,
-    type ViewUpdateResponse as ViewUpdateResponse,
+    type FunctionIdentifier as FunctionIdentifier,
+    type TimeWindow as TimeWindow,
+    type View as View,
+    type ViewAggregation as ViewAggregation,
+    type ViewColumn as ViewColumn,
+    type ViewCreate as ViewCreate,
+    type ViewFilter as ViewFilter,
     type ViewListResponse as ViewListResponse,
     type ViewGenerateAggregationDataResponse as ViewGenerateAggregationDataResponse,
     type ViewGenerateTableDataResponse as ViewGenerateTableDataResponse,
@@ -1585,9 +1607,7 @@ export declare namespace Bem {
 
   export {
     Buckets as Buckets,
-    type BucketCreateResponse as BucketCreateResponse,
-    type BucketRetrieveResponse as BucketRetrieveResponse,
-    type BucketUpdateResponse as BucketUpdateResponse,
+    type BucketV3 as BucketV3,
     type BucketListResponse as BucketListResponse,
     type BucketCreateParams as BucketCreateParams,
     type BucketUpdateParams as BucketUpdateParams,
@@ -1597,6 +1617,8 @@ export declare namespace Bem {
 
   export {
     Entities as Entities,
+    type RelatedEntity as RelatedEntity,
+    type SeedRowResult as SeedRowResult,
     type EntityUpdateResponse as EntityUpdateResponse,
     type EntityBulkCreateResponse as EntityBulkCreateResponse,
     type EntityBulkValidateResponse as EntityBulkValidateResponse,
@@ -1610,9 +1632,7 @@ export declare namespace Bem {
 
   export {
     EntityTypes as EntityTypes,
-    type EntityTypeCreateResponse as EntityTypeCreateResponse,
-    type EntityTypeRetrieveResponse as EntityTypeRetrieveResponse,
-    type EntityTypeUpdateResponse as EntityTypeUpdateResponse,
+    type EntityType as EntityType,
     type EntityTypeListResponse as EntityTypeListResponse,
     type EntityTypeCreateParams as EntityTypeCreateParams,
     type EntityTypeUpdateParams as EntityTypeUpdateParams,
