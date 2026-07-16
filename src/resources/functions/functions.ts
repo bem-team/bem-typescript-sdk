@@ -802,9 +802,9 @@ export namespace EnrichConfig {
      * Natural-language instructions for LLM agent reasoning.
      *
      * When set, the candidates fetched from the endpoint are passed to an LLM with
-     * these instructions, which selects the best match(es) and returns them with
-     * confidence scores. Each injected result has the shape
-     * `{ data, confidence, reasoning? }`.
+     * these instructions, which selects the best match(es) and returns them ranked
+     * best-first. Each injected result has the shape
+     * `{ data, rank, confidence, reasoning? }` (rank is 1-based, 1 = best).
      *
      * When omitted, the raw fetched value is injected without any LLM involvement.
      */
@@ -925,10 +925,30 @@ export namespace EnrichConfig {
  * - `exact`: Exact keyword matching — best for SKU numbers, IDs, routing numbers
  * - `hybrid`: Combined semantic + keyword search — best for tags and categories
  *
- * **Result Format (collection source):**
+ * **Result Format (collection source, exact mode — no re-ranking):**
  *
  * - Always an array sorted by relevance (best match first)
- * - Each element: `{ data, cosineDistance? }` or `{ data, hybridScore? }`
+ * - Each element: `{ data, cosine_distance? }` or `{ data, hybrid_score? }`
+ *
+ * **Result Format (collection source, semantic/hybrid — re-ranking always on):**
+ *
+ * - Re-ranking uses a fixed, built-in instruction to the LLM (rank the candidates
+ *   by how well each matches the source value); it is not configurable per step
+ * - Array of matches, best first:
+ *   `[{ data, rank, confidence?, reasoning?, score?, scoreType?, cosine_distance?, hybrid_score? }, ...]`
+ * - `rank` is 1-based (1 = best)
+ * - `confidence` is the LLM's 0–1 score. It is present only for entries the LLM
+ *   ranked and **omitted** for backfilled entries (see below) — a missing
+ *   `confidence` means "not ranked by the LLM", not a score of 0
+ * - `score` is the original retrieval score and `scoreType` says which metric it
+ *   is (`"cosineDistance"` for semantic search, `"hybridScore"` for hybrid); both
+ *   included only when `includeScore` is set
+ * - `cosine_distance` (semantic) and `hybrid_score` (hybrid) are **deprecated**
+ *   (use `score` + `scoreType`): each mirrors `score` under the pre-rerank field
+ *   name for backward compatibility; exactly one is present, matching `scoreType`
+ * - Length is `min(candidates surviving the scoreThreshold filter, topK)`. The LLM
+ *   re-orders the survivors; if it ranks fewer than that length, the remaining
+ *   survivors are backfilled in retrieval (score) order with `confidence` omitted
  *
  * **Result Format (endpoint source, no matchInstructions):**
  *
@@ -936,7 +956,9 @@ export namespace EnrichConfig {
  *
  * **Result Format (endpoint source, with matchInstructions):**
  *
- * - Array of LLM-ranked matches: `[{ data, confidence, reasoning? }, ...]`
+ * - Array of LLM-ranked matches, best first:
+ *   `[{ data, rank, confidence, reasoning? }, ...]`
+ * - `rank` is 1-based (1 = best); `confidence` is the LLM's 0–1 score
  * - Length capped by `enrichEndpoint.matchTopK` (default 1)
  */
 export interface EnrichStep {
@@ -1041,6 +1063,11 @@ export interface EnrichStep {
    *
    * - 1: Returns array with single best match: `[{...}]`
    * - > 1: Returns array with multiple matches: `[{...}, {...}, ...]`
+   *
+   * When re-ranking is on (the default for `semantic`/`hybrid`), `topK` is still the
+   * number of results returned — re-ranking changes their order, not the count. The
+   * candidate pool the LLM chooses from is widened internally to at least 5, so even
+   * `topK: 1` re-ranks a real pool and returns the single best match.
    */
   topK?: number;
 }
