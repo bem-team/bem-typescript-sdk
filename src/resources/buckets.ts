@@ -31,13 +31,13 @@ export class Buckets extends APIResource {
    *
    * @example
    * ```ts
-   * const bucket = await client.buckets.create({
+   * const bucketV3 = await client.buckets.create({
    *   name: 'invoices',
    *   description: 'Knowledge graph for invoice documents',
    * });
    * ```
    */
-  create(body: BucketCreateParams, options?: RequestOptions): APIPromise<BucketCreateResponse> {
+  create(body: BucketCreateParams, options?: RequestOptions): APIPromise<BucketV3> {
     return this._client.post('/v3/buckets', { body, ...options });
   }
 
@@ -46,10 +46,10 @@ export class Buckets extends APIResource {
    *
    * @example
    * ```ts
-   * const bucket = await client.buckets.retrieve('bucketID');
+   * const bucketV3 = await client.buckets.retrieve('bucketID');
    * ```
    */
-  retrieve(bucketID: string, options?: RequestOptions): APIPromise<BucketRetrieveResponse> {
+  retrieve(bucketID: string, options?: RequestOptions): APIPromise<BucketV3> {
     return this._client.get(path`/v3/buckets/${bucketID}`, options);
   }
 
@@ -58,14 +58,10 @@ export class Buckets extends APIResource {
    *
    * @example
    * ```ts
-   * const bucket = await client.buckets.update('bucketID');
+   * const bucketV3 = await client.buckets.update('bucketID');
    * ```
    */
-  update(
-    bucketID: string,
-    body: BucketUpdateParams,
-    options?: RequestOptions,
-  ): APIPromise<BucketUpdateResponse> {
+  update(bucketID: string, body: BucketUpdateParams, options?: RequestOptions): APIPromise<BucketV3> {
     return this._client.patch(path`/v3/buckets/${bucketID}`, { body, ...options });
   }
 
@@ -114,87 +110,7 @@ export class Buckets extends APIResource {
  * Every account+environment has exactly one default bucket. The default bucket can
  * be renamed but never deleted.
  */
-export interface BucketCreateResponse {
-  /**
-   * Stable public identifier for the bucket (`bkt_...`).
-   */
-  bucketID: string;
-
-  /**
-   * Creation timestamp (RFC 3339).
-   */
-  createdAt: string;
-
-  /**
-   * Optional human-facing note about the bucket.
-   */
-  description: string;
-
-  /**
-   * Whether this is the account+environment's default bucket.
-   */
-  isDefault: boolean;
-
-  /**
-   * Human-facing bucket name. Unique within an account+environment.
-   */
-  name: string;
-
-  /**
-   * Last-update timestamp (RFC 3339).
-   */
-  updatedAt: string;
-}
-
-/**
- * A Bucket is a named partition of the knowledge graph within an
- * account+environment. Entities, mentions, and relations are scoped to a bucket so
- * a single account+environment can host multiple isolated graphs.
- *
- * Every account+environment has exactly one default bucket. The default bucket can
- * be renamed but never deleted.
- */
-export interface BucketRetrieveResponse {
-  /**
-   * Stable public identifier for the bucket (`bkt_...`).
-   */
-  bucketID: string;
-
-  /**
-   * Creation timestamp (RFC 3339).
-   */
-  createdAt: string;
-
-  /**
-   * Optional human-facing note about the bucket.
-   */
-  description: string;
-
-  /**
-   * Whether this is the account+environment's default bucket.
-   */
-  isDefault: boolean;
-
-  /**
-   * Human-facing bucket name. Unique within an account+environment.
-   */
-  name: string;
-
-  /**
-   * Last-update timestamp (RFC 3339).
-   */
-  updatedAt: string;
-}
-
-/**
- * A Bucket is a named partition of the knowledge graph within an
- * account+environment. Entities, mentions, and relations are scoped to a bucket so
- * a single account+environment can host multiple isolated graphs.
- *
- * Every account+environment has exactly one default bucket. The default bucket can
- * be renamed but never deleted.
- */
-export interface BucketUpdateResponse {
+export interface BucketV3 {
   /**
    * Stable public identifier for the bucket (`bkt_...`).
    */
@@ -230,54 +146,12 @@ export interface BucketUpdateResponse {
  * Response body for listing buckets.
  */
 export interface BucketListResponse {
-  buckets: Array<BucketListResponse.Bucket>;
+  buckets: Array<BucketV3>;
 
   /**
    * Total number of buckets matching the query, ignoring pagination.
    */
   totalCount: number;
-}
-
-export namespace BucketListResponse {
-  /**
-   * A Bucket is a named partition of the knowledge graph within an
-   * account+environment. Entities, mentions, and relations are scoped to a bucket so
-   * a single account+environment can host multiple isolated graphs.
-   *
-   * Every account+environment has exactly one default bucket. The default bucket can
-   * be renamed but never deleted.
-   */
-  export interface Bucket {
-    /**
-     * Stable public identifier for the bucket (`bkt_...`).
-     */
-    bucketID: string;
-
-    /**
-     * Creation timestamp (RFC 3339).
-     */
-    createdAt: string;
-
-    /**
-     * Optional human-facing note about the bucket.
-     */
-    description: string;
-
-    /**
-     * Whether this is the account+environment's default bucket.
-     */
-    isDefault: boolean;
-
-    /**
-     * Human-facing bucket name. Unique within an account+environment.
-     */
-    name: string;
-
-    /**
-     * Last-update timestamp (RFC 3339).
-     */
-    updatedAt: string;
-  }
 }
 
 export interface BucketCreateParams {
@@ -339,9 +213,7 @@ export interface BucketDeleteParams {
 
 export declare namespace Buckets {
   export {
-    type BucketCreateResponse as BucketCreateResponse,
-    type BucketRetrieveResponse as BucketRetrieveResponse,
-    type BucketUpdateResponse as BucketUpdateResponse,
+    type BucketV3 as BucketV3,
     type BucketListResponse as BucketListResponse,
     type BucketCreateParams as BucketCreateParams,
     type BucketUpdateParams as BucketUpdateParams,

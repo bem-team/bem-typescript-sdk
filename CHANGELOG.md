@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.29.0 (2026-07-18)
+
+Full Changelog: [v0.28.0...v0.29.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.28.0...v0.29.0)
+
+### Features
+
+* **api:** api update ([7d63444](https://github.com/bem-team/bem-typescript-sdk/commit/7d63444f337622679e9d6d617c16475fbeaf7860))
+* **api:** api update ([a6e95a7](https://github.com/bem-team/bem-typescript-sdk/commit/a6e95a70712398f62239ff7cb9def59079445e88))
+* **api:** manual updates ([b7ceaae](https://github.com/bem-team/bem-typescript-sdk/commit/b7ceaae8f7eaf20c71d5f0c9ee72969cba90893b))
+* **stlc:** configurable CI runner and private-production-repo support in workflow templates ([fd4f14f](https://github.com/bem-team/bem-typescript-sdk/commit/fd4f14f08cf3481a088e3cb49e40bba51084e153))
+
+
+### Bug Fixes
+
+* **ci:** bump @arethetypeswrong/cli to ^0.18.0 and run CI workflows on Node 24 ([a663653](https://github.com/bem-team/bem-typescript-sdk/commit/a66365349239627426512835f061ca2f283d9f2e))
+
 ## 0.28.0 (2026-07-09)
 
 Full Changelog: [v0.27.0...v0.28.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.27.0...v0.28.0)

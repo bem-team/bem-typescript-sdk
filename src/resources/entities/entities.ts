@@ -1,6 +1,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../core/resource';
+import * as EntitiesAPI from './entities';
 import * as SynonymsAPI from './synonyms';
 import { SynonymAddParams, SynonymAddResponse, SynonymRemoveParams, Synonyms } from './synonyms';
 import { APIPromise } from '../../core/api-promise';
@@ -99,6 +100,60 @@ export class Entities extends APIResource {
 }
 
 /**
+ * A compact view of an entity sitting on the far end of a relation edge — the
+ * stable public id, the canonical name, and the effective type. The full entity is
+ * fetched separately via the entity detail / File System endpoints.
+ */
+export interface RelatedEntity {
+  /**
+   * Stable public identifier for the entity (`ent_...`).
+   */
+  id: string;
+
+  /**
+   * Canonical (most descriptive) surface form of the entity.
+   */
+  canonical: string;
+
+  /**
+   * Hops from the queried entity. This endpoint returns direct relations, so this is
+   * 1 (a self-loop's far end is the queried entity itself, 0).
+   */
+  depth: number;
+
+  /**
+   * Effective entity type.
+   */
+  type: string;
+}
+
+/**
+ * The outcome of seeding one row.
+ */
+export interface SeedRowResult {
+  /**
+   * The canonical name from the input row.
+   */
+  canonical: string;
+
+  /**
+   * What happened to this row: `created` (new entity), `merged-with` (matched an
+   * existing entity), or `rejected` (see `reason`).
+   */
+  outcome: 'created' | 'merged-with' | 'rejected';
+
+  /**
+   * Public ID (`ent_...`) of the created or merged entity. Absent when rejected.
+   */
+  entityID?: string;
+
+  /**
+   * Human-readable explanation when `outcome` is `rejected`.
+   */
+  reason?: string;
+}
+
+/**
  * An entity record, including its curation status and assigned type.
  */
 export interface EntityUpdateResponse {
@@ -170,7 +225,7 @@ export interface EntityBulkCreateResponse {
   /**
    * Per-row outcomes, in request order.
    */
-  results: Array<EntityBulkCreateResponse.Result>;
+  results: Array<SeedRowResult>;
 
   /**
    * Per-outcome tally across a batch.
@@ -179,32 +234,6 @@ export interface EntityBulkCreateResponse {
 }
 
 export namespace EntityBulkCreateResponse {
-  /**
-   * The outcome of seeding one row.
-   */
-  export interface Result {
-    /**
-     * The canonical name from the input row.
-     */
-    canonical: string;
-
-    /**
-     * What happened to this row: `created` (new entity), `merged-with` (matched an
-     * existing entity), or `rejected` (see `reason`).
-     */
-    outcome: 'created' | 'merged-with' | 'rejected';
-
-    /**
-     * Public ID (`ent_...`) of the created or merged entity. Absent when rejected.
-     */
-    entityID?: string;
-
-    /**
-     * Human-readable explanation when `outcome` is `rejected`.
-     */
-    reason?: string;
-  }
-
   /**
    * Per-outcome tally across a batch.
    */
@@ -330,37 +359,7 @@ export namespace EntityRetrieveRelationsResponse {
      * stable public id, the canonical name, and the effective type. The full entity is
      * fetched separately via the entity detail / File System endpoints.
      */
-    sourceEntity: Inbound.SourceEntity;
-  }
-
-  export namespace Inbound {
-    /**
-     * A compact view of an entity sitting on the far end of a relation edge — the
-     * stable public id, the canonical name, and the effective type. The full entity is
-     * fetched separately via the entity detail / File System endpoints.
-     */
-    export interface SourceEntity {
-      /**
-       * Stable public identifier for the entity (`ent_...`).
-       */
-      id: string;
-
-      /**
-       * Canonical (most descriptive) surface form of the entity.
-       */
-      canonical: string;
-
-      /**
-       * Hops from the queried entity. This endpoint returns direct relations, so this is
-       * 1 (a self-loop's far end is the queried entity itself, 0).
-       */
-      depth: number;
-
-      /**
-       * Effective entity type.
-       */
-      type: string;
-    }
+    sourceEntity: EntitiesAPI.RelatedEntity;
   }
 
   /**
@@ -387,37 +386,7 @@ export namespace EntityRetrieveRelationsResponse {
      * stable public id, the canonical name, and the effective type. The full entity is
      * fetched separately via the entity detail / File System endpoints.
      */
-    targetEntity: Outbound.TargetEntity;
-  }
-
-  export namespace Outbound {
-    /**
-     * A compact view of an entity sitting on the far end of a relation edge — the
-     * stable public id, the canonical name, and the effective type. The full entity is
-     * fetched separately via the entity detail / File System endpoints.
-     */
-    export interface TargetEntity {
-      /**
-       * Stable public identifier for the entity (`ent_...`).
-       */
-      id: string;
-
-      /**
-       * Canonical (most descriptive) surface form of the entity.
-       */
-      canonical: string;
-
-      /**
-       * Hops from the queried entity. This endpoint returns direct relations, so this is
-       * 1 (a self-loop's far end is the queried entity itself, 0).
-       */
-      depth: number;
-
-      /**
-       * Effective entity type.
-       */
-      type: string;
-    }
+    targetEntity: EntitiesAPI.RelatedEntity;
   }
 }
 
@@ -463,35 +432,7 @@ export interface EntityRetrieveSeedStatusResponse {
   /**
    * Per-row outcomes. Present only once `status` is `completed`.
    */
-  results?: Array<EntityRetrieveSeedStatusResponse.Result>;
-}
-
-export namespace EntityRetrieveSeedStatusResponse {
-  /**
-   * The outcome of seeding one row.
-   */
-  export interface Result {
-    /**
-     * The canonical name from the input row.
-     */
-    canonical: string;
-
-    /**
-     * What happened to this row: `created` (new entity), `merged-with` (matched an
-     * existing entity), or `rejected` (see `reason`).
-     */
-    outcome: 'created' | 'merged-with' | 'rejected';
-
-    /**
-     * Public ID (`ent_...`) of the created or merged entity. Absent when rejected.
-     */
-    entityID?: string;
-
-    /**
-     * Human-readable explanation when `outcome` is `rejected`.
-     */
-    reason?: string;
-  }
+  results?: Array<SeedRowResult>;
 }
 
 export interface EntityUpdateParams {
@@ -631,6 +572,8 @@ Entities.Synonyms = Synonyms;
 
 export declare namespace Entities {
   export {
+    type RelatedEntity as RelatedEntity,
+    type SeedRowResult as SeedRowResult,
     type EntityUpdateResponse as EntityUpdateResponse,
     type EntityBulkCreateResponse as EntityBulkCreateResponse,
     type EntityBulkValidateResponse as EntityBulkValidateResponse,

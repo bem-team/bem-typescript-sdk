@@ -1954,6 +1954,7 @@ export type InputType =
   | 'mp4'
   | 'pdf'
   | 'png'
+  | 'pptx'
   | 'text'
   | 'wav'
   | 'webp'
