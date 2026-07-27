@@ -424,6 +424,13 @@ export namespace CreateFunction {
     displayName?: string;
 
     /**
+     * When true, image and PDF inputs are sent directly to the model for routing
+     * instead of being OCR'd to text first. Defaults to true for new classify
+     * functions and false for the legacy route type.
+     */
+    nativeVisualInput?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
@@ -1327,6 +1334,13 @@ export namespace Function {
      * Display name of function. Human-readable name to help you identify the function.
      */
     displayName?: string;
+
+    /**
+     * When true, image and PDF inputs are sent directly to the model for routing
+     * instead of being OCR'd to text first. Defaults to true for new classify
+     * functions and false for the legacy route type.
+     */
+    nativeVisualInput?: boolean;
 
     /**
      * Array of tags to categorize and organize functions.
@@ -2329,6 +2343,13 @@ export namespace UpdateFunction {
     functionName?: string;
 
     /**
+     * When true, image and PDF inputs are sent directly to the model for routing
+     * instead of being OCR'd to text first. Defaults to true for new classify
+     * functions and false for the legacy route type.
+     */
+    nativeVisualInput?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
@@ -3094,6 +3115,13 @@ export declare namespace FunctionCreateParams {
     displayName?: string;
 
     /**
+     * When true, image and PDF inputs are sent directly to the model for routing
+     * instead of being OCR'd to text first. Defaults to true for new classify
+     * functions and false for the legacy route type.
+     */
+    nativeVisualInput?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
@@ -3460,6 +3488,13 @@ export declare namespace FunctionUpdateParams {
      * Name of function. Must be UNIQUE on a per-environment basis.
      */
     functionName?: string;
+
+    /**
+     * When true, image and PDF inputs are sent directly to the model for routing
+     * instead of being OCR'd to text first. Defaults to true for new classify
+     * functions and false for the legacy route type.
+     */
+    nativeVisualInput?: boolean;
 
     /**
      * Array of tags to categorize and organize functions.
