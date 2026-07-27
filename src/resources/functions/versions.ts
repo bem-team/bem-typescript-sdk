@@ -341,6 +341,13 @@ export namespace FunctionVersion {
     displayName?: string;
 
     /**
+     * When true, image and PDF inputs are sent directly to the model for routing
+     * instead of being OCR'd to text first. Defaults to true for new classify
+     * functions and false for the legacy route type.
+     */
+    nativeVisualInput?: boolean;
+
+    /**
      * Array of tags to categorize and organize functions.
      */
     tags?: Array<string>;
