@@ -942,7 +942,7 @@ export namespace EnrichConfig {
  * - Re-ranking uses a fixed, built-in instruction to the LLM (rank the candidates
  *   by how well each matches the source value); it is not configurable per step
  * - Array of matches, best first:
- *   `[{ data, rank, confidence?, reasoning?, score?, scoreType?, cosine_distance?, hybrid_score? }, ...]`
+ *   `[{ data, rank, confidence?, reasoning?, score?, scoreType? }, ...]`
  * - `rank` is 1-based (1 = best)
  * - `confidence` is the LLM's 0–1 score. It is present only for entries the LLM
  *   ranked and **omitted** for backfilled entries (see below) — a missing
@@ -950,9 +950,6 @@ export namespace EnrichConfig {
  * - `score` is the original retrieval score and `scoreType` says which metric it
  *   is (`"cosineDistance"` for semantic search, `"hybridScore"` for hybrid); both
  *   included only when `includeScore` is set
- * - `cosine_distance` (semantic) and `hybrid_score` (hybrid) are **deprecated**
- *   (use `score` + `scoreType`): each mirrors `score` under the pre-rerank field
- *   name for backward compatibility; exactly one is present, matching `scoreType`
  * - Length is `min(candidates surviving the scoreThreshold filter, topK)`. The LLM
  *   re-orders the survivors; if it ranks fewer than that length, the remaining
  *   survivors are backfilled in retrieval (score) order with `confidence` omitted
@@ -1000,8 +997,9 @@ export interface EnrichStep {
    * from 0.0 (perfect match) to 2.0 (completely dissimilar). Lower scores indicate
    * better semantic similarity.
    *
-   * When enabled, each result includes a `cosine_distance` field (semantic mode) or
-   * a `hybrid_score` field (hybrid mode).
+   * When enabled, each result includes a `score` field with `scoreType` identifying
+   * the metric (`"cosineDistance"` for semantic mode, `"hybridScore"` for hybrid
+   * mode).
    */
   includeScore?: boolean;
 
