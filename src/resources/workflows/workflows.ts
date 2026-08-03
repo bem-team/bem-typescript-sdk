@@ -242,8 +242,9 @@ export class Workflows extends APIResource {
    * **not** use `--wait true` (with a space) — the `true` will be parsed as an
    * unexpected positional argument.
    *
-   * Supported `inputType` values: csv, docx, email, heic, heif, html, jpeg, json,
-   * m4a, mp3, pdf, png, text, wav, webp, xls, xlsx, xml.
+   * Supported `inputType` values: csv, docx, email, heic, heif, html, jfif, jpeg,
+   * json, m4a, mp3, mov, mp4, pdf, png, pptx, text, wav, webp, xls, xlsx, xml.
+   * `jfif` (and `jpg`) are normalized to `jpeg`.
    */
   call(
     workflowName: string,
@@ -870,6 +871,11 @@ export namespace WorkflowCallParams {
 
         /**
          * The input type of the content you're sending for transformation.
+         *
+         * `jfif` is accepted as an alias for `jpeg` — JFIF is the same format under a
+         * different extension — and is normalized to `jpeg`, so responses and webhooks
+         * report `jpeg` for a JFIF upload. The undeclared alias `jpg` behaves the same
+         * way.
          */
         inputType: OutputsAPI.InputType;
 
