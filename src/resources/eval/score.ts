@@ -75,15 +75,6 @@ export class Score extends APIResource {
    * ```ts
    * const score = await client.eval.score.create({
    *   functionName: 'functionName',
-   *   pairs: [
-   *     {
-   *       expected: {},
-   *       input: {
-   *         inputContent: 'inputContent',
-   *         inputType: 'csv',
-   *       },
-   *     },
-   *   ],
    * });
    * ```
    */
@@ -348,9 +339,13 @@ export interface ScoreCreateParams {
   functionName: string;
 
   /**
-   * Up to 1000 pairs per request.
+   * A saved Golden Data Set (`gds_…`) to score against. Mutually exclusive with
+   * `pairs`; provide exactly one. Its input / corrected / schema columns are
+   * resolved by column role. When it carries a `schema`-role column, scoring types
+   * each row against that ground-truth schema instead of the function's own schema —
+   * so results hold up as functions/schemas evolve.
    */
-  pairs: Array<ScoreCreateParams.Pair>;
+  datasetID?: string;
 
   /**
    * Optional version number to score against. P0: only the function's current
@@ -362,6 +357,12 @@ export interface ScoreCreateParams {
    * Comparator configuration. All fields optional; conservative defaults.
    */
   matchConfig?: EvalMatchConfig;
+
+  /**
+   * Inline `(input, expected)` pairs to score, up to 1000 per request. Mutually
+   * exclusive with `datasetID`; provide exactly one.
+   */
+  pairs?: Array<ScoreCreateParams.Pair>;
 }
 
 export namespace ScoreCreateParams {
