@@ -338,6 +338,15 @@ export interface Workflow {
   nodes: Array<WorkflowNodeResponse>;
 
   /**
+   * Whether this workflow is hidden from other members of the account in the bem web
+   * app. When true, only account owners and admins and explicitly granted users see
+   * the workflow and its calls, outputs, and errors in the app. This is a
+   * UI-visibility control: API keys are not scoped to workflows, so an environment
+   * API key still reads a restricted workflow and its data.
+   */
+  restricted: boolean;
+
+  /**
    * The date and time the workflow was last updated.
    */
   updatedAt: string;
