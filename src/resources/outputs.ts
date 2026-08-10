@@ -1398,6 +1398,12 @@ export namespace Event {
     functionVersionNum?: number;
 
     /**
+     * The client-submitted ground-truth re-ranking of this output's candidates, if any
+     * (see `POST /v3/events/{eventID}/enrich-feedback`). Omitted when not set.
+     */
+    groundTruth?: unknown;
+
+    /**
      * The inbound email that triggered this event.
      */
     inboundEmail?: ErrorsAPI.InboundEmailEvent;
