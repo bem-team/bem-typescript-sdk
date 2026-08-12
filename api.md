@@ -262,7 +262,6 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/eval/score.ts">EvalMatchConfig</a></code>
 - <code><a href="./src/resources/eval/score.ts">EvalScoreRun</a></code>
 - <code><a href="./src/resources/eval/score.ts">EvalScoreRunStatus</a></code>
 - <code><a href="./src/resources/eval/score.ts">FileInput</a></code>
