@@ -5,7 +5,6 @@ import * as ResultsAPI from './results';
 import { EvaluationResults, ResultRetrieveResultsParams, Results } from './results';
 import * as ScoreAPI from './score';
 import {
-  EvalMatchConfig,
   EvalScoreRun,
   EvalScoreRunStatus,
   FileInput,
@@ -146,7 +145,6 @@ export declare namespace Eval {
 
   export {
     Score as Score,
-    type EvalMatchConfig as EvalMatchConfig,
     type EvalScoreRun as EvalScoreRun,
     type EvalScoreRunStatus as EvalScoreRunStatus,
     type FileInput as FileInput,

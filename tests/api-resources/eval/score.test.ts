@@ -26,13 +26,6 @@ describe('resource score', () => {
       functionName: 'functionName',
       datasetID: 'datasetID',
       functionVersionNum: 0,
-      matchConfig: {
-        arrayMatch: 'by-index',
-        fuzzyThreshold: 0,
-        ignorePaths: ['string'],
-        numericTolerance: 0,
-        stringMatch: 'exact',
-      },
       pairs: [
         {
           expected: {},

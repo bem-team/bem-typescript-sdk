@@ -4,7 +4,6 @@ export { Eval, type EvalTriggerEvaluationResponse, type EvalTriggerEvaluationPar
 export { Results, type EvaluationResults, type ResultRetrieveResultsParams } from './results';
 export {
   Score,
-  type EvalMatchConfig,
   type EvalScoreRun,
   type EvalScoreRunStatus,
   type FileInput,
