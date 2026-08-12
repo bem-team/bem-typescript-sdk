@@ -64,26 +64,13 @@ export class Score extends APIResource {
    * `GET /v3/eval/score/{scoreRunID}` until `status` is one of `completed`, `error`,
    * or `cancelled`.
    *
-   * `matchConfig` controls comparator behavior:
-   *
-   * - `numericTolerance`: relative tolerance for numeric fields (0 = exact)
-   * - `stringMatch`: `exact` (default) or `fuzzy` (Levenshtein ratio)
-   * - `arrayMatch`: `by-index` (default; only mode in P0)
-   * - `ignorePaths`: JSON Pointer paths to skip, supports `*` wildcards
+   * This request says only _what to extract_. How the output is compared against the
+   * expected value happens on the GET, recomputed from stored JSON each time.
    *
    * @example
    * ```ts
    * const score = await client.eval.score.create({
    *   functionName: 'functionName',
-   *   pairs: [
-   *     {
-   *       expected: {},
-   *       input: {
-   *         inputContent: 'inputContent',
-   *         inputType: 'csv',
-   *       },
-   *     },
-   *   ],
    * });
    * ```
    */
@@ -94,7 +81,16 @@ export class Score extends APIResource {
   /**
    * **Get the status and per-pair results of a score run.**
    *
-   * Returns `aggregate` only once `status` reaches `completed`. `perPair` is
+   * The comparison happens here, not in the run: the function's output is compared
+   * against the expected value on every read, under the configuration supplied
+   * below. Re-reading the same run with different settings returns different metrics
+   * and costs nothing — no model calls are repeated.
+   *
+   * Comparison is exact and takes no configuration: a value matches the expected one
+   * or it is a miss. It is still redone on every read, so the numbers reflect the
+   * stored data as it is now.
+   *
+   * Returns `aggregate` once `status` reaches `completed` or `error`. `perPair` is
    * populated incrementally — each pair's `fieldResults` appears as its underlying
    * function call terminates.
    *
@@ -129,42 +125,12 @@ export class Score extends APIResource {
 }
 
 /**
- * Comparator configuration. All fields optional; conservative defaults.
- */
-export interface EvalMatchConfig {
-  /**
-   * P0 supports only `by-index`.
-   */
-  arrayMatch?: 'by-index';
-
-  /**
-   * Levenshtein-ratio threshold used when `stringMatch == "fuzzy"`. Range `[0, 1]`.
-   * Default `0.85`.
-   */
-  fuzzyThreshold?: number;
-
-  /**
-   * JSON Pointer paths to skip during comparison. The asterisk character matches
-   * arbitrary object keys / array indices.
-   *
-   * Example values: /metadata, /lineItems with asterisk segment, etc.
-   */
-  ignorePaths?: Array<string>;
-
-  /**
-   * Relative tolerance for numeric fields. `0` (default) means exact equality;
-   * `0.01` means ±1%.
-   */
-  numericTolerance?: number;
-
-  /**
-   * `exact` (default) or `fuzzy`.
-   */
-  stringMatch?: 'exact' | 'fuzzy';
-}
-
-/**
  * Full status payload returned by `GET /v3/eval/score/{scoreRunID}`.
+ *
+ * Scoring takes no configuration: a value matches the expected one or it is a
+ * miss. The comparison is still recomputed on every read from the stored JSON, so
+ * the numbers reflect the data as it is now rather than as it was when the run
+ * executed.
  */
 export interface EvalScoreRun {
   functionName: string;
@@ -172,12 +138,7 @@ export interface EvalScoreRun {
   functionVersionNum: number;
 
   /**
-   * Comparator configuration. All fields optional; conservative defaults.
-   */
-  matchConfig: EvalMatchConfig;
-
-  /**
-   * Per-pair results. `fieldResults` appears once a pair has been compared.
+   * Per-pair results. `fieldResults` appears once a pair has an output to compare.
    */
   perPair: Array<EvalScoreRun.PerPair>;
 
@@ -233,15 +194,15 @@ export namespace EvalScoreRun {
      */
     export interface FieldResult {
       /**
-       * Classification:
+       * Classification, in the same vocabulary the model-comparison endpoint reports.
+       * Comparison is exact — a value matches or it does not:
        *
-       * - `exact`: both present and deep-equal
-       * - `within_tolerance`: both numbers, within configured tolerance
-       * - `fuzzy_match`: both strings, Levenshtein ratio above threshold
-       * - `miss`: expected present, actual absent or different
+       * - `match`: both present and deep-equal
+       * - `mismatch`: both present, different
+       * - `missing`: expected present, actual absent
        * - `extra`: actual present, expected absent
        */
-      match: 'exact' | 'within_tolerance' | 'fuzzy_match' | 'miss' | 'extra';
+      match: 'match' | 'mismatch' | 'missing' | 'extra';
 
       /**
        * JSON Pointer to the leaf.
@@ -251,11 +212,20 @@ export namespace EvalScoreRun {
       actual?: unknown;
 
       /**
-       * Populated for numeric comparisons; `actual - expected`.
+       * Populated for every non-identical numeric pair; `actual - expected`. Reported as
+       * evidence only — numbers have no threshold, so a delta tells you how far off a
+       * value was without ever excusing it.
        */
       delta?: number;
 
       expected?: unknown;
+
+      /**
+       * Populated for every non-identical string pair; the Levenshtein ratio in
+       * `[0, 1]`. Reported as evidence: it says how close a wrong value was, which never
+       * makes it right.
+       */
+      similarity?: number;
     }
   }
 
@@ -274,15 +244,15 @@ export namespace EvalScoreRun {
    * Aggregate accuracy metrics.
    */
   export interface Aggregate {
-    exactMatches: number;
-
     extras: number;
 
     f1: number;
 
-    fuzzyMatches: number;
+    matches: number;
 
-    misses: number;
+    mismatches: number;
+
+    missing: number;
 
     precision: number;
 
@@ -291,8 +261,6 @@ export namespace EvalScoreRun {
     totalFieldsActual: number;
 
     totalFieldsExpected: number;
-
-    withinTolerance: number;
   }
 }
 
@@ -348,9 +316,13 @@ export interface ScoreCreateParams {
   functionName: string;
 
   /**
-   * Up to 1000 pairs per request.
+   * A saved Golden Data Set (`gds_…`) to score against. Mutually exclusive with
+   * `pairs`; provide exactly one. Its input / corrected / schema columns are
+   * resolved by column role. When it carries a `schema`-role column, scoring types
+   * each row against that ground-truth schema instead of the function's own schema —
+   * so results hold up as functions/schemas evolve.
    */
-  pairs: Array<ScoreCreateParams.Pair>;
+  datasetID?: string;
 
   /**
    * Optional version number to score against. P0: only the function's current
@@ -359,9 +331,10 @@ export interface ScoreCreateParams {
   functionVersionNum?: number;
 
   /**
-   * Comparator configuration. All fields optional; conservative defaults.
+   * Inline `(input, expected)` pairs to score, up to 1000 per request. Mutually
+   * exclusive with `datasetID`; provide exactly one.
    */
-  matchConfig?: EvalMatchConfig;
+  pairs?: Array<ScoreCreateParams.Pair>;
 }
 
 export namespace ScoreCreateParams {
@@ -388,7 +361,6 @@ export namespace ScoreCreateParams {
 
 export declare namespace Score {
   export {
-    type EvalMatchConfig as EvalMatchConfig,
     type EvalScoreRun as EvalScoreRun,
     type EvalScoreRunStatus as EvalScoreRunStatus,
     type FileInput as FileInput,

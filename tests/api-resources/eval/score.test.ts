@@ -10,15 +10,7 @@ const client = new Bem({
 describe('resource score', () => {
   // Mock server tests are disabled
   test.skip('create: only required params', async () => {
-    const responsePromise = client.eval.score.create({
-      functionName: 'functionName',
-      pairs: [
-        {
-          expected: {},
-          input: { inputContent: 'inputContent', inputType: 'csv' },
-        },
-      ],
-    });
+    const responsePromise = client.eval.score.create({ functionName: 'functionName' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -32,20 +24,14 @@ describe('resource score', () => {
   test.skip('create: required and optional params', async () => {
     const response = await client.eval.score.create({
       functionName: 'functionName',
+      datasetID: 'datasetID',
+      functionVersionNum: 0,
       pairs: [
         {
           expected: {},
           input: { inputContent: 'inputContent', inputType: 'csv' },
         },
       ],
-      functionVersionNum: 0,
-      matchConfig: {
-        arrayMatch: 'by-index',
-        fuzzyThreshold: 0,
-        ignorePaths: ['string'],
-        numericTolerance: 0,
-        stringMatch: 'exact',
-      },
     });
   });
 
