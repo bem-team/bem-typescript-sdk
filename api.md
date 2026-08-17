@@ -390,18 +390,14 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityType</a></code>
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityTypeListResponse</a></code>
+- <code><a href="./src/resources/entity-types.ts">EntityType</a></code>
 
 Methods:
 
-- <code title="post /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">create</a>({ ...params }) -> EntityType</code>
-- <code title="get /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">retrieve</a>(typeID) -> EntityType</code>
-- <code title="patch /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">update</a>(typeID, { ...params }) -> EntityType</code>
-- <code title="get /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">list</a>({ ...params }) -> EntityTypeListResponse</code>
-- <code title="delete /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">delete</a>(typeID) -> void</code>
-
-## Reviewers
+- <code title="post /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types.ts">create</a>({ ...params }) -> EntityType</code>
+- <code title="get /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types.ts">retrieve</a>(typeID) -> EntityType</code>
+- <code title="patch /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types.ts">update</a>(typeID, { ...params }) -> EntityType</code>
+- <code title="delete /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types.ts">delete</a>(typeID) -> void</code>
 
 # KnowledgeGraph
 
@@ -412,7 +408,3 @@ Types:
 Methods:
 
 - <code title="get /v3/knowledge-graph">client.knowledgeGraph.<a href="./src/resources/knowledge-graph.ts">retrieve</a>({ ...params }) -> KnowledgeGraphRetrieveResponse</code>
-
-# ReviewQueue
-
-# Users

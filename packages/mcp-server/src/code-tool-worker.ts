@@ -186,7 +186,6 @@ const fuse = new Fuse(
     'client.entities.synonyms.remove',
     'client.entityTypes.create',
     'client.entityTypes.delete',
-    'client.entityTypes.list',
     'client.entityTypes.retrieve',
     'client.entityTypes.update',
     'client.knowledgeGraph.retrieve',
