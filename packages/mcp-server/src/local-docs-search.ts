@@ -3754,55 +3754,6 @@ const EMBEDDED_METHODS: MethodEntry[] = [
     },
   },
   {
-    name: 'list',
-    endpoint: '/v3/entity-types',
-    httpMethod: 'get',
-    summary: 'List Entity Types',
-    description: 'List Entity Types',
-    stainlessPath: '(resource) entity_types > (method) list',
-    qualified: 'client.entityTypes.list',
-    params: [
-      'endingBefore?: string;',
-      'limit?: number;',
-      'name?: string;',
-      'parentTypeId?: string;',
-      'startingAfter?: string;',
-    ],
-    response:
-      '{ entityTypes: { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }[]; totalCount: number; }',
-    markdown:
-      "## list\n\n`client.entityTypes.list(endingBefore?: string, limit?: number, name?: string, parentTypeId?: string, startingAfter?: string): { entityTypes: entity_type[]; totalCount: number; }`\n\n**get** `/v3/entity-types`\n\nList Entity Types\n\n### Parameters\n\n- `endingBefore?: string`\n  Cursor: return types whose `typeID` sorts before this value.\n\n- `limit?: number`\n  Maximum number of entity types to return (default 50, max 200).\n\n- `name?: string`\n  Case-insensitive substring match on the entity type name.\n\n- `parentTypeId?: string`\n  Filter to the direct children of this parent type (`ety_...`).\n\n- `startingAfter?: string`\n  Cursor: return types whose `typeID` sorts after this value.\n\n### Returns\n\n- `{ entityTypes: { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }[]; totalCount: number; }`\n  Response body for listing entity types.\n\n  - `entityTypes: { createdAt: string; description: string; name: string; parentTypeID: string; typeID: string; updatedAt: string; attributeSchema?: object; }[]`\n  - `totalCount: number`\n\n### Example\n\n```typescript\nimport Bem from 'bem-ai-sdk';\n\nconst client = new Bem();\n\nconst entityTypes = await client.entityTypes.list();\n\nconsole.log(entityTypes);\n```",
-    perLanguage: {
-      typescript: {
-        method: 'client.entityTypes.list',
-        example:
-          "import Bem from 'bem-ai-sdk';\n\nconst client = new Bem({\n  apiKey: process.env['BEM_API_KEY'], // This is the default and can be omitted\n});\n\nconst entityTypes = await client.entityTypes.list();\n\nconsole.log(entityTypes.entityTypes);",
-      },
-      python: {
-        method: 'entity_types.list',
-        example:
-          'import os\nfrom bem import Bem\n\nclient = Bem(\n    api_key=os.environ.get("BEM_API_KEY"),  # This is the default and can be omitted\n)\nentity_types = client.entity_types.list()\nprint(entity_types.entity_types)',
-      },
-      go: {
-        method: 'client.EntityTypes.List',
-        example:
-          'package main\n\nimport (\n\t"context"\n\t"fmt"\n\n\t"github.com/bem-team/bem-go-sdk"\n\t"github.com/bem-team/bem-go-sdk/option"\n)\n\nfunc main() {\n\tclient := bem.NewClient(\n\t\toption.WithAPIKey("My API Key"),\n\t)\n\tentityTypes, err := client.EntityTypes.List(context.TODO(), bem.EntityTypeListParams{})\n\tif err != nil {\n\t\tpanic(err.Error())\n\t}\n\tfmt.Printf("%+v\\n", entityTypes.EntityTypes)\n}\n',
-      },
-      cli: {
-        method: 'entity_types list',
-        example: "bem entity-types list \\\n  --api-key 'My API Key'",
-      },
-      csharp: {
-        method: 'EntityTypes.List',
-        example:
-          'EntityTypeListParams parameters = new();\n\nvar entityTypes = await client.EntityTypes.List(parameters);\n\nConsole.WriteLine(entityTypes);',
-      },
-      http: {
-        example: 'curl https://api.bem.ai/v3/entity-types \\\n    -H "x-api-key: $BEM_API_KEY"',
-      },
-    },
-  },
-  {
     name: 'retrieve',
     endpoint: '/v3/entity-types/{typeID}',
     httpMethod: 'get',

@@ -60,6 +60,12 @@ import {
   Connectors,
 } from './resources/connectors';
 import {
+  EntityType,
+  EntityTypeCreateParams,
+  EntityTypeUpdateParams,
+  EntityTypes,
+} from './resources/entity-types';
+import {
   ErrorEvent,
   ErrorEventsErrorsPage,
   ErrorListParams,
@@ -84,7 +90,6 @@ import {
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
-import { ReviewQueue } from './resources/review-queue';
 import {
   SubscriptionCreateParams,
   SubscriptionListParams,
@@ -93,7 +98,6 @@ import {
   SubscriptionV3,
   Subscriptions,
 } from './resources/subscriptions';
-import { Users } from './resources/users';
 import {
   FunctionIdentifier,
   TimeWindow,
@@ -153,14 +157,6 @@ import {
   RelatedEntity,
   SeedRowResult,
 } from './resources/entities/entities';
-import {
-  EntityType,
-  EntityTypeCreateParams,
-  EntityTypeListParams,
-  EntityTypeListResponse,
-  EntityTypeUpdateParams,
-  EntityTypes,
-} from './resources/entity-types/entity-types';
 import { Eval, EvalTriggerEvaluationParams, EvalTriggerEvaluationResponse } from './resources/eval/eval';
 import {
   ClassificationListItem,
@@ -1333,8 +1329,6 @@ export class Bem {
    * a single bucket; omit it for the unscoped account+environment view.
    */
   knowledgeGraph: API.KnowledgeGraph = new API.KnowledgeGraph(this);
-  reviewQueue: API.ReviewQueue = new API.ReviewQueue(this);
-  users: API.Users = new API.Users(this);
 }
 
 Bem.Functions = Functions;
@@ -1356,8 +1350,6 @@ Bem.Buckets = Buckets;
 Bem.Entities = Entities;
 Bem.EntityTypes = EntityTypes;
 Bem.KnowledgeGraph = KnowledgeGraph;
-Bem.ReviewQueue = ReviewQueue;
-Bem.Users = Users;
 
 export declare namespace Bem {
   export type RequestOptions = Opts.RequestOptions;
@@ -1600,10 +1592,8 @@ export declare namespace Bem {
   export {
     EntityTypes as EntityTypes,
     type EntityType as EntityType,
-    type EntityTypeListResponse as EntityTypeListResponse,
     type EntityTypeCreateParams as EntityTypeCreateParams,
     type EntityTypeUpdateParams as EntityTypeUpdateParams,
-    type EntityTypeListParams as EntityTypeListParams,
   };
 
   export {
@@ -1611,8 +1601,4 @@ export declare namespace Bem {
     type KnowledgeGraphRetrieveResponse as KnowledgeGraphRetrieveResponse,
     type KnowledgeGraphRetrieveParams as KnowledgeGraphRetrieveParams,
   };
-
-  export { ReviewQueue as ReviewQueue };
-
-  export { Users as Users };
 }

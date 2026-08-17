@@ -54,11 +54,9 @@ export {
 export {
   EntityTypes,
   type EntityType,
-  type EntityTypeListResponse,
   type EntityTypeCreateParams,
   type EntityTypeUpdateParams,
-  type EntityTypeListParams,
-} from './entity-types/entity-types';
+} from './entity-types';
 export {
   Errors,
   type ErrorEvent,
@@ -122,7 +120,6 @@ export {
   type OutputListParams,
   type EventsOutputsPage,
 } from './outputs';
-export { ReviewQueue } from './review-queue';
 export {
   Subscriptions,
   type SubscriptionV3,
@@ -131,7 +128,6 @@ export {
   type SubscriptionUpdateParams,
   type SubscriptionListParams,
 } from './subscriptions';
-export { Users } from './users';
 export {
   Views,
   type FunctionIdentifier,

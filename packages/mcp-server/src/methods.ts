@@ -480,12 +480,6 @@ export const sdkMethods: SdkMethod[] = [
     httpPath: '/v3/entity-types/{typeID}',
   },
   {
-    clientCallName: 'client.entityTypes.list',
-    fullyQualifiedName: 'entityTypes.list',
-    httpMethod: 'get',
-    httpPath: '/v3/entity-types',
-  },
-  {
     clientCallName: 'client.entityTypes.delete',
     fullyQualifiedName: 'entityTypes.delete',
     httpMethod: 'delete',
