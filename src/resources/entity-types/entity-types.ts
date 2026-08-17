@@ -2,13 +2,7 @@
 
 import { APIResource } from '../../core/resource';
 import * as ReviewersAPI from './reviewers';
-import {
-  Reviewer,
-  ReviewerAssignParams,
-  ReviewerListResponse,
-  ReviewerRemoveParams,
-  Reviewers,
-} from './reviewers';
+import { Reviewers } from './reviewers';
 import { APIPromise } from '../../core/api-promise';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
@@ -222,6 +216,11 @@ export interface EntityTypeListParams {
   limit?: number;
 
   /**
+   * Case-insensitive substring match on the entity type name.
+   */
+  name?: string;
+
+  /**
    * Filter to the direct children of this parent type (`ety_...`).
    */
   parentTypeId?: string;
@@ -243,11 +242,5 @@ export declare namespace EntityTypes {
     type EntityTypeListParams as EntityTypeListParams,
   };
 
-  export {
-    Reviewers as Reviewers,
-    type Reviewer as Reviewer,
-    type ReviewerListResponse as ReviewerListResponse,
-    type ReviewerAssignParams as ReviewerAssignParams,
-    type ReviewerRemoveParams as ReviewerRemoveParams,
-  };
+  export { Reviewers as Reviewers };
 }

@@ -39,7 +39,10 @@ describe('resource calls', () => {
       client.calls.list(
         {
           callIDs: ['string'],
+          callTypes: ['workflow'],
           endingBefore: 'endingBefore',
+          functionIDs: ['string'],
+          functionNames: ['string'],
           limit: 1,
           referenceIDs: ['string'],
           referenceIDSubstring: 'referenceIDSubstring',

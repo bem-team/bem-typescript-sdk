@@ -74,6 +74,7 @@ describe('resource entityTypes', () => {
         {
           endingBefore: 'endingBefore',
           limit: 0,
+          name: 'name',
           parentTypeId: 'parentTypeId',
           startingAfter: 'startingAfter',
         },

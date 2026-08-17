@@ -20,6 +20,7 @@ export {
   type WorkflowNodeResponse,
   type WorkflowRetrieveResponse,
   type WorkflowUpdateResponse,
+  type WorkflowDeleteResponse,
   type WorkflowCopyResponse,
   type WorkflowCreateParams,
   type WorkflowUpdateParams,
