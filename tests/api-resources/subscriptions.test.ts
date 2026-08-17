@@ -82,7 +82,6 @@ describe('resource subscriptions', () => {
           endingBefore: 'endingBefore',
           functionNames: ['string'],
           limit: 1,
-          sortOrder: 'asc',
           startingAfter: 'startingAfter',
         },
         { path: '/_stainless_unknown_path' },

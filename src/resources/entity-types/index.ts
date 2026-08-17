@@ -8,10 +8,4 @@ export {
   type EntityTypeUpdateParams,
   type EntityTypeListParams,
 } from './entity-types';
-export {
-  Reviewers,
-  type Reviewer,
-  type ReviewerListResponse,
-  type ReviewerAssignParams,
-  type ReviewerRemoveParams,
-} from './reviewers';
+export { Reviewers } from './reviewers';

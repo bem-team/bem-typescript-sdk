@@ -305,13 +305,6 @@ export interface SubscriptionListParams {
   limit?: number;
 
   /**
-   * Specifies sorting behavior. The two options are `asc` and `desc` to sort
-   * ascending and descending respectively, with default sort being ascending. Paging
-   * works in both directions.
-   */
-  sortOrder?: 'asc' | 'desc';
-
-  /**
    * A cursor to use in pagination. `startingAfter` is a task ID that defines your
    * place in the list. For example, if you make a list request and receive 50
    * objects, ending with `sub_2c9AXIj48cUYJtCuv1gsQtHGDzK`, your subsequent call can

@@ -16,6 +16,7 @@ import * as VersionsAPI from './versions';
 import {
   FunctionVersion,
   ListFunctionVersionsResponse,
+  VersionListParams,
   VersionRetrieveParams,
   VersionRetrieveResponse,
   Versions,
@@ -80,8 +81,12 @@ export class Functions extends APIResource {
    * );
    * ```
    */
-  retrieve(functionName: string, options?: RequestOptions): APIPromise<FunctionResponse> {
-    return this._client.get(path`/v3/functions/${functionName}`, options);
+  retrieve(
+    functionName: string,
+    query: FunctionRetrieveParams | null | undefined = {},
+    options?: RequestOptions,
+  ): APIPromise<FunctionResponse> {
+    return this._client.get(path`/v3/functions/${functionName}`, { query, ...options });
   }
 
   /**
@@ -139,6 +144,8 @@ export class Functions extends APIResource {
    * - `workflowIDs` / `workflowNames`: returns only functions referenced by the
    *   named workflows. Useful for "what functions does this workflow depend on?"
    *   lookups.
+   * - `workflowIDVersionNums` / `workflowNameVersionNums`: the same lookup pinned to
+   *   a specific workflow version.
    *
    * ## Pagination
    *
@@ -3427,6 +3434,14 @@ export declare namespace FunctionCreateParams {
   }
 }
 
+export interface FunctionRetrieveParams {
+  /**
+   * Populate the function's `extraConfig` block. Omitted or `false` by default, in
+   * which case `extraConfig` is absent from the response.
+   */
+  includeExtraSettings?: boolean;
+}
+
 export type FunctionUpdateParams =
   | FunctionUpdateParams.UpsertExtractFunction
   | FunctionUpdateParams.UpsertClassifyFunction
@@ -3794,6 +3809,12 @@ export interface FunctionListParams extends FunctionsPageParams {
 
   functionNames?: Array<string>;
 
+  /**
+   * Populate each function's `extraConfig` block. Omitted or `false` by default, in
+   * which case `extraConfig` is absent from the response.
+   */
+  includeExtraSettings?: boolean;
+
   sortOrder?: 'asc' | 'desc';
 
   tags?: Array<string>;
@@ -3802,7 +3823,20 @@ export interface FunctionListParams extends FunctionsPageParams {
 
   workflowIDs?: Array<string>;
 
+  /**
+   * Return only functions referenced by a specific workflow version. Each entry is
+   * `<workflowID>.<versionNum>` — for example `wf_2c9AXIj48cUYJtCuv1gsQtHGDzK.3`.
+   */
+  workflowIDVersionNums?: Array<string>;
+
   workflowNames?: Array<string>;
+
+  /**
+   * Return only functions referenced by a specific workflow version, keyed by
+   * workflow name. Each entry is `<workflowName>.<versionNum>` — for example
+   * `invoice-pipeline.3`.
+   */
+  workflowNameVersionNums?: Array<string>;
 }
 
 export interface FunctionCompareMetricsParams {
@@ -3894,6 +3928,11 @@ export interface FunctionEstimateReviewRequirementsParams {
 
 export interface FunctionGetMetricsParams {
   /**
+   * Case-insensitive substring match on the function display name.
+   */
+  displayName?: string;
+
+  /**
    * Cursor — a `functionID` defining your place in the list.
    */
   endingBefore?: string;
@@ -3915,7 +3954,34 @@ export interface FunctionGetMetricsParams {
    */
   startingAfter?: string;
 
+  /**
+   * Returns metrics for functions tagged with any of the supplied tags.
+   */
+  tags?: Array<string>;
+
   types?: Array<FunctionType>;
+
+  /**
+   * Returns metrics only for functions referenced by the named workflows.
+   */
+  workflowIDs?: Array<string>;
+
+  /**
+   * Narrow the workflow filter to a specific workflow version. Each entry is
+   * `<workflowID>.<versionNum>`.
+   */
+  workflowIDVersionNums?: Array<string>;
+
+  /**
+   * Returns metrics only for functions referenced by the named workflows.
+   */
+  workflowNames?: Array<string>;
+
+  /**
+   * Narrow the workflow filter to a specific workflow version, keyed by workflow
+   * name. Each entry is `<workflowName>.<versionNum>`.
+   */
+  workflowNameVersionNums?: Array<string>;
 }
 
 Functions.Copy = Copy;
@@ -3952,6 +4018,7 @@ export declare namespace Functions {
     type FunctionGetMetricsResponse as FunctionGetMetricsResponse,
     type FunctionsFunctionsPage as FunctionsFunctionsPage,
     type FunctionCreateParams as FunctionCreateParams,
+    type FunctionRetrieveParams as FunctionRetrieveParams,
     type FunctionUpdateParams as FunctionUpdateParams,
     type FunctionListParams as FunctionListParams,
     type FunctionCompareMetricsParams as FunctionCompareMetricsParams,
@@ -3971,6 +4038,7 @@ export declare namespace Functions {
     type ListFunctionVersionsResponse as ListFunctionVersionsResponse,
     type VersionRetrieveResponse as VersionRetrieveResponse,
     type VersionRetrieveParams as VersionRetrieveParams,
+    type VersionListParams as VersionListParams,
   };
 
   export {

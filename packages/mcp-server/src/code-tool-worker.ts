@@ -189,12 +189,7 @@ const fuse = new Fuse(
     'client.entityTypes.list',
     'client.entityTypes.retrieve',
     'client.entityTypes.update',
-    'client.entityTypes.reviewers.assign',
-    'client.entityTypes.reviewers.list',
-    'client.entityTypes.reviewers.remove',
     'client.knowledgeGraph.retrieve',
-    'client.reviewQueue.list',
-    'client.users.listReviewerAssignments',
   ],
   { threshold: 1, shouldSort: true },
 );

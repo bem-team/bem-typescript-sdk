@@ -22,7 +22,10 @@ describe('resource versions', () => {
 
   // Mock server tests are disabled
   test.skip('retrieve: required and optional params', async () => {
-    const response = await client.functions.versions.retrieve(0, { functionName: 'functionName' });
+    const response = await client.functions.versions.retrieve(0, {
+      functionName: 'functionName',
+      includeExtraSettings: true,
+    });
   });
 
   // Mock server tests are disabled
@@ -35,5 +38,22 @@ describe('resource versions', () => {
     const dataAndResponse = await responsePromise.withResponse();
     expect(dataAndResponse.data).toBe(response);
     expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  // Mock server tests are disabled
+  test.skip('list: request options and params are passed correctly', async () => {
+    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
+    await expect(
+      client.functions.versions.list(
+        'functionName',
+        {
+          endingBefore: 0,
+          limit: 1,
+          sortOrder: 'asc',
+          startingAfter: 0,
+        },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(Bem.NotFoundError);
   });
 });

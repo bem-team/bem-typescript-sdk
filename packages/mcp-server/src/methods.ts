@@ -492,40 +492,10 @@ export const sdkMethods: SdkMethod[] = [
     httpPath: '/v3/entity-types/{typeID}',
   },
   {
-    clientCallName: 'client.entityTypes.reviewers.list',
-    fullyQualifiedName: 'entityTypes.reviewers.list',
-    httpMethod: 'get',
-    httpPath: '/v3/entity-types/{typeID}/reviewers',
-  },
-  {
-    clientCallName: 'client.entityTypes.reviewers.assign',
-    fullyQualifiedName: 'entityTypes.reviewers.assign',
-    httpMethod: 'post',
-    httpPath: '/v3/entity-types/{typeID}/reviewers',
-  },
-  {
-    clientCallName: 'client.entityTypes.reviewers.remove',
-    fullyQualifiedName: 'entityTypes.reviewers.remove',
-    httpMethod: 'delete',
-    httpPath: '/v3/entity-types/{typeID}/reviewers/{userID}',
-  },
-  {
     clientCallName: 'client.knowledgeGraph.retrieve',
     fullyQualifiedName: 'knowledgeGraph.retrieve',
     httpMethod: 'get',
     httpPath: '/v3/knowledge-graph',
-  },
-  {
-    clientCallName: 'client.reviewQueue.list',
-    fullyQualifiedName: 'reviewQueue.list',
-    httpMethod: 'get',
-    httpPath: '/v3/review-queue',
-  },
-  {
-    clientCallName: 'client.users.listReviewerAssignments',
-    fullyQualifiedName: 'users.listReviewerAssignments',
-    httpMethod: 'get',
-    httpPath: '/v3/users/{userID}/reviewer-assignments',
   },
 ];
 

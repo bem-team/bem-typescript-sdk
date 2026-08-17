@@ -48,6 +48,18 @@ describe('resource functions', () => {
   });
 
   // Mock server tests are disabled
+  test.skip('retrieve: request options and params are passed correctly', async () => {
+    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
+    await expect(
+      client.functions.retrieve(
+        'functionName',
+        { includeExtraSettings: true },
+        { path: '/_stainless_unknown_path' },
+      ),
+    ).rejects.toThrow(Bem.NotFoundError);
+  });
+
+  // Mock server tests are disabled
   test.skip('update: only required params', async () => {
     const responsePromise = client.functions.update('functionName', { type: 'extract' });
     const rawResponse = await responsePromise.asResponse();
@@ -96,13 +108,16 @@ describe('resource functions', () => {
           endingBefore: 'endingBefore',
           functionIDs: ['string'],
           functionNames: ['string'],
+          includeExtraSettings: true,
           limit: 1,
           sortOrder: 'asc',
           startingAfter: 'startingAfter',
           tags: ['string'],
           types: ['transform'],
           workflowIDs: ['string'],
+          workflowIDVersionNums: ['string'],
           workflowNames: ['string'],
+          workflowNameVersionNums: ['string'],
         },
         { path: '/_stainless_unknown_path' },
       ),
@@ -191,13 +206,19 @@ describe('resource functions', () => {
     await expect(
       client.functions.getMetrics(
         {
+          displayName: 'displayName',
           endingBefore: 'endingBefore',
           functionIDs: ['string'],
           functionNames: ['string'],
           limit: 1,
           sortOrder: 'asc',
           startingAfter: 'startingAfter',
+          tags: ['string'],
           types: ['transform'],
+          workflowIDs: ['string'],
+          workflowIDVersionNums: ['string'],
+          workflowNames: ['string'],
+          workflowNameVersionNums: ['string'],
         },
         { path: '/_stainless_unknown_path' },
       ),

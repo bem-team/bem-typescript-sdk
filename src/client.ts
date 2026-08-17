@@ -84,7 +84,7 @@ import {
   OutputRetrieveResponse,
   Outputs,
 } from './resources/outputs';
-import { ReviewQueue, ReviewQueueListParams, ReviewQueueListResponse } from './resources/review-queue';
+import { ReviewQueue } from './resources/review-queue';
 import {
   SubscriptionCreateParams,
   SubscriptionListParams,
@@ -93,7 +93,7 @@ import {
   SubscriptionV3,
   Subscriptions,
 } from './resources/subscriptions';
-import { UserListReviewerAssignmentsResponse, Users } from './resources/users';
+import { Users } from './resources/users';
 import {
   FunctionIdentifier,
   TimeWindow,
@@ -178,6 +178,7 @@ import {
   FunctionGetMetricsResponse,
   FunctionListParams,
   FunctionResponse,
+  FunctionRetrieveParams,
   FunctionType,
   FunctionUpdateParams,
   Functions,
@@ -209,6 +210,7 @@ import {
   WorkflowCopyParams,
   WorkflowCopyResponse,
   WorkflowCreateParams,
+  WorkflowDeleteResponse,
   WorkflowEdge,
   WorkflowEdgeResponse,
   WorkflowListParams,
@@ -1331,44 +1333,7 @@ export class Bem {
    * a single bucket; omit it for the unscoped account+environment view.
    */
   knowledgeGraph: API.KnowledgeGraph = new API.KnowledgeGraph(this);
-  /**
-   * The reviewer-facing read surface for entity curation, available on the
-   * dashboard (JWT) only.
-   *
-   * - **`GET /v3/review-queue`** returns a cursor-paginated set of entities
-   *   awaiting curation, scoped to your account+environment (and optional
-   *   `bucket`). Each row is a full entity plus a small preview (up to 2) of
-   *   its first mentions, so a reviewer can triage without opening every
-   *   entity.
-   *
-   * Filters AND together. `status` (repeatable) defaults to the pre-terminal
-   * states `extracted` + `proposed` when omitted. `type` (repeatable `ety_…`
-   * IDs) matches the entity's *effective* type — its assigned type id, or, for
-   * entities with no assigned type, its bem-inferred type name. `assignedTo`
-   * (`me` or a `usr_…` ID) restricts to entities whose effective type the user
-   * reviews. `since` (RFC3339) filters by creation time. Pagination is
-   * cursor-based on `entityID` ascending; default limit 50, maximum 200.
-   */
   reviewQueue: API.ReviewQueue = new API.ReviewQueue(this);
-  /**
-   * Reviewer assignments link users to the entity types they are responsible
-   * for reviewing, scoped to an account+environment. These are dashboard-only
-   * endpoints: an assignment needs a user identity, which only the dashboard
-   * (JWT) surface carries.
-   *
-   * - **`POST /v3/entity-types/{typeID}/reviewers`** assigns a user as a
-   *   reviewer of the type. The assignment is idempotent: re-assigning an
-   *   existing reviewer returns the existing assignment. Requires the `admin`
-   *   role.
-   * - **`GET /v3/entity-types/{typeID}/reviewers`** lists the users assigned
-   *   to review the type, with each user's email and role. Requires the
-   *   `operator` role.
-   * - **`DELETE /v3/entity-types/{typeID}/reviewers/{userID}`** removes an
-   *   assignment. Requires the `admin` role.
-   * - **`GET /v3/users/{userID}/reviewer-assignments`** is the reverse lookup:
-   *   the entity types a user reviews. A user may read their own assignments;
-   *   reading another user's assignments requires the `admin` role.
-   */
   users: API.Users = new API.Users(this);
 }
 
@@ -1454,6 +1419,7 @@ export declare namespace Bem {
     type FunctionGetMetricsResponse as FunctionGetMetricsResponse,
     type FunctionsFunctionsPage as FunctionsFunctionsPage,
     type FunctionCreateParams as FunctionCreateParams,
+    type FunctionRetrieveParams as FunctionRetrieveParams,
     type FunctionUpdateParams as FunctionUpdateParams,
     type FunctionListParams as FunctionListParams,
     type FunctionCompareMetricsParams as FunctionCompareMetricsParams,
@@ -1503,6 +1469,7 @@ export declare namespace Bem {
     type WorkflowNodeResponse as WorkflowNodeResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
+    type WorkflowDeleteResponse as WorkflowDeleteResponse,
     type WorkflowCopyResponse as WorkflowCopyResponse,
     type WorkflowsWorkflowsPage as WorkflowsWorkflowsPage,
     type WorkflowCreateParams as WorkflowCreateParams,
@@ -1645,11 +1612,7 @@ export declare namespace Bem {
     type KnowledgeGraphRetrieveParams as KnowledgeGraphRetrieveParams,
   };
 
-  export {
-    ReviewQueue as ReviewQueue,
-    type ReviewQueueListResponse as ReviewQueueListResponse,
-    type ReviewQueueListParams as ReviewQueueListParams,
-  };
+  export { ReviewQueue as ReviewQueue };
 
-  export { Users as Users, type UserListReviewerAssignmentsResponse as UserListReviewerAssignmentsResponse };
+  export { Users as Users };
 }

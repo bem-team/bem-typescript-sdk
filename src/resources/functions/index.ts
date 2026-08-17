@@ -30,6 +30,7 @@ export {
   type FunctionEstimateReviewRequirementsResponse,
   type FunctionGetMetricsResponse,
   type FunctionCreateParams,
+  type FunctionRetrieveParams,
   type FunctionUpdateParams,
   type FunctionListParams,
   type FunctionCompareMetricsParams,
@@ -50,4 +51,5 @@ export {
   type ListFunctionVersionsResponse,
   type VersionRetrieveResponse,
   type VersionRetrieveParams,
+  type VersionListParams,
 } from './versions';

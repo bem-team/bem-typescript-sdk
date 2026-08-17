@@ -71,6 +71,7 @@ describe('resource entities', () => {
     const response = await client.entities.bulkValidate({
       entityIDs: ['ent_2abc', 'ent_2def'],
       status: 'approved',
+      bucket: 'bucket',
     });
   });
 

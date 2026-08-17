@@ -99,6 +99,7 @@ export {
   type FunctionEstimateReviewRequirementsResponse,
   type FunctionGetMetricsResponse,
   type FunctionCreateParams,
+  type FunctionRetrieveParams,
   type FunctionUpdateParams,
   type FunctionListParams,
   type FunctionCompareMetricsParams,
@@ -121,7 +122,7 @@ export {
   type OutputListParams,
   type EventsOutputsPage,
 } from './outputs';
-export { ReviewQueue, type ReviewQueueListResponse, type ReviewQueueListParams } from './review-queue';
+export { ReviewQueue } from './review-queue';
 export {
   Subscriptions,
   type SubscriptionV3,
@@ -130,7 +131,7 @@ export {
   type SubscriptionUpdateParams,
   type SubscriptionListParams,
 } from './subscriptions';
-export { Users, type UserListReviewerAssignmentsResponse } from './users';
+export { Users } from './users';
 export {
   Views,
   type FunctionIdentifier,
@@ -179,6 +180,7 @@ export {
   type WorkflowNodeResponse,
   type WorkflowRetrieveResponse,
   type WorkflowUpdateResponse,
+  type WorkflowDeleteResponse,
   type WorkflowCopyResponse,
   type WorkflowCreateParams,
   type WorkflowUpdateParams,

@@ -41,8 +41,11 @@ export class Versions extends APIResource {
     params: VersionRetrieveParams,
     options?: RequestOptions,
   ): APIPromise<VersionRetrieveResponse> {
-    const { functionName } = params;
-    return this._client.get(path`/v3/functions/${functionName}/versions/${versionNum}`, options);
+    const { functionName, ...query } = params;
+    return this._client.get(path`/v3/functions/${functionName}/versions/${versionNum}`, {
+      query,
+      ...options,
+    });
   }
 
   /**
@@ -59,8 +62,12 @@ export class Versions extends APIResource {
    *   await client.functions.versions.list('functionName');
    * ```
    */
-  list(functionName: string, options?: RequestOptions): APIPromise<ListFunctionVersionsResponse> {
-    return this._client.get(path`/v3/functions/${functionName}/versions`, options);
+  list(
+    functionName: string,
+    query: VersionListParams | null | undefined = {},
+    options?: RequestOptions,
+  ): APIPromise<ListFunctionVersionsResponse> {
+    return this._client.get(path`/v3/functions/${functionName}/versions`, { query, ...options });
   }
 }
 
@@ -822,7 +829,26 @@ export interface VersionRetrieveResponse {
 }
 
 export interface VersionRetrieveParams {
+  /**
+   * Path param
+   */
   functionName: string;
+
+  /**
+   * Query param: Populate the version's `extraConfig` block. Omitted or `false` by
+   * default, in which case `extraConfig` is absent from the response.
+   */
+  includeExtraSettings?: boolean;
+}
+
+export interface VersionListParams {
+  endingBefore?: number;
+
+  limit?: number;
+
+  sortOrder?: 'asc' | 'desc';
+
+  startingAfter?: number;
 }
 
 export declare namespace Versions {
@@ -831,5 +857,6 @@ export declare namespace Versions {
     type ListFunctionVersionsResponse as ListFunctionVersionsResponse,
     type VersionRetrieveResponse as VersionRetrieveResponse,
     type VersionRetrieveParams as VersionRetrieveParams,
+    type VersionListParams as VersionListParams,
   };
 }
