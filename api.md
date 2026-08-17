@@ -32,7 +32,7 @@ Types:
 Methods:
 
 - <code title="post /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">create</a>({ ...params }) -> FunctionResponse</code>
-- <code title="get /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">retrieve</a>(functionName) -> FunctionResponse</code>
+- <code title="get /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">retrieve</a>(functionName, { ...params }) -> FunctionResponse</code>
 - <code title="patch /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">update</a>(pathFunctionName, { ...params }) -> FunctionResponse</code>
 - <code title="get /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">list</a>({ ...params }) -> FunctionsFunctionsPage</code>
 - <code title="delete /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">delete</a>(functionName) -> void</code>
@@ -61,7 +61,7 @@ Types:
 Methods:
 
 - <code title="get /v3/functions/{functionName}/versions/{versionNum}">client.functions.versions.<a href="./src/resources/functions/versions.ts">retrieve</a>(versionNum, { ...params }) -> VersionRetrieveResponse</code>
-- <code title="get /v3/functions/{functionName}/versions">client.functions.versions.<a href="./src/resources/functions/versions.ts">list</a>(functionName) -> ListFunctionVersionsResponse</code>
+- <code title="get /v3/functions/{functionName}/versions">client.functions.versions.<a href="./src/resources/functions/versions.ts">list</a>(functionName, { ...params }) -> ListFunctionVersionsResponse</code>
 
 ## Regression
 
@@ -132,6 +132,7 @@ Types:
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowNodeResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowRetrieveResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowUpdateResponse</a></code>
+- <code><a href="./src/resources/workflows/workflows.ts">WorkflowDeleteResponse</a></code>
 - <code><a href="./src/resources/workflows/workflows.ts">WorkflowCopyResponse</a></code>
 
 Methods:
@@ -140,7 +141,7 @@ Methods:
 - <code title="get /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">retrieve</a>(workflowName) -> WorkflowRetrieveResponse</code>
 - <code title="patch /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">update</a>(workflowName, { ...params }) -> WorkflowUpdateResponse</code>
 - <code title="get /v3/workflows">client.workflows.<a href="./src/resources/workflows/workflows.ts">list</a>({ ...params }) -> WorkflowsWorkflowsPage</code>
-- <code title="delete /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">delete</a>(workflowName) -> void</code>
+- <code title="delete /v3/workflows/{workflowName}">client.workflows.<a href="./src/resources/workflows/workflows.ts">delete</a>(workflowName) -> WorkflowDeleteResponse</code>
 - <code title="post /v3/workflows/{workflowName}/call">client.workflows.<a href="./src/resources/workflows/workflows.ts">call</a>(workflowName, { ...params }) -> CallGetResponse</code>
 - <code title="post /v3/workflows/copy">client.workflows.<a href="./src/resources/workflows/workflows.ts">copy</a>({ ...params }) -> WorkflowCopyResponse</code>
 
@@ -389,29 +390,14 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityType</a></code>
-- <code><a href="./src/resources/entity-types/entity-types.ts">EntityTypeListResponse</a></code>
+- <code><a href="./src/resources/entity-types.ts">EntityType</a></code>
 
 Methods:
 
-- <code title="post /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">create</a>({ ...params }) -> EntityType</code>
-- <code title="get /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">retrieve</a>(typeID) -> EntityType</code>
-- <code title="patch /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">update</a>(typeID, { ...params }) -> EntityType</code>
-- <code title="get /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">list</a>({ ...params }) -> EntityTypeListResponse</code>
-- <code title="delete /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types/entity-types.ts">delete</a>(typeID) -> void</code>
-
-## Reviewers
-
-Types:
-
-- <code><a href="./src/resources/entity-types/reviewers.ts">Reviewer</a></code>
-- <code><a href="./src/resources/entity-types/reviewers.ts">ReviewerListResponse</a></code>
-
-Methods:
-
-- <code title="get /v3/entity-types/{typeID}/reviewers">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">list</a>(typeID) -> ReviewerListResponse</code>
-- <code title="post /v3/entity-types/{typeID}/reviewers">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">assign</a>(typeID, { ...params }) -> Reviewer</code>
-- <code title="delete /v3/entity-types/{typeID}/reviewers/{userID}">client.entityTypes.reviewers.<a href="./src/resources/entity-types/reviewers.ts">remove</a>(userID, { ...params }) -> void</code>
+- <code title="post /v3/entity-types">client.entityTypes.<a href="./src/resources/entity-types.ts">create</a>({ ...params }) -> EntityType</code>
+- <code title="get /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types.ts">retrieve</a>(typeID) -> EntityType</code>
+- <code title="patch /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types.ts">update</a>(typeID, { ...params }) -> EntityType</code>
+- <code title="delete /v3/entity-types/{typeID}">client.entityTypes.<a href="./src/resources/entity-types.ts">delete</a>(typeID) -> void</code>
 
 # KnowledgeGraph
 
@@ -422,23 +408,3 @@ Types:
 Methods:
 
 - <code title="get /v3/knowledge-graph">client.knowledgeGraph.<a href="./src/resources/knowledge-graph.ts">retrieve</a>({ ...params }) -> KnowledgeGraphRetrieveResponse</code>
-
-# ReviewQueue
-
-Types:
-
-- <code><a href="./src/resources/review-queue.ts">ReviewQueueListResponse</a></code>
-
-Methods:
-
-- <code title="get /v3/review-queue">client.reviewQueue.<a href="./src/resources/review-queue.ts">list</a>({ ...params }) -> ReviewQueueListResponse</code>
-
-# Users
-
-Types:
-
-- <code><a href="./src/resources/users.ts">UserListReviewerAssignmentsResponse</a></code>
-
-Methods:
-
-- <code title="get /v3/users/{userID}/reviewer-assignments">client.users.<a href="./src/resources/users.ts">listReviewerAssignments</a>(userID) -> UserListReviewerAssignmentsResponse</code>

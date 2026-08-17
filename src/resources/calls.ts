@@ -56,6 +56,8 @@ export class Calls extends APIResource {
    * - `callIDs`: Specific call identifiers
    * - `referenceIDs`: Your custom reference IDs
    * - `workflowIDs` / `workflowNames`: Filter by workflow
+   * - `functionIDs` / `functionNames`: Filter by function (function calls only)
+   * - `callTypes`: Restrict to workflow calls or to function calls
    *
    * ## Pagination
    *
@@ -96,23 +98,36 @@ export class Calls extends APIResource {
 export type CallsCallsPage = CallsPage<Call>;
 
 /**
- * A workflow call returned by the V3 API.
+ * A call returned by the V3 API.
  *
  * Compared to the V2 `Call` model:
  *
  * - Terminal outputs are split into `outputs` (non-error events) and `errors`
  *   (error events)
- * - `callType` and function-scoped fields are removed — V3 calls are always
- *   workflow calls
  * - The deprecated `functionCalls` field is removed (use
  *   `GET /v3/calls/{callID}/trace`)
  * - `url` and `traceUrl` hint fields are included for resource discovery
+ *
+ * Most calls are workflow calls, and `POST /v3/workflows/{workflowName}/call` only
+ * ever creates those. `GET /v3/calls` and `GET /v3/calls/{callID}` also return
+ * direct and adhoc function calls, which carry the function-scoped fields instead
+ * of the workflow-scoped ones — read `callType` to tell them apart.
  */
 export interface Call {
   /**
    * Unique identifier of the call.
    */
   callID: string;
+
+  /**
+   * What kind of call this is. Always present.
+   *
+   * - `workflow` — created by `POST /v3/workflows/{workflowName}/call`; carries the
+   *   `workflow*` fields.
+   * - `direct_function` / `adhoc_function` — a call against a single function;
+   *   carries the `function*` fields instead.
+   */
+  callType: 'workflow' | 'direct_function' | 'adhoc_function';
 
   /**
    * The date and time the call was created.
@@ -161,6 +176,26 @@ export interface Call {
   finishedAt?: string;
 
   /**
+   * Unique identifier of the function. Only set for function calls.
+   */
+  functionID?: string;
+
+  /**
+   * Name of the function. Only set for function calls.
+   */
+  functionName?: string;
+
+  /**
+   * The type of the function.
+   */
+  functionType?: FunctionsAPI.FunctionType;
+
+  /**
+   * Version number of the function. Only set for function calls.
+   */
+  functionVersionNum?: number;
+
+  /**
    * Input to the main function call.
    */
   input?: Call.Input;
@@ -171,17 +206,17 @@ export interface Call {
   status?: 'pending' | 'running' | 'completed' | 'failed';
 
   /**
-   * Unique identifier of the workflow.
+   * Unique identifier of the workflow. Only set when `callType` is `workflow`.
    */
   workflowID?: string;
 
   /**
-   * Name of the workflow.
+   * Name of the workflow. Only set when `callType` is `workflow`.
    */
   workflowName?: string;
 
   /**
-   * Version number of the workflow.
+   * Version number of the workflow. Only set when `callType` is `workflow`.
    */
   workflowVersionNum?: number;
 }
@@ -236,17 +271,20 @@ export namespace Call {
 
 export interface CallGetResponse {
   /**
-   * A workflow call returned by the V3 API.
+   * A call returned by the V3 API.
    *
    * Compared to the V2 `Call` model:
    *
    * - Terminal outputs are split into `outputs` (non-error events) and `errors`
    *   (error events)
-   * - `callType` and function-scoped fields are removed — V3 calls are always
-   *   workflow calls
    * - The deprecated `functionCalls` field is removed (use
    *   `GET /v3/calls/{callID}/trace`)
    * - `url` and `traceUrl` hint fields are included for resource discovery
+   *
+   * Most calls are workflow calls, and `POST /v3/workflows/{workflowName}/call` only
+   * ever creates those. `GET /v3/calls` and `GET /v3/calls/{callID}` also return
+   * direct and adhoc function calls, which carry the function-scoped fields instead
+   * of the workflow-scoped ones — read `callType` to tell them apart.
    */
   call?: Call;
 
@@ -421,6 +459,22 @@ export namespace CallRetrieveTraceResponse {
 
 export interface CallListParams extends CallsPageParams {
   callIDs?: Array<string>;
+
+  /**
+   * Filter by call type. Omit to return every call regardless of type.
+   */
+  callTypes?: Array<'workflow' | 'direct_function' | 'adhoc_function'>;
+
+  /**
+   * Filter by function API ID. Only matches function calls — workflow calls carry no
+   * function reference of their own.
+   */
+  functionIDs?: Array<string>;
+
+  /**
+   * Filter by function name. Only matches function calls.
+   */
+  functionNames?: Array<string>;
 
   referenceIDs?: Array<string>;
 

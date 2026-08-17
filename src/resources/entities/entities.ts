@@ -21,8 +21,9 @@ export class Entities extends APIResource {
    * });
    * ```
    */
-  update(id: string, body: EntityUpdateParams, options?: RequestOptions): APIPromise<EntityUpdateResponse> {
-    return this._client.patch(path`/v3/entities/${id}`, { body, ...options });
+  update(id: string, params: EntityUpdateParams, options?: RequestOptions): APIPromise<EntityUpdateResponse> {
+    const { bucket, ...body } = params;
+    return this._client.patch(path`/v3/entities/${id}`, { query: { bucket }, body, ...options });
   }
 
   /**
@@ -60,10 +61,11 @@ export class Entities extends APIResource {
    * ```
    */
   bulkValidate(
-    body: EntityBulkValidateParams,
+    params: EntityBulkValidateParams,
     options?: RequestOptions,
   ): APIPromise<EntityBulkValidateResponse> {
-    return this._client.post('/v3/entities/bulk-validate', { body, ...options });
+    const { bucket, ...body } = params;
+    return this._client.post('/v3/entities/bulk-validate', { query: { bucket }, body, ...options });
   }
 
   /**
@@ -437,36 +439,45 @@ export interface EntityRetrieveSeedStatusResponse {
 
 export interface EntityUpdateParams {
   /**
-   * Surface forms to attach as `customer_defined` synonyms.
+   * Query param: Optional bucket public ID (`bkt_...`) to scope the lookup to. Omit
+   * for the default bucket.
+   */
+  bucket?: string;
+
+  /**
+   * Body param: Surface forms to attach as `customer_defined` synonyms.
    */
   addSynonyms?: Array<string>;
 
   /**
-   * The `ety_...` public ID of the type to assign (overriding the bem-inferred
-   * type). The empty string clears the assignment. Omit to leave unchanged.
+   * Body param: The `ety_...` public ID of the type to assign (overriding the
+   * bem-inferred type). The empty string clears the assignment. Omit to leave
+   * unchanged.
    */
   assignedTypeID?: string;
 
   /**
-   * Replace the entity's canonical surface form (re-derives its normalized form).
+   * Body param: Replace the entity's canonical surface form (re-derives its
+   * normalized form).
    */
   canonical?: string;
 
   /**
-   * Optional BCP 47 locale tag stamped on any added synonyms.
+   * Body param: Optional BCP 47 locale tag stamped on any added synonyms.
    */
   locale?: string;
 
   /**
-   * `esn_...` synonym IDs to soft-delete. Only `customer_defined` / `sme_approved`
-   * synonyms may be removed; an `extracted` synonym is rejected with `409`.
+   * Body param: `esn_...` synonym IDs to soft-delete. Only `customer_defined` /
+   * `sme_approved` synonyms may be removed; an `extracted` synonym is rejected with
+   * `409`.
    */
   removeSynonymIDs?: Array<string>;
 
   /**
-   * Transition the entity's curation status. Only `approved` or `rejected` are
-   * accepted, and only from `extracted` or `proposed` (any other transition is
-   * rejected with `409`).
+   * Body param: Transition the entity's curation status. Only `approved` or
+   * `rejected` are accepted, and only from `extracted` or `proposed` (any other
+   * transition is rejected with `409`).
    */
   status?: 'approved' | 'rejected';
 }
@@ -530,14 +541,20 @@ export namespace EntityBulkCreateParams {
 
 export interface EntityBulkValidateParams {
   /**
-   * The `ent_...` IDs to transition. Must be non-empty.
+   * Body param: The `ent_...` IDs to transition. Must be non-empty.
    */
   entityIDs: Array<string>;
 
   /**
-   * Terminal status to apply to every entity.
+   * Body param: Terminal status to apply to every entity.
    */
   status: 'approved' | 'rejected';
+
+  /**
+   * Query param: Optional bucket public ID (`bkt_...`) to scope the lookup to. Omit
+   * for the default bucket.
+   */
+  bucket?: string;
 }
 
 export interface EntityRetrieveRelationsParams {

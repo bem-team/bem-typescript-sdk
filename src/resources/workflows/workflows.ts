@@ -15,7 +15,6 @@ import {
   WorkflowsPage,
   type WorkflowsPageParams,
 } from '../../core/pagination';
-import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 import { maybeMultipartFormRequestOptions } from '../../internal/uploads';
 import { path } from '../../internal/utils/path';
@@ -137,6 +136,8 @@ export class Workflows extends APIResource {
    * - `functionIDs` / `functionNames`: returns only workflows that reference the
    *   named functions in any node. Useful for "which workflows depend on this
    *   function?" lookups before changing or deleting a function.
+   * - `functionIDVersionNums` / `functionNameVersionNums`: the same lookup narrowed
+   *   to nodes pinned to a specific function version.
    *
    * ## Pagination
    *
@@ -159,12 +160,14 @@ export class Workflows extends APIResource {
    *
    * Functions referenced by the deleted workflow are not removed — they remain
    * available to other workflows or for direct reference.
+   *
+   * Any connectors attached to the workflow are torn down first. Teardown is
+   * best-effort: per-connector failures are reported in `connectorErrors` but do not
+   * block the deletion, so check that array rather than relying on the status code
+   * alone.
    */
-  delete(workflowName: string, options?: RequestOptions): APIPromise<void> {
-    return this._client.delete(path`/v3/workflows/${workflowName}`, {
-      ...options,
-      headers: buildHeaders([{ Accept: '*/*' }, options?.headers]),
-    });
+  delete(workflowName: string, options?: RequestOptions): APIPromise<WorkflowDeleteResponse> {
+    return this._client.delete(path`/v3/workflows/${workflowName}`, options);
   }
 
   /**
@@ -649,6 +652,51 @@ export interface WorkflowUpdateResponse {
   workflow?: Workflow;
 }
 
+export interface WorkflowDeleteResponse {
+  /**
+   * Per-connector failures from tearing down the deleted workflow's connectors.
+   * Connector teardown is best-effort: a failure here is reported but does not block
+   * the deletion, so a `200` response with a non-empty `connectorErrors` means the
+   * workflow is gone while one or more of its connectors may still need manual
+   * cleanup. Empty or omitted when all teardowns succeeded.
+   */
+  connectorErrors?: Array<WorkflowConnectorError>;
+
+  /**
+   * Error message if the workflow deletion failed.
+   */
+  error?: string;
+
+  /**
+   * Identifies the workflow that was deleted, pinned to the version number it was on
+   * at deletion time.
+   */
+  workflow?: WorkflowDeleteResponse.Workflow;
+}
+
+export namespace WorkflowDeleteResponse {
+  /**
+   * Identifies the workflow that was deleted, pinned to the version number it was on
+   * at deletion time.
+   */
+  export interface Workflow {
+    /**
+     * Unique identifier of workflow.
+     */
+    id: string;
+
+    /**
+     * Unique name of workflow. Must be UNIQUE on a per-environment basis.
+     */
+    name: string;
+
+    /**
+     * Version number of workflow version.
+     */
+    versionNum: number;
+  }
+}
+
 export interface WorkflowCopyResponse {
   /**
    * Functions that were copied when copying to a different environment. Empty when
@@ -785,7 +833,21 @@ export interface WorkflowListParams extends WorkflowsPageParams {
 
   functionIDs?: Array<string>;
 
+  /**
+   * Return only workflows with a node pinned to a specific function version. Each
+   * entry is `<functionID>.<versionNum>` — for example
+   * `fn_2c9AXIj48cUYJtCuv1gsQtHGDzK.4`.
+   */
+  functionIDVersionNums?: Array<string>;
+
   functionNames?: Array<string>;
+
+  /**
+   * Return only workflows with a node pinned to a specific function version, keyed
+   * by function name. Each entry is `<functionName>.<versionNum>` — for example
+   * `invoice-extract.4`.
+   */
+  functionNameVersionNums?: Array<string>;
 
   sortOrder?: 'asc' | 'desc';
 
@@ -947,6 +1009,7 @@ export declare namespace Workflows {
     type WorkflowNodeResponse as WorkflowNodeResponse,
     type WorkflowRetrieveResponse as WorkflowRetrieveResponse,
     type WorkflowUpdateResponse as WorkflowUpdateResponse,
+    type WorkflowDeleteResponse as WorkflowDeleteResponse,
     type WorkflowCopyResponse as WorkflowCopyResponse,
     type WorkflowsWorkflowsPage as WorkflowsWorkflowsPage,
     type WorkflowCreateParams as WorkflowCreateParams,
