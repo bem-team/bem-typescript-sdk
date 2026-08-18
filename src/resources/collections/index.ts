@@ -10,6 +10,7 @@ export {
   type CollectionListParams,
   type CollectionDeleteParams,
   type CollectionCountTokensParams,
+  type CollectionListResponsesCollectionsPage,
 } from './collections';
 export {
   Items,

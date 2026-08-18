@@ -17,14 +17,20 @@ import * as Errors from './core/error';
 import * as Pagination from './core/pagination';
 import {
   AbstractPage,
+  type BucketsPageParams,
+  BucketsPageResponse,
   type CallsPageParams,
   CallsPageResponse,
+  type CollectionsPageParams,
+  CollectionsPageResponse,
   type ErrorsPageParams,
   ErrorsPageResponse,
   type FunctionsPageParams,
   FunctionsPageResponse,
   type OutputsPageParams,
   OutputsPageResponse,
+  type ViewsPageParams,
+  ViewsPageResponse,
   type WorkflowVersionsPageParams,
   WorkflowVersionsPageResponse,
   type WorkflowsPageParams,
@@ -37,9 +43,9 @@ import {
   BucketCreateParams,
   BucketDeleteParams,
   BucketListParams,
-  BucketListResponse,
   BucketUpdateParams,
   BucketV3,
+  BucketV3sBucketsPage,
   Buckets,
 } from './resources/buckets';
 import {
@@ -112,9 +118,9 @@ import {
   ViewGenerateTableDataParams,
   ViewGenerateTableDataResponse,
   ViewListParams,
-  ViewListResponse,
   ViewUpdateParams,
   Views,
+  ViewsViewsPage,
 } from './resources/views';
 import { WebhookSecret, WebhookSecretResource } from './resources/webhook-secret';
 import {
@@ -141,6 +147,7 @@ import {
   CollectionItem,
   CollectionListParams,
   CollectionListResponse,
+  CollectionListResponsesCollectionsPage,
   Collections,
 } from './resources/collections/collections';
 import {
@@ -1381,6 +1388,18 @@ export declare namespace Bem {
     type WorkflowVersionsPageResponse as WorkflowVersionsPageResponse,
   };
 
+  export import ViewsPage = Pagination.ViewsPage;
+  export { type ViewsPageParams as ViewsPageParams, type ViewsPageResponse as ViewsPageResponse };
+
+  export import BucketsPage = Pagination.BucketsPage;
+  export { type BucketsPageParams as BucketsPageParams, type BucketsPageResponse as BucketsPageResponse };
+
+  export import CollectionsPage = Pagination.CollectionsPage;
+  export {
+    type CollectionsPageParams as CollectionsPageParams,
+    type CollectionsPageResponse as CollectionsPageResponse,
+  };
+
   export {
     Functions as Functions,
     type ClassificationListItem as ClassificationListItem,
@@ -1483,6 +1502,7 @@ export declare namespace Bem {
     type CollectionItem as CollectionItem,
     type CollectionListResponse as CollectionListResponse,
     type CollectionCountTokensResponse as CollectionCountTokensResponse,
+    type CollectionListResponsesCollectionsPage as CollectionListResponsesCollectionsPage,
     type CollectionCreateParams as CollectionCreateParams,
     type CollectionListParams as CollectionListParams,
     type CollectionDeleteParams as CollectionDeleteParams,
@@ -1554,9 +1574,9 @@ export declare namespace Bem {
     type ViewColumn as ViewColumn,
     type ViewCreate as ViewCreate,
     type ViewFilter as ViewFilter,
-    type ViewListResponse as ViewListResponse,
     type ViewGenerateAggregationDataResponse as ViewGenerateAggregationDataResponse,
     type ViewGenerateTableDataResponse as ViewGenerateTableDataResponse,
+    type ViewsViewsPage as ViewsViewsPage,
     type ViewCreateParams as ViewCreateParams,
     type ViewUpdateParams as ViewUpdateParams,
     type ViewListParams as ViewListParams,
@@ -1567,7 +1587,7 @@ export declare namespace Bem {
   export {
     Buckets as Buckets,
     type BucketV3 as BucketV3,
-    type BucketListResponse as BucketListResponse,
+    type BucketV3sBucketsPage as BucketV3sBucketsPage,
     type BucketCreateParams as BucketCreateParams,
     type BucketUpdateParams as BucketUpdateParams,
     type BucketListParams as BucketListParams,

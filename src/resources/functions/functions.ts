@@ -2892,118 +2892,33 @@ export namespace FunctionEstimateReviewRequirementsResponse {
        * Keys are confidence levels as strings ("90", "95", "99"). Values contain
        * statistical confidence intervals.
        */
-      accuracyAboveThreshold?: ThresholdMatrix.AccuracyAboveThreshold;
+      accuracyAboveThreshold?: { [key: string]: FunctionsAPI.RateConfidenceInterval };
 
       /**
        * False Discovery Rate confidence intervals by confidence level. Keys are
        * confidence levels as strings ("90", "95", "99"). Values contain statistical
        * confidence intervals.
        */
-      falseDiscoveryRate?: ThresholdMatrix.FalseDiscoveryRate;
+      falseDiscoveryRate?: { [key: string]: FunctionsAPI.RateConfidenceInterval };
 
       /**
        * False Positive Rate confidence intervals by confidence level. Keys are
        * confidence levels as strings ("90", "95", "99"). Values contain statistical
        * confidence intervals.
        */
-      falsePositiveRate?: ThresholdMatrix.FalsePositiveRate;
+      falsePositiveRate?: { [key: string]: FunctionsAPI.RateConfidenceInterval };
 
       /**
        * Precision confidence intervals by confidence level. Keys are confidence levels
        * as strings ("90", "95", "99"). Values contain statistical confidence intervals.
        */
-      precision?: ThresholdMatrix.Precision;
+      precision?: { [key: string]: FunctionsAPI.RateConfidenceInterval };
 
       /**
        * Recall confidence intervals by confidence level. Keys are confidence levels as
        * strings ("90", "95", "99"). Values contain statistical confidence intervals.
        */
-      recall?: ThresholdMatrix.Recall;
-    }
-
-    export namespace ThresholdMatrix {
-      /**
-       * Accuracy confidence intervals for samples above threshold, by confidence level.
-       * Keys are confidence levels as strings ("90", "95", "99"). Values contain
-       * statistical confidence intervals.
-       */
-      export interface AccuracyAboveThreshold {
-        /**
-         * Confidence interval for a rate/proportion using Wald (normal approximation)
-         * method by default.
-         *
-         * Wald confidence intervals use the normal approximation to the binomial
-         * distribution. For extreme rates or small sample sizes, Wilson confidence
-         * intervals may be more appropriate.
-         */
-        '95'?: FunctionsAPI.RateConfidenceInterval;
-      }
-
-      /**
-       * False Discovery Rate confidence intervals by confidence level. Keys are
-       * confidence levels as strings ("90", "95", "99"). Values contain statistical
-       * confidence intervals.
-       */
-      export interface FalseDiscoveryRate {
-        /**
-         * Confidence interval for a rate/proportion using Wald (normal approximation)
-         * method by default.
-         *
-         * Wald confidence intervals use the normal approximation to the binomial
-         * distribution. For extreme rates or small sample sizes, Wilson confidence
-         * intervals may be more appropriate.
-         */
-        '95'?: FunctionsAPI.RateConfidenceInterval;
-      }
-
-      /**
-       * False Positive Rate confidence intervals by confidence level. Keys are
-       * confidence levels as strings ("90", "95", "99"). Values contain statistical
-       * confidence intervals.
-       */
-      export interface FalsePositiveRate {
-        /**
-         * Confidence interval for a rate/proportion using Wald (normal approximation)
-         * method by default.
-         *
-         * Wald confidence intervals use the normal approximation to the binomial
-         * distribution. For extreme rates or small sample sizes, Wilson confidence
-         * intervals may be more appropriate.
-         */
-        '95'?: FunctionsAPI.RateConfidenceInterval;
-      }
-
-      /**
-       * Precision confidence intervals by confidence level. Keys are confidence levels
-       * as strings ("90", "95", "99"). Values contain statistical confidence intervals.
-       */
-      export interface Precision {
-        /**
-         * Confidence interval for a rate/proportion using Wald (normal approximation)
-         * method by default.
-         *
-         * Wald confidence intervals use the normal approximation to the binomial
-         * distribution. For extreme rates or small sample sizes, Wilson confidence
-         * intervals may be more appropriate.
-         */
-        '95'?: FunctionsAPI.RateConfidenceInterval;
-      }
-
-      /**
-       * Recall confidence intervals by confidence level. Keys are confidence levels as
-       * strings ("90", "95", "99"). Values contain statistical confidence intervals.
-       */
-      export interface Recall {
-        /**
-         * Confidence interval for a rate/proportion using Wald (normal approximation)
-         * method by default.
-         *
-         * Wald confidence intervals use the normal approximation to the binomial
-         * distribution. For extreme rates or small sample sizes, Wilson confidence
-         * intervals may be more appropriate.
-         */
-        '95'?: FunctionsAPI.RateConfidenceInterval;
-      }
+      recall?: { [key: string]: FunctionsAPI.RateConfidenceInterval };
     }
   }
 }

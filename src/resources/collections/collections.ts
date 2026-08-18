@@ -12,6 +12,7 @@ import {
   Items,
 } from './items';
 import { APIPromise } from '../../core/api-promise';
+import { CollectionsPage, type CollectionsPageParams, PagePromise } from '../../core/pagination';
 import { buildHeaders } from '../../internal/headers';
 import { RequestOptions } from '../../internal/request-options';
 
@@ -63,14 +64,20 @@ export class Collections extends APIResource {
    *
    * @example
    * ```ts
-   * const collections = await client.collections.list();
+   * // Automatically fetches more pages as needed.
+   * for await (const collectionListResponse of client.collections.list()) {
+   *   // ...
+   * }
    * ```
    */
   list(
     query: CollectionListParams | null | undefined = {},
     options?: RequestOptions,
-  ): APIPromise<CollectionListResponse> {
-    return this._client.get('/v3/collections', { query, ...options });
+  ): PagePromise<CollectionListResponsesCollectionsPage, CollectionListResponse> {
+    return this._client.getAPIList('/v3/collections', CollectionsPage<CollectionListResponse>, {
+      query,
+      ...options,
+    });
   }
 
   /**
@@ -111,6 +118,8 @@ export class Collections extends APIResource {
     return this._client.post('/v3/collections/token-count', { body, ...options });
   }
 }
+
+export type CollectionListResponsesCollectionsPage = CollectionsPage<CollectionListResponse>;
 
 /**
  * Collection details
@@ -189,66 +198,34 @@ export interface CollectionItem {
 }
 
 /**
- * Response for listing collections
+ * Collection metadata without items
  */
 export interface CollectionListResponse {
   /**
-   * List of collections
+   * Unique identifier for the collection
    */
-  collections: Array<CollectionListResponse.Collection>;
+  collectionID: string;
 
   /**
-   * Number of collections per page
+   * The collection name/path. Only letters, digits, underscores, and dots are
+   * allowed.
    */
-  limit: number;
+  collectionName: string;
 
   /**
-   * Current page number
+   * When the collection was created
    */
-  page: number;
+  createdAt: string;
 
   /**
-   * Total number of collections
+   * Number of items in the collection
    */
-  totalCount: number;
+  itemCount: number;
 
   /**
-   * Total number of pages
+   * When the collection was last updated
    */
-  totalPages: number;
-}
-
-export namespace CollectionListResponse {
-  /**
-   * Collection metadata without items
-   */
-  export interface Collection {
-    /**
-     * Unique identifier for the collection
-     */
-    collectionID: string;
-
-    /**
-     * The collection name/path. Only letters, digits, underscores, and dots are
-     * allowed.
-     */
-    collectionName: string;
-
-    /**
-     * When the collection was created
-     */
-    createdAt: string;
-
-    /**
-     * Number of items in the collection
-     */
-    itemCount: number;
-
-    /**
-     * When the collection was last updated
-     */
-    updatedAt?: string;
-  }
+  updatedAt?: string;
 }
 
 /**
@@ -334,22 +311,12 @@ export interface CollectionCreateParams {
   collectionName: string;
 }
 
-export interface CollectionListParams {
+export interface CollectionListParams extends CollectionsPageParams {
   /**
    * Optional substring search filter for collection names (case-insensitive). For
    * example, "premium" will match "customers.premium", "products.premium", etc.
    */
   collectionNameSearch?: string;
-
-  /**
-   * Number of collections per page
-   */
-  limit?: number;
-
-  /**
-   * Page number for pagination
-   */
-  page?: number;
 
   /**
    * Optional filter to list only collections under a specific parent collection
@@ -382,6 +349,7 @@ export declare namespace Collections {
     type CollectionItem as CollectionItem,
     type CollectionListResponse as CollectionListResponse,
     type CollectionCountTokensResponse as CollectionCountTokensResponse,
+    type CollectionListResponsesCollectionsPage as CollectionListResponsesCollectionsPage,
     type CollectionCreateParams as CollectionCreateParams,
     type CollectionListParams as CollectionListParams,
     type CollectionDeleteParams as CollectionDeleteParams,

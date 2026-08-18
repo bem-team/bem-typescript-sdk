@@ -3,11 +3,11 @@
 export {
   Buckets,
   type BucketV3,
-  type BucketListResponse,
   type BucketCreateParams,
   type BucketUpdateParams,
   type BucketListParams,
   type BucketDeleteParams,
+  type BucketV3sBucketsPage,
 } from './buckets';
 export {
   Calls,
@@ -27,6 +27,7 @@ export {
   type CollectionListParams,
   type CollectionDeleteParams,
   type CollectionCountTokensParams,
+  type CollectionListResponsesCollectionsPage,
 } from './collections/collections';
 export {
   Connectors,
@@ -137,7 +138,6 @@ export {
   type ViewColumn,
   type ViewCreate,
   type ViewFilter,
-  type ViewListResponse,
   type ViewGenerateAggregationDataResponse,
   type ViewGenerateTableDataResponse,
   type ViewCreateParams,
@@ -145,6 +145,7 @@ export {
   type ViewListParams,
   type ViewGenerateAggregationDataParams,
   type ViewGenerateTableDataParams,
+  type ViewsViewsPage,
 } from './views';
 export { WebhookSecretResource, type WebhookSecret } from './webhook-secret';
 export {

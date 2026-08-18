@@ -263,7 +263,7 @@ export namespace Event {
 
   export namespace TransformEvent {
     export interface Output {
-      output?: Array<OutputsAPI.AnyType | null>;
+      output: Array<OutputsAPI.AnyType | null>;
     }
 
     export interface Input {
@@ -469,7 +469,7 @@ export namespace Event {
 
   export namespace ExtractEvent {
     export interface Output {
-      output?: Array<OutputsAPI.AnyType | null>;
+      output: Array<OutputsAPI.AnyType | null>;
     }
 
     export interface Input {
@@ -640,7 +640,7 @@ export namespace Event {
 
   export namespace ParseEvent {
     export interface Output {
-      output?: Array<OutputsAPI.AnyType | null>;
+      output: Array<OutputsAPI.AnyType | null>;
     }
 
     export interface Input {

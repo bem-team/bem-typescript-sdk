@@ -178,7 +178,7 @@ Types:
 Methods:
 
 - <code title="post /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">create</a>({ ...params }) -> Collection</code>
-- <code title="get /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">list</a>({ ...params }) -> CollectionListResponse</code>
+- <code title="get /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">list</a>({ ...params }) -> CollectionListResponsesCollectionsPage</code>
 - <code title="delete /v3/collections">client.collections.<a href="./src/resources/collections/collections.ts">delete</a>({ ...params }) -> void</code>
 - <code title="post /v3/collections/token-count">client.collections.<a href="./src/resources/collections/collections.ts">countTokens</a>({ ...params }) -> CollectionCountTokensResponse</code>
 
@@ -326,7 +326,6 @@ Types:
 - <code><a href="./src/resources/views.ts">ViewColumn</a></code>
 - <code><a href="./src/resources/views.ts">ViewCreate</a></code>
 - <code><a href="./src/resources/views.ts">ViewFilter</a></code>
-- <code><a href="./src/resources/views.ts">ViewListResponse</a></code>
 - <code><a href="./src/resources/views.ts">ViewGenerateAggregationDataResponse</a></code>
 - <code><a href="./src/resources/views.ts">ViewGenerateTableDataResponse</a></code>
 
@@ -335,7 +334,7 @@ Methods:
 - <code title="post /v3/views">client.views.<a href="./src/resources/views.ts">create</a>({ ...params }) -> View</code>
 - <code title="get /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">retrieve</a>(viewID) -> View</code>
 - <code title="put /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">update</a>(viewID, { ...params }) -> View</code>
-- <code title="get /v3/views">client.views.<a href="./src/resources/views.ts">list</a>({ ...params }) -> ViewListResponse</code>
+- <code title="get /v3/views">client.views.<a href="./src/resources/views.ts">list</a>({ ...params }) -> ViewsViewsPage</code>
 - <code title="delete /v3/views/{view_id}">client.views.<a href="./src/resources/views.ts">delete</a>(viewID) -> void</code>
 - <code title="post /v3/views/aggregation-data">client.views.<a href="./src/resources/views.ts">generateAggregationData</a>({ ...params }) -> ViewGenerateAggregationDataResponse</code>
 - <code title="post /v3/views/table-data">client.views.<a href="./src/resources/views.ts">generateTableData</a>({ ...params }) -> ViewGenerateTableDataResponse</code>
@@ -345,14 +344,13 @@ Methods:
 Types:
 
 - <code><a href="./src/resources/buckets.ts">BucketV3</a></code>
-- <code><a href="./src/resources/buckets.ts">BucketListResponse</a></code>
 
 Methods:
 
 - <code title="post /v3/buckets">client.buckets.<a href="./src/resources/buckets.ts">create</a>({ ...params }) -> BucketV3</code>
 - <code title="get /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">retrieve</a>(bucketID) -> BucketV3</code>
 - <code title="patch /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">update</a>(bucketID, { ...params }) -> BucketV3</code>
-- <code title="get /v3/buckets">client.buckets.<a href="./src/resources/buckets.ts">list</a>({ ...params }) -> BucketListResponse</code>
+- <code title="get /v3/buckets">client.buckets.<a href="./src/resources/buckets.ts">list</a>({ ...params }) -> BucketV3sBucketsPage</code>
 - <code title="delete /v3/buckets/{bucketID}">client.buckets.<a href="./src/resources/buckets.ts">delete</a>(bucketID, { ...params }) -> void</code>
 
 # Entities

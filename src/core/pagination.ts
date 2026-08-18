@@ -510,3 +510,191 @@ export class WorkflowVersionsPage<Item extends { versionNum: number }>
     };
   }
 }
+
+export interface ViewsPageResponse<Item> {
+  views: Array<Item>;
+}
+
+export interface ViewsPageParams {
+  startingAfter?: string;
+
+  endingBefore?: string;
+
+  limit?: number;
+}
+
+export class ViewsPage<Item extends { viewID: string }>
+  extends AbstractPage<Item>
+  implements ViewsPageResponse<Item>
+{
+  views: Array<Item>;
+
+  constructor(client: Bem, response: Response, body: ViewsPageResponse<Item>, options: FinalRequestOptions) {
+    super(client, response, body, options);
+
+    this.views = body.views || [];
+  }
+
+  getPaginatedItems(): Item[] {
+    return this.views ?? [];
+  }
+
+  nextPageRequestOptions(): PageRequestOptions | null {
+    const views = this.getPaginatedItems();
+
+    const isForwards = !(
+      typeof this.options.query === 'object' && 'endingBefore' in (this.options.query || {})
+    );
+    if (isForwards) {
+      const viewID = views[views.length - 1]?.viewID;
+      if (!viewID) {
+        return null;
+      }
+
+      return {
+        ...this.options,
+        query: {
+          ...maybeObj(this.options.query),
+          startingAfter: viewID,
+        },
+      };
+    }
+
+    const viewID = views[0]?.viewID;
+    if (!viewID) {
+      return null;
+    }
+
+    return {
+      ...this.options,
+      query: {
+        ...maybeObj(this.options.query),
+        endingBefore: viewID,
+      },
+    };
+  }
+}
+
+export interface BucketsPageResponse<Item> {
+  buckets: Array<Item>;
+}
+
+export interface BucketsPageParams {
+  startingAfter?: string;
+
+  endingBefore?: string;
+
+  limit?: number;
+}
+
+export class BucketsPage<Item extends { bucketID: string }>
+  extends AbstractPage<Item>
+  implements BucketsPageResponse<Item>
+{
+  buckets: Array<Item>;
+
+  constructor(
+    client: Bem,
+    response: Response,
+    body: BucketsPageResponse<Item>,
+    options: FinalRequestOptions,
+  ) {
+    super(client, response, body, options);
+
+    this.buckets = body.buckets || [];
+  }
+
+  getPaginatedItems(): Item[] {
+    return this.buckets ?? [];
+  }
+
+  nextPageRequestOptions(): PageRequestOptions | null {
+    const buckets = this.getPaginatedItems();
+
+    const isForwards = !(
+      typeof this.options.query === 'object' && 'endingBefore' in (this.options.query || {})
+    );
+    if (isForwards) {
+      const bucketID = buckets[buckets.length - 1]?.bucketID;
+      if (!bucketID) {
+        return null;
+      }
+
+      return {
+        ...this.options,
+        query: {
+          ...maybeObj(this.options.query),
+          startingAfter: bucketID,
+        },
+      };
+    }
+
+    const bucketID = buckets[0]?.bucketID;
+    if (!bucketID) {
+      return null;
+    }
+
+    return {
+      ...this.options,
+      query: {
+        ...maybeObj(this.options.query),
+        endingBefore: bucketID,
+      },
+    };
+  }
+}
+
+export interface CollectionsPageResponse<Item> {
+  collections: Array<Item>;
+
+  page: number;
+
+  totalPages: number;
+}
+
+export interface CollectionsPageParams {
+  page?: number;
+
+  limit?: number;
+}
+
+export class CollectionsPage<Item> extends AbstractPage<Item> implements CollectionsPageResponse<Item> {
+  collections: Array<Item>;
+
+  page: number;
+
+  totalPages: number;
+
+  constructor(
+    client: Bem,
+    response: Response,
+    body: CollectionsPageResponse<Item>,
+    options: FinalRequestOptions,
+  ) {
+    super(client, response, body, options);
+
+    this.collections = body.collections || [];
+    this.page = body.page || 0;
+    this.totalPages = body.totalPages || 0;
+  }
+
+  getPaginatedItems(): Item[] {
+    return this.collections ?? [];
+  }
+
+  nextPageRequestOptions(): PageRequestOptions | null {
+    const currentPage = this.page;
+
+    if (currentPage >= this.totalPages) {
+      return null;
+    }
+
+    return {
+      ...this.options,
+      query: {
+        ...maybeObj(this.options.query),
+        page: currentPage + 1,
+      },
+    };
+  }
+}

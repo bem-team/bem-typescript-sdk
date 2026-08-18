@@ -2,6 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import { APIPromise } from '../core/api-promise';
+import { PagePromise, ViewsPage, type ViewsPageParams } from '../core/pagination';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
 import { path } from '../internal/utils/path';
@@ -97,8 +98,8 @@ export class Views extends APIResource {
   list(
     query: ViewListParams | null | undefined = {},
     options?: RequestOptions,
-  ): APIPromise<ViewListResponse> {
-    return this._client.get('/v3/views', { query, ...options });
+  ): PagePromise<ViewsViewsPage, View> {
+    return this._client.getAPIList('/v3/views', ViewsPage<View>, { query, ...options });
   }
 
   /**
@@ -154,6 +155,8 @@ export class Views extends APIResource {
     return this._client.post('/v3/views/table-data', { body, ...options });
   }
 }
+
+export type ViewsViewsPage = ViewsPage<View>;
 
 export interface FunctionIdentifier {
   /**
@@ -350,21 +353,6 @@ export interface ViewFilter {
 }
 
 /**
- * Response containing a list of views
- */
-export interface ViewListResponse {
-  /**
-   * Total number of views matching the query
-   */
-  totalCount: number;
-
-  /**
-   * Array of views
-   */
-  views: Array<View>;
-}
-
-/**
  * Response containing aggregation data for a view
  */
 export interface ViewGenerateAggregationDataResponse {
@@ -453,7 +441,7 @@ export namespace ViewGenerateTableDataResponse {
       /**
        * Value of the column (can be any JSON type)
        */
-      value: string | number | boolean | unknown | unknown | Array<unknown>;
+      value: string | number | boolean | unknown | Array<unknown>;
     }
   }
 }
@@ -522,12 +510,7 @@ export interface ViewUpdateParams {
   description?: string;
 }
 
-export interface ViewListParams {
-  /**
-   * Cursor — a `viewID` defining your place in the list.
-   */
-  endingBefore?: string;
-
+export interface ViewListParams extends ViewsPageParams {
   /**
    * Return only views that read from at least one of the named functions.
    */
@@ -538,17 +521,10 @@ export interface ViewListParams {
    */
   functionNames?: Array<string>;
 
-  limit?: number;
-
   /**
    * Sort order over view IDs (default `asc`).
    */
   sortOrder?: 'asc' | 'desc';
-
-  /**
-   * Cursor — a `viewID` defining your place in the list.
-   */
-  startingAfter?: string;
 
   /**
    * Return only the specified view IDs.
@@ -654,9 +630,9 @@ export declare namespace Views {
     type ViewColumn as ViewColumn,
     type ViewCreate as ViewCreate,
     type ViewFilter as ViewFilter,
-    type ViewListResponse as ViewListResponse,
     type ViewGenerateAggregationDataResponse as ViewGenerateAggregationDataResponse,
     type ViewGenerateTableDataResponse as ViewGenerateTableDataResponse,
+    type ViewsViewsPage as ViewsViewsPage,
     type ViewCreateParams as ViewCreateParams,
     type ViewUpdateParams as ViewUpdateParams,
     type ViewListParams as ViewListParams,

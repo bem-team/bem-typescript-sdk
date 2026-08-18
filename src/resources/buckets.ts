@@ -2,6 +2,7 @@
 
 import { APIResource } from '../core/resource';
 import { APIPromise } from '../core/api-promise';
+import { BucketsPage, type BucketsPageParams, PagePromise } from '../core/pagination';
 import { buildHeaders } from '../internal/headers';
 import { RequestOptions } from '../internal/request-options';
 import { path } from '../internal/utils/path';
@@ -70,14 +71,17 @@ export class Buckets extends APIResource {
    *
    * @example
    * ```ts
-   * const buckets = await client.buckets.list();
+   * // Automatically fetches more pages as needed.
+   * for await (const bucketV3 of client.buckets.list()) {
+   *   // ...
+   * }
    * ```
    */
   list(
     query: BucketListParams | null | undefined = {},
     options?: RequestOptions,
-  ): APIPromise<BucketListResponse> {
-    return this._client.get('/v3/buckets', { query, ...options });
+  ): PagePromise<BucketV3sBucketsPage, BucketV3> {
+    return this._client.getAPIList('/v3/buckets', BucketsPage<BucketV3>, { query, ...options });
   }
 
   /**
@@ -101,6 +105,8 @@ export class Buckets extends APIResource {
     });
   }
 }
+
+export type BucketV3sBucketsPage = BucketsPage<BucketV3>;
 
 /**
  * A Bucket is a named partition of the knowledge graph within an
@@ -142,18 +148,6 @@ export interface BucketV3 {
   updatedAt: string;
 }
 
-/**
- * Response body for listing buckets.
- */
-export interface BucketListResponse {
-  buckets: Array<BucketV3>;
-
-  /**
-   * Total number of buckets matching the query, ignoring pagination.
-   */
-  totalCount: number;
-}
-
 export interface BucketCreateParams {
   /**
    * Bucket name. Required and unique within the account+environment.
@@ -178,26 +172,11 @@ export interface BucketUpdateParams {
   name?: string;
 }
 
-export interface BucketListParams {
-  /**
-   * Cursor: return buckets whose `bucketID` sorts before this value.
-   */
-  endingBefore?: string;
-
-  /**
-   * Maximum number of buckets to return (default 50, max 200).
-   */
-  limit?: number;
-
+export interface BucketListParams extends BucketsPageParams {
   /**
    * Case-insensitive substring match on the bucket name.
    */
   nameSubstring?: string;
-
-  /**
-   * Cursor: return buckets whose `bucketID` sorts after this value.
-   */
-  startingAfter?: string;
 }
 
 export interface BucketDeleteParams {
@@ -214,7 +193,7 @@ export interface BucketDeleteParams {
 export declare namespace Buckets {
   export {
     type BucketV3 as BucketV3,
-    type BucketListResponse as BucketListResponse,
+    type BucketV3sBucketsPage as BucketV3sBucketsPage,
     type BucketCreateParams as BucketCreateParams,
     type BucketUpdateParams as BucketUpdateParams,
     type BucketListParams as BucketListParams,

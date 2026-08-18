@@ -168,7 +168,7 @@ export interface ExtractWebhookEvent {
 
 export namespace ExtractWebhookEvent {
   export interface Output {
-    output?: Array<OutputsAPI.AnyType | null>;
+    output: Array<OutputsAPI.AnyType | null>;
   }
 
   export interface Input {
@@ -427,7 +427,7 @@ export interface ParseWebhookEvent {
 
 export namespace ParseWebhookEvent {
   export interface Output {
-    output?: Array<OutputsAPI.AnyType | null>;
+    output: Array<OutputsAPI.AnyType | null>;
   }
 
   export interface Input {
