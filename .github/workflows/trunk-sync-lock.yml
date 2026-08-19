@@ -1,7 +1,7 @@
 name: Trunk sync lock
 
 # OPTIONAL: copy into .github/workflows/ if your production repo takes community PRs
-# or if custom-code PRs merge on staging during release windows. This workflow posts 
+# or if custom-code PRs merge on staging during release windows. This workflow posts
 # a `trunk-synced` status to open PRs against staging main.
 #
 # Make it a required check on staging. It gates PRs only; the back-sync pushes staging main directly.
@@ -13,7 +13,7 @@ on:
     branches: [main]
     types: [opened, synchronize, reopened]
   workflow_run:
-    workflows: ["Sync SDK repos"]
+    workflows: ['Sync SDK repos']
     types: [completed]
   repository_dispatch:
     types: [prod-released]
