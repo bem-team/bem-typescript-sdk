@@ -68,7 +68,7 @@ export class InferSchema extends APIResource {
  */
 export interface InferSchemaCreateResponse {
   /**
-   * Analysis result returned by the infer-schema endpoint.
+   * Full analysis result including description, schema, and document classification.
    */
   analysis: InferSchemaCreateResponse.Analysis;
 
@@ -80,7 +80,7 @@ export interface InferSchemaCreateResponse {
 
 export namespace InferSchemaCreateResponse {
   /**
-   * Analysis result returned by the infer-schema endpoint.
+   * Full analysis result including description, schema, and document classification.
    */
   export interface Analysis {
     /**

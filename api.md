@@ -33,7 +33,7 @@ Methods:
 
 - <code title="post /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">create</a>({ ...params }) -> FunctionResponse</code>
 - <code title="get /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">retrieve</a>(functionName, { ...params }) -> FunctionResponse</code>
-- <code title="patch /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">update</a>(pathFunctionName, { ...params }) -> FunctionResponse</code>
+- <code title="patch /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">update</a>(functionName, { ...params }) -> FunctionResponse</code>
 - <code title="get /v3/functions">client.functions.<a href="./src/resources/functions/functions.ts">list</a>({ ...params }) -> FunctionsFunctionsPage</code>
 - <code title="delete /v3/functions/{functionName}">client.functions.<a href="./src/resources/functions/functions.ts">delete</a>(functionName) -> void</code>
 - <code title="post /v3/functions/compare">client.functions.<a href="./src/resources/functions/functions.ts">compareMetrics</a>({ ...params }) -> FunctionCompareMetricsResponse</code>

@@ -125,7 +125,7 @@ export interface Connector {
   paragonSyncID: string;
 
   /**
-   * Connector type.
+   * The connector type.
    */
   type: ConnectorType;
 
@@ -161,7 +161,7 @@ export interface ConnectorCreateParams {
   name: string;
 
   /**
-   * Connector type.
+   * The connector type.
    */
   type: ConnectorType;
 

@@ -1705,12 +1705,12 @@ export namespace Event {
 
   export interface SendEvent {
     /**
-     * Outcome of a Send function's delivery attempt.
+     * Whether the payload was successfully delivered or the send node was skipped.
      */
     deliveryStatus: 'success' | 'skip';
 
     /**
-     * Destination type for a Send function.
+     * The type of destination the payload was sent to.
      */
     destinationType: FunctionsAPI.SendDestinationType;
 
@@ -1771,7 +1771,7 @@ export namespace Event {
     functionVersionNum?: number;
 
     /**
-     * Metadata returned when a Send function delivers to Google Drive.
+     * Populated when destinationType is "google_drive".
      */
     googleDriveOutput?: SendEvent.GoogleDriveOutput;
 
@@ -1783,12 +1783,12 @@ export namespace Event {
     metadata?: SendEvent.Metadata;
 
     /**
-     * Metadata returned when a Send function delivers to an S3 bucket.
+     * Populated when destinationType is "s3".
      */
     s3Output?: SendEvent.S3Output;
 
     /**
-     * Metadata returned when a Send function delivers to a webhook.
+     * Populated when destinationType is "webhook".
      */
     webhookOutput?: SendEvent.WebhookOutput;
 
@@ -1810,7 +1810,7 @@ export namespace Event {
 
   export namespace SendEvent {
     /**
-     * Metadata returned when a Send function delivers to Google Drive.
+     * Populated when destinationType is "google_drive".
      */
     export interface GoogleDriveOutput {
       /**
@@ -1829,7 +1829,7 @@ export namespace Event {
     }
 
     /**
-     * Metadata returned when a Send function delivers to an S3 bucket.
+     * Populated when destinationType is "s3".
      */
     export interface S3Output {
       /**
@@ -1844,7 +1844,7 @@ export namespace Event {
     }
 
     /**
-     * Metadata returned when a Send function delivers to a webhook.
+     * Populated when destinationType is "webhook".
      */
     export interface WebhookOutput {
       /**
@@ -1991,11 +1991,7 @@ export type InputType =
 
 export interface OutputRetrieveResponse {
   /**
-   * V3 read-side event union. Superset of the shared `Event` union: it contains
-   * every shared variant verbatim (backward compatible) and adds the V3-only
-   * `extract`, `parse`, `classify`, `analyze`, `payload_shaping`, and `evaluation`
-   * variants. This is also the union delivered as the body of outbound webhook
-   * payloads.
+   * The output event. Polymorphic by `eventType`.
    */
   output: Event;
 }

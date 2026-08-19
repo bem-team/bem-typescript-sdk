@@ -186,7 +186,7 @@ export interface Call {
   functionName?: string;
 
   /**
-   * The type of the function.
+   * Type of the function. Only set for function calls.
    */
   functionType?: FunctionsAPI.FunctionType;
 

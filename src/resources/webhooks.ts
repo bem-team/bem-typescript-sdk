@@ -1010,12 +1010,12 @@ export namespace PayloadShapingWebhookEvent {
 
 export interface SendWebhookEvent {
   /**
-   * Outcome of a Send function's delivery attempt.
+   * Whether the payload was successfully delivered or the send node was skipped.
    */
   deliveryStatus: 'success' | 'skip';
 
   /**
-   * Destination type for a Send function.
+   * The type of destination the payload was sent to.
    */
   destinationType: FunctionsAPI.SendDestinationType;
 
@@ -1076,7 +1076,7 @@ export interface SendWebhookEvent {
   functionVersionNum?: number;
 
   /**
-   * Metadata returned when a Send function delivers to Google Drive.
+   * Populated when destinationType is "google_drive".
    */
   googleDriveOutput?: SendWebhookEvent.GoogleDriveOutput;
 
@@ -1088,12 +1088,12 @@ export interface SendWebhookEvent {
   metadata?: SendWebhookEvent.Metadata;
 
   /**
-   * Metadata returned when a Send function delivers to an S3 bucket.
+   * Populated when destinationType is "s3".
    */
   s3Output?: SendWebhookEvent.S3Output;
 
   /**
-   * Metadata returned when a Send function delivers to a webhook.
+   * Populated when destinationType is "webhook".
    */
   webhookOutput?: SendWebhookEvent.WebhookOutput;
 
@@ -1115,7 +1115,7 @@ export interface SendWebhookEvent {
 
 export namespace SendWebhookEvent {
   /**
-   * Metadata returned when a Send function delivers to Google Drive.
+   * Populated when destinationType is "google_drive".
    */
   export interface GoogleDriveOutput {
     /**
@@ -1134,7 +1134,7 @@ export namespace SendWebhookEvent {
   }
 
   /**
-   * Metadata returned when a Send function delivers to an S3 bucket.
+   * Populated when destinationType is "s3".
    */
   export interface S3Output {
     /**
@@ -1149,7 +1149,7 @@ export namespace SendWebhookEvent {
   }
 
   /**
-   * Metadata returned when a Send function delivers to a webhook.
+   * Populated when destinationType is "webhook".
    */
   export interface WebhookOutput {
     /**
