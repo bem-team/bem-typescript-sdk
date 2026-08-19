@@ -230,14 +230,14 @@ export interface EntityBulkCreateResponse {
   results: Array<SeedRowResult>;
 
   /**
-   * Per-outcome tally across a batch.
+   * Aggregate counts.
    */
   summary: EntityBulkCreateResponse.Summary;
 }
 
 export namespace EntityBulkCreateResponse {
   /**
-   * Per-outcome tally across a batch.
+   * Aggregate counts.
    */
   export interface Summary {
     /**
@@ -267,7 +267,7 @@ export interface EntityBulkValidateResponse {
   results: Array<EntityBulkValidateResponse.Result>;
 
   /**
-   * Per-outcome tally across a bulk-validate batch.
+   * Aggregate counts.
    */
   summary: EntityBulkValidateResponse.Summary;
 }
@@ -295,7 +295,7 @@ export namespace EntityBulkValidateResponse {
   }
 
   /**
-   * Per-outcome tally across a bulk-validate batch.
+   * Aggregate counts.
    */
   export interface Summary {
     /**
@@ -357,9 +357,7 @@ export namespace EntityRetrieveRelationsResponse {
     relationType: string;
 
     /**
-     * A compact view of an entity sitting on the far end of a relation edge — the
-     * stable public id, the canonical name, and the effective type. The full entity is
-     * fetched separately via the entity detail / File System endpoints.
+     * The entity at the tail of the edge.
      */
     sourceEntity: EntitiesAPI.RelatedEntity;
   }
@@ -384,9 +382,7 @@ export namespace EntityRetrieveRelationsResponse {
     relationType: string;
 
     /**
-     * A compact view of an entity sitting on the far end of a relation edge — the
-     * stable public id, the canonical name, and the effective type. The full entity is
-     * fetched separately via the entity detail / File System endpoints.
+     * The entity at the head of the edge.
      */
     targetEntity: EntitiesAPI.RelatedEntity;
   }

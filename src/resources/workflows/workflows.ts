@@ -396,19 +396,19 @@ export namespace Workflow {
     name: string;
 
     /**
-     * Discriminator for a workflow connector. V3 supports `paragon` only.
+     * Connector type.
      */
     type: WorkflowsAPI.WorkflowConnectorType;
 
     /**
-     * Paragon-integration configuration on a workflow connector.
+     * Paragon configuration. Present iff `type == "paragon"`.
      */
     paragon?: Connector.Paragon;
   }
 
   export namespace Connector {
     /**
-     * Paragon-integration configuration on a workflow connector.
+     * Paragon configuration. Present iff `type == "paragon"`.
      */
     export interface Paragon {
       /**
@@ -456,7 +456,7 @@ export interface WorkflowConnector {
   name: string;
 
   /**
-   * Discriminator for a workflow connector. V3 supports `paragon` only.
+   * Connector type. Must match stored type on update.
    */
   type: WorkflowConnectorType;
 
@@ -466,16 +466,14 @@ export interface WorkflowConnector {
   connectorID?: string;
 
   /**
-   * Request-side config block for a Paragon connector. Fields absent on update are
-   * unchanged.
+   * Paragon configuration. Required on create for `type: "paragon"`.
    */
   paragon?: WorkflowConnector.Paragon;
 }
 
 export namespace WorkflowConnector {
   /**
-   * Request-side config block for a Paragon connector. Fields absent on update are
-   * unchanged.
+   * Paragon configuration. Required on create for `type: "paragon"`.
    */
   export interface Paragon {
     /**
@@ -715,7 +713,7 @@ export interface WorkflowCopyResponse {
   error?: string;
 
   /**
-   * V3 read representation of a workflow version.
+   * The newly created workflow.
    */
   workflow?: Workflow;
 }
@@ -860,12 +858,16 @@ export interface WorkflowListParams extends WorkflowsPageParams {
 
 export interface WorkflowCallParams {
   /**
-   * Body param: Input file(s) for a call. Provide exactly one of `singleFile` or
-   * `batchFiles`.
+   * Body param: Input file(s) for the workflow. Use nested flags to specify a single
+   * file or batch:
    *
-   * In the CLI, use the nested flags `--input.single-file` or `--input.batch-files`
-   * with `@path/to/file` for automatic file embedding:
-   * `--input.single-file '{"inputContent": "@invoice.pdf", "inputType": "pdf"}' --wait`
+   * Single file:
+   * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}'` Batch
+   * files:
+   * `--input.batch-files '{"inputs": [{"inputContent": "@a.pdf", "inputType": "pdf"}]}'`
+   *
+   * The `@path/to/file` syntax reads and base64-encodes the file automatically.
+   * Provide exactly one of `singleFile` or `batchFiles`.
    */
   input: WorkflowCallParams.Input;
 
@@ -900,11 +902,16 @@ export interface WorkflowCallParams {
 
 export namespace WorkflowCallParams {
   /**
-   * Input file(s) for a call. Provide exactly one of `singleFile` or `batchFiles`.
+   * Input file(s) for the workflow. Use nested flags to specify a single file or
+   * batch:
    *
-   * In the CLI, use the nested flags `--input.single-file` or `--input.batch-files`
-   * with `@path/to/file` for automatic file embedding:
-   * `--input.single-file '{"inputContent": "@invoice.pdf", "inputType": "pdf"}' --wait`
+   * Single file:
+   * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}'` Batch
+   * files:
+   * `--input.batch-files '{"inputs": [{"inputContent": "@a.pdf", "inputType": "pdf"}]}'`
+   *
+   * The `@path/to/file` syntax reads and base64-encodes the file automatically.
+   * Provide exactly one of `singleFile` or `batchFiles`.
    */
   export interface Input {
     /**
@@ -914,11 +921,9 @@ export namespace WorkflowCallParams {
     batchFiles?: Input.BatchFiles;
 
     /**
-     * A single file input with base64-encoded content.
-     *
-     * When using the Bem CLI, use `@path/to/file` in the `inputContent` field to
-     * automatically read and base64-encode the file:
-     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}' --wait`
+     * A single file to process. Use
+     * `--input.single-file '{"inputContent": "@file.pdf", "inputType": "pdf"}'` in the
+     * CLI.
      */
     singleFile?: ScoreAPI.FileInput;
   }
@@ -943,10 +948,7 @@ export namespace WorkflowCallParams {
         /**
          * The input type of the content you're sending for transformation.
          *
-         * `jfif` is accepted as an alias for `jpeg` — JFIF is the same format under a
-         * different extension — and is normalized to `jpeg`, so responses and webhooks
-         * report `jpeg` for a JFIF upload. The undeclared alias `jpg` behaves the same
-         * way.
+         * Must match the actual file format. See `InputType` for allowed values.
          */
         inputType: OutputsAPI.InputType;
 

@@ -151,27 +151,7 @@ export interface FNavigateResponse {
   data: unknown;
 
   /**
-   * Operations exposed by `POST /v3/fs`.
-   *
-   * The verbs and their flag names mirror Unix tools so an LLM agent's existing
-   * vocabulary maps directly:
-   *
-   * - `ls` — list parsed documents
-   * - `cat` — read one parsed doc (optionally sliced by range / projected by select)
-   * - `grep` — substring or regex search across parse outputs
-   * - `head` — first N sections of one doc
-   * - `stat` — metadata only (page count, section count, parsed at, ...)
-   * - `find` — list canonical entities (cross-doc memory)
-   * - `open` — entity + mentions
-   * - `xref` — entity → sections across docs that mention it
-   *
-   * Doc-level ops (ls, cat, grep, head, stat) work on every parsed document,
-   * regardless of how the parse function was configured.
-   *
-   * Memory-level ops (find, open, xref) operate on the global entities table which
-   * is only populated when the parse function had `linkAcrossDocuments: true`. On
-   * environments with no memory-linked docs they return empty data with a hint
-   * pointing at the toggle.
+   * The op echoed back.
    */
   op: FsOp;
 
@@ -202,34 +182,14 @@ export interface FNavigateResponse {
 
 export interface FNavigateParams {
   /**
-   * Operations exposed by `POST /v3/fs`.
-   *
-   * The verbs and their flag names mirror Unix tools so an LLM agent's existing
-   * vocabulary maps directly:
-   *
-   * - `ls` — list parsed documents
-   * - `cat` — read one parsed doc (optionally sliced by range / projected by select)
-   * - `grep` — substring or regex search across parse outputs
-   * - `head` — first N sections of one doc
-   * - `stat` — metadata only (page count, section count, parsed at, ...)
-   * - `find` — list canonical entities (cross-doc memory)
-   * - `open` — entity + mentions
-   * - `xref` — entity → sections across docs that mention it
-   *
-   * Doc-level ops (ls, cat, grep, head, stat) work on every parsed document,
-   * regardless of how the parse function was configured.
-   *
-   * Memory-level ops (find, open, xref) operate on the global entities table which
-   * is only populated when the parse function had `linkAcrossDocuments: true`. On
-   * environments with no memory-linked docs they return empty data with a hint
-   * pointing at the toggle.
+   * The operation to run. Required.
    */
   op: FsOp;
 
   /**
-   * Request-scoping concerns that are orthogonal to the op itself. Carried on a
-   * `context` object so future scoping hints (e.g. as-of timestamps, read
-   * consistency) can slot in without reshaping the op-specific fields.
+   * Request-scoping context (currently just the bucket scope). Optional; when
+   * omitted the request resolves against the account+environment default bucket. See
+   * `FSContext`.
    */
   context?: FNavigateParams.Context;
 
@@ -246,7 +206,7 @@ export interface FNavigateParams {
   cursor?: string;
 
   /**
-   * Filter options for `op=ls` and `op=find`.
+   * Narrows results for `op=ls` and `op=find`.
    */
   filter?: FNavigateParams.Filter;
 
@@ -279,7 +239,7 @@ export interface FNavigateParams {
   pattern?: string;
 
   /**
-   * Slice the parse output along page or section dimensions. Used with `op=cat`.
+   * Slices the parse output for `op=cat`.
    */
   range?: FNavigateParams.Range;
 
@@ -304,9 +264,9 @@ export interface FNavigateParams {
 
 export namespace FNavigateParams {
   /**
-   * Request-scoping concerns that are orthogonal to the op itself. Carried on a
-   * `context` object so future scoping hints (e.g. as-of timestamps, read
-   * consistency) can slot in without reshaping the op-specific fields.
+   * Request-scoping context (currently just the bucket scope). Optional; when
+   * omitted the request resolves against the account+environment default bucket. See
+   * `FSContext`.
    */
   export interface Context {
     /**
@@ -327,7 +287,7 @@ export namespace FNavigateParams {
   }
 
   /**
-   * Filter options for `op=ls` and `op=find`.
+   * Narrows results for `op=ls` and `op=find`.
    */
   export interface Filter {
     /**
@@ -353,7 +313,7 @@ export namespace FNavigateParams {
   }
 
   /**
-   * Slice the parse output along page or section dimensions. Used with `op=cat`.
+   * Slices the parse output for `op=cat`.
    */
   export interface Range {
     /**

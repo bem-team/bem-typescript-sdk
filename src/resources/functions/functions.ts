@@ -120,11 +120,11 @@ export class Functions extends APIResource {
    * ```
    */
   update(
-    pathFunctionName: string,
+    functionName: string,
     body: FunctionUpdateParams,
     options?: RequestOptions,
   ): APIPromise<FunctionResponse> {
-    return this._client.patch(path`/v3/functions/${pathFunctionName}`, { body, ...options });
+    return this._client.patch(path`/v3/functions/${functionName}`, { body, ...options });
   }
 
   /**
@@ -452,7 +452,7 @@ export namespace CreateFunction {
     type: 'send';
 
     /**
-     * Destination type for a Send function.
+     * Where the payload is delivered.
      */
     destinationType?: FunctionsAPI.SendDestinationType;
 
@@ -696,11 +696,9 @@ export namespace CreateFunction {
     functionName: string;
 
     /**
-     * Request-side render configuration. Carries the template document as
-     * base64-encoded `.docx` bytes: the server validates them, stores the template,
-     * and derives the placeholder/style-id contract at create/update time, so clients
-     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
-     * returns the derived contract.
+     * Render configuration. Required at create time — a Render function without a
+     * template has nothing to bind data to. Update bodies may omit this for partial
+     * edits.
      */
     renderConfig: FunctionsAPI.RenderConfigInput;
 
@@ -1392,7 +1390,7 @@ export namespace Function {
    */
   export interface SendFunction {
     /**
-     * Destination type for a Send function.
+     * Where the payload is delivered.
      */
     destinationType: FunctionsAPI.SendDestinationType;
 
@@ -1986,7 +1984,7 @@ export interface MetricsComparison {
  */
 export interface MetricsDetails {
   /**
-   * Comprehensive performance metrics
+   * Aggregate confusion matrix metrics across all fields
    */
   aggregateMetrics?: Metrics;
 
@@ -2158,16 +2156,8 @@ export namespace RenderConfig {
     name?: string;
 
     /**
-     * The placeholder contract a Render template declares, grouped by how each
-     * placeholder is filled. Derived from the template at create/update time by
-     * scanning its `docxtpl` tags; not user-supplied.
-     *
-     * - `stringKeys`: bare string placeholders (`{{ key }}`) filled with a single
-     *   value.
-     * - `blockKeys`: wrapped-primitive placeholders (`{{p key }}`) — bind one core
-     *   primitive (paragraph, table, image, or list). The placeholder's own paragraph
-     *   dissolves and is replaced by the rendered subdocument's blocks, rather than
-     *   substituting text inline.
+     * The placeholder contract derived from the template at create/update time. Absent
+     * on configs created before create/update-time validation existed.
      */
     placeholders?: Template.Placeholders;
 
@@ -2188,16 +2178,8 @@ export namespace RenderConfig {
 
   export namespace Template {
     /**
-     * The placeholder contract a Render template declares, grouped by how each
-     * placeholder is filled. Derived from the template at create/update time by
-     * scanning its `docxtpl` tags; not user-supplied.
-     *
-     * - `stringKeys`: bare string placeholders (`{{ key }}`) filled with a single
-     *   value.
-     * - `blockKeys`: wrapped-primitive placeholders (`{{p key }}`) — bind one core
-     *   primitive (paragraph, table, image, or list). The placeholder's own paragraph
-     *   dissolves and is replaced by the rendered subdocument's blocks, rather than
-     *   substituting text inline.
+     * The placeholder contract derived from the template at create/update time. Absent
+     * on configs created before create/update-time validation existed.
      */
     export interface Placeholders {
       blockKeys: Array<string>;
@@ -2391,7 +2373,7 @@ export namespace UpdateFunction {
     type: 'send';
 
     /**
-     * Destination type for a Send function.
+     * Where the payload is delivered.
      */
     destinationType?: FunctionsAPI.SendDestinationType;
 
@@ -3168,7 +3150,7 @@ export declare namespace FunctionCreateParams {
     type: 'send';
 
     /**
-     * Destination type for a Send function.
+     * Where the payload is delivered.
      */
     destinationType?: SendDestinationType;
 
@@ -3412,11 +3394,9 @@ export declare namespace FunctionCreateParams {
     functionName: string;
 
     /**
-     * Request-side render configuration. Carries the template document as
-     * base64-encoded `.docx` bytes: the server validates them, stores the template,
-     * and derives the placeholder/style-id contract at create/update time, so clients
-     * never submit `placeholders` or `styleIds`. The response shape (`RenderConfig`)
-     * returns the derived contract.
+     * Render configuration. Required at create time — a Render function without a
+     * template has nothing to bind data to. Update bodies may omit this for partial
+     * edits.
      */
     renderConfig: RenderConfigInput;
 
@@ -3546,7 +3526,7 @@ export declare namespace FunctionUpdateParams {
     type: 'send';
 
     /**
-     * Destination type for a Send function.
+     * Where the payload is delivered.
      */
     destinationType?: SendDestinationType;
 

@@ -367,7 +367,7 @@ export namespace FunctionVersion {
 
   export interface SendFunctionVersion {
     /**
-     * Destination type for a Send function.
+     * Where the payload is delivered.
      */
     destinationType: FunctionsAPI.SendDestinationType;
 
