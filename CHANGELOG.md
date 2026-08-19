@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.34.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.33.0...v0.34.0) (2026-08-19)
+
+
+### Features
+
+* initial stlc build ([5db27eb](https://github.com/bem-team/bem-typescript-sdk/commit/5db27eb668ee17896c4bc4f6d6710b1aaf051510))
+
+
+### Styles
+
+* format trunk-sync-lock.yml with prettier ([85b7dab](https://github.com/bem-team/bem-typescript-sdk/commit/85b7dab3337d134f8eaf83b85931df0eae5e7cd7))
+
 ## 0.33.0 (2026-08-17)
 
 Full Changelog: [v0.32.0...v0.33.0](https://github.com/bem-team/bem-typescript-sdk/compare/v0.32.0...v0.33.0)
